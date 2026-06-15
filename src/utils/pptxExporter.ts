@@ -1,0 +1,439 @@
+import pptxgen from 'pptxgenjs';
+import { 
+  ProjectFinancials, 
+  Requirement, 
+  DomainBuild, 
+  FinancialAllocation, 
+  QAStatus, 
+  Defect, 
+  RiskIssue 
+} from './mockData';
+
+export const exportToPPT = (
+  financials: ProjectFinancials,
+  requirements: Requirement[],
+  domains: DomainBuild[],
+  allocations: FinancialAllocation[],
+  qaStatus: QAStatus,
+  defects: Defect[],
+  risks: RiskIssue[],
+  ragStatus: { schedule: string; budget: string; scope: string; quality: string; overall: string }
+) => {
+  const pptx = new pptxgen();
+  pptx.layout = 'LAYOUT_16x9';
+
+  // Theme colors
+  const BG_COLOR = '070B19';
+  const CARD_BG = '0D162F';
+  const CYAN = '00F2FE';
+  const PURPLE = 'BD00FF';
+  const TEXT_WHITE = 'F8FAFC';
+  const TEXT_GRAY = '94A3B8';
+  
+  // Status Colors
+  const COLOR_GREEN = '00F5A0';
+  const COLOR_AMBER = 'F59E0B';
+  const COLOR_RED = 'EF4444';
+
+  const getRagHex = (val: string) => {
+    if (val.toLowerCase() === 'green') return COLOR_GREEN;
+    if (val.toLowerCase() === 'amber') return COLOR_AMBER;
+    return COLOR_RED;
+  };
+
+  // Helper to add standard slide header
+  const addSlideHeader = (slide: any, title: string) => {
+    // Slide Background
+    slide.background = { color: BG_COLOR };
+
+    // Header bar
+    slide.addShape(pptx.ShapeType.rect, {
+      x: 0, y: 0, w: '100%', h: 0.9,
+      fill: { color: '050812' }
+    });
+
+    // Header title
+    slide.addText(title.toUpperCase(), {
+      x: 0.5, y: 0.2, w: 8.0, h: 0.5,
+      fontSize: 22, bold: true, color: CYAN, fontFace: 'Outfit'
+    });
+
+    // Small footer label
+    slide.addText('TDM NEXUS - STEERING COMMITTEE REPORT', {
+      x: 0.5, y: 7.1, w: 5.0, h: 0.3,
+      fontSize: 10, color: TEXT_GRAY, fontFace: 'Outfit'
+    });
+
+    // Slide Number (handled by library automatically if defined globally, but simple text is fine here)
+  };
+
+  // ==========================================
+  // SLIDE 1: Title Slide (Futuristic Landing)
+  // ==========================================
+  const slide1 = pptx.addSlide();
+  slide1.background = { color: BG_COLOR };
+
+  // Decorative glow blocks (shapes)
+  slide1.addShape(pptx.ShapeType.rect, {
+    x: 1.0, y: 1.5, w: 0.15, h: 3.5,
+    fill: { color: CYAN }
+  });
+
+  slide1.addText('PROJECT VELOCITY', {
+    x: 1.4, y: 1.6, w: 10.0, h: 1.0,
+    fontSize: 44, bold: true, color: TEXT_WHITE, fontFace: 'Outfit'
+  });
+
+  slide1.addText('eSIM & Multi-Play Carrier Billing Launch', {
+    x: 1.4, y: 2.6, w: 10.0, h: 0.5,
+    fontSize: 20, color: CYAN, fontFace: 'Outfit'
+  });
+
+  slide1.addText('TECHNICAL DELIVERY STEERING COMMITTEE REPORT', {
+    x: 1.4, y: 3.5, w: 10.0, h: 0.4,
+    fontSize: 14, bold: true, color: PURPLE, fontFace: 'Outfit'
+  });
+
+  // Details box
+  slide1.addShape(pptx.ShapeType.rect, {
+    x: 1.4, y: 4.4, w: 5.5, h: 1.5,
+    fill: { color: CARD_BG },
+    line: { color: '00F2FE', width: 1 }
+  });
+
+  slide1.addText([
+    { text: 'Reporting Date: ', options: { bold: true, color: TEXT_WHITE } },
+    { text: new Date().toLocaleDateString() + '\n', options: { color: TEXT_GRAY } },
+    { text: 'Overall Project status: ', options: { bold: true, color: TEXT_WHITE } },
+    { text: ragStatus.overall.toUpperCase() + '\n', options: { color: getRagHex(ragStatus.overall), bold: true } },
+    { text: 'Release Version: ', options: { bold: true, color: TEXT_WHITE } },
+    { text: 'v3.0.0-Core (Production)', options: { color: TEXT_GRAY } }
+  ], {
+    x: 1.6, y: 4.5, w: 5.1, h: 1.3,
+    fontSize: 12, fontFace: 'Outfit', lineSpacing: 22
+  });
+
+  // ==========================================
+  // SLIDE 2: Executive Summary & RAG Status
+  // ==========================================
+  const slide2 = pptx.addSlide();
+  addSlideHeader(slide2, 'Executive Summary & RAG Status');
+
+  // Business case context card
+  slide2.addShape(pptx.ShapeType.rect, {
+    x: 0.5, y: 1.2, w: 12.3, h: 1.3,
+    fill: { color: CARD_BG },
+    line: { color: '00F2FE', width: 1 }
+  });
+
+  slide2.addText('PROJECT GOAL & BUSINESS VALUE PROPOSITION', {
+    x: 0.7, y: 1.3, w: 6.0, h: 0.3,
+    fontSize: 11, bold: true, color: CYAN, fontFace: 'Outfit'
+  });
+
+  slide2.addText('Launch the new Unified Mobile & Digital Proposition platform, enabling instant eSIM activation and carrier-billing integration for third-party streaming partners. Replaces manual SIM processes and legacy billing interfaces, yielding an expected revenue benefit of $12.5M over 5 years.', {
+    x: 0.7, y: 1.6, w: 11.9, h: 0.8,
+    fontSize: 12, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 18
+  });
+
+  // RAG cards (4 cards side-by-side)
+  const rags = [
+    { label: 'Schedule', val: ragStatus.schedule, desc: 'E2E Testing completion scheduled 1 week delay' },
+    { label: 'Budget', val: ragStatus.budget, desc: 'Spending aligned with forecast; Capex margin OK' },
+    { label: 'Scope', val: ragStatus.scope, desc: 'Core specifications locked. No scope creep reported' },
+    { label: 'Quality', val: ragStatus.quality, desc: 'Critical defects open on eSIM provisioning gateway' }
+  ];
+
+  rags.forEach((r, idx) => {
+    const xOffset = 0.5 + idx * 3.1;
+    slide2.addShape(pptx.ShapeType.rect, {
+      x: xOffset, y: 2.8, w: 2.9, h: 3.8,
+      fill: { color: CARD_BG },
+      line: { color: getRagHex(r.val), width: 1.5 }
+    });
+
+    slide2.addText(r.label.toUpperCase(), {
+      x: xOffset + 0.2, y: 3.0, w: 2.5, h: 0.3,
+      fontSize: 16, bold: true, color: TEXT_WHITE, fontFace: 'Outfit'
+    });
+
+    // RAG Status Badge indicator inside card
+    slide2.addShape(pptx.ShapeType.rect, {
+      x: xOffset + 0.2, y: 3.4, w: 1.2, h: 0.4,
+      fill: { color: getRagHex(r.val) + '22' },
+      line: { color: getRagHex(r.val), width: 1 }
+    });
+
+    slide2.addText(r.val.toUpperCase(), {
+      x: xOffset + 0.2, y: 3.4, w: 1.2, h: 0.4,
+      fontSize: 12, bold: true, color: getRagHex(r.val), fontFace: 'Outfit',
+      align: 'center', valign: 'middle'
+    });
+
+    slide2.addText(r.desc, {
+      x: xOffset + 0.2, y: 4.1, w: 2.5, h: 2.0,
+      fontSize: 12, color: TEXT_GRAY, fontFace: 'Outfit', lineSpacing: 18
+    });
+  });
+
+  // ==========================================
+  // SLIDE 3: Financial Health
+  // ==========================================
+  const slide3 = pptx.addSlide();
+  addSlideHeader(slide3, 'Financial Health & Forecast Allocations');
+
+  // Main high-level financial summary (3 top cards)
+  const finCards = [
+    { label: 'CAPEX BUDGET LIMIT', val: `$${financials.capexLimit.toLocaleString()}`, color: CYAN },
+    { label: 'OPEX BUDGET LIMIT', val: `$${financials.opexLimit.toLocaleString()}`, color: PURPLE },
+    { label: 'TOTAL FUNDS SPENT', val: `$${financials.totalSpent.toLocaleString()}`, color: COLOR_GREEN }
+  ];
+
+  finCards.forEach((c, idx) => {
+    const xOffset = 0.5 + idx * 4.2;
+    slide3.addShape(pptx.ShapeType.rect, {
+      x: xOffset, y: 1.2, w: 3.9, h: 1.2,
+      fill: { color: CARD_BG },
+      line: { color: c.color, width: 1 }
+    });
+
+    slide3.addText(c.label, {
+      x: xOffset + 0.2, y: 1.3, w: 3.5, h: 0.3,
+      fontSize: 10, bold: true, color: TEXT_GRAY, fontFace: 'Outfit'
+    });
+
+    slide3.addText(c.val, {
+      x: xOffset + 0.2, y: 1.6, w: 3.5, h: 0.6,
+      fontSize: 24, bold: true, color: c.color, fontFace: 'Outfit'
+    });
+  });
+
+  // Financial table of domain allocations
+  const finTableRows: any[][] = [
+    [
+      { text: 'System Domain Owner', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
+      { text: 'CAPEX Alloc', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
+      { text: 'CAPEX Spent', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
+      { text: 'OPEX Alloc', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
+      { text: 'OPEX Spent', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
+      { text: 'Variance', options: { bold: true, color: CYAN, fill: { color: '050812' } } }
+    ]
+  ];
+
+  allocations.forEach(a => {
+    const totalAlloc = a.capexAllocated + a.opexAllocated;
+    const totalSpent = a.capexSpent + a.opexSpent;
+    const variance = totalAlloc - totalSpent;
+    
+    finTableRows.push([
+      { text: a.domainName, options: { color: TEXT_WHITE, fill: { color: CARD_BG } } },
+      { text: `$${(a.capexAllocated / 1000).toFixed(0)}k`, options: { color: TEXT_GRAY, fill: { color: CARD_BG } } },
+      { text: `$${(a.capexSpent / 1000).toFixed(0)}k`, options: { color: TEXT_GRAY, fill: { color: CARD_BG } } },
+      { text: `$${(a.opexAllocated / 1000).toFixed(0)}k`, options: { color: TEXT_GRAY, fill: { color: CARD_BG } } },
+      { text: `$${(a.opexSpent / 1000).toFixed(0)}k`, options: { color: TEXT_GRAY, fill: { color: CARD_BG } } },
+      { 
+        text: `$${(variance / 1000).toFixed(0)}k`, 
+        options: { color: variance >= 0 ? COLOR_GREEN : COLOR_RED, bold: true, fill: { color: CARD_BG } } 
+      }
+    ]);
+  });
+
+  slide3.addTable(finTableRows, {
+    x: 0.5, y: 2.8, w: 12.3, h: 3.8,
+    border: { type: 'solid', color: '1e293b', pt: 1 },
+    fontSize: 11, fontFace: 'Outfit',
+    align: 'left',
+    valign: 'middle'
+  });
+
+  // ==========================================
+  // SLIDE 4: Delivery & Domain Build Progress
+  // ==========================================
+  const slide4 = pptx.addSlide();
+  addSlideHeader(slide4, 'Delivery Pipeline & Build Progress');
+
+  // Draw 5 domain tracks
+  domains.forEach((d, idx) => {
+    const yOffset = 1.3 + idx * 1.1;
+
+    // Background panel
+    slide4.addShape(pptx.ShapeType.rect, {
+      x: 0.5, y: yOffset, w: 12.3, h: 0.9,
+      fill: { color: CARD_BG },
+      line: { color: d.status === 'Blocked' ? COLOR_RED : '1e293b', width: 1 }
+    });
+
+    // Domain name
+    slide4.addText(d.name, {
+      x: 0.7, y: yOffset + 0.15, w: 3.5, h: 0.3,
+      fontSize: 14, bold: true, color: TEXT_WHITE, fontFace: 'Outfit'
+    });
+
+    slide4.addText(`Lead: ${d.lead} | Target: ${d.releaseVersion}`, {
+      x: 0.7, y: yOffset + 0.45, w: 3.5, h: 0.3,
+      fontSize: 10, color: TEXT_GRAY, fontFace: 'Outfit'
+    });
+
+    // Build Progress Bar Background
+    slide4.addShape(pptx.ShapeType.rect, {
+      x: 4.5, y: yOffset + 0.3, w: 5.0, h: 0.25,
+      fill: { color: '161e38' }
+    });
+
+    // Fill progress
+    if (d.progress > 0) {
+      slide4.addShape(pptx.ShapeType.rect, {
+        x: 4.5, y: yOffset + 0.3, w: (d.progress / 100) * 5.0, h: 0.25,
+        fill: { color: d.status === 'Blocked' ? COLOR_AMBER : CYAN }
+      });
+    }
+
+    // Progress percentage text
+    slide4.addText(`${d.progress}%`, {
+      x: 9.6, y: yOffset + 0.25, w: 0.8, h: 0.3,
+      fontSize: 12, bold: true, color: CYAN, fontFace: 'Outfit'
+    });
+
+    // Status badge
+    const statusCol = d.status === 'Completed' ? COLOR_GREEN : d.status === 'Blocked' ? COLOR_RED : COLOR_AMBER;
+    slide4.addShape(pptx.ShapeType.rect, {
+      x: 10.6, y: yOffset + 0.25, w: 1.8, h: 0.4,
+      fill: { color: statusCol + '22' },
+      line: { color: statusCol, width: 1 }
+    });
+
+    slide4.addText(d.status.toUpperCase(), {
+      x: 10.6, y: yOffset + 0.25, w: 1.8, h: 0.4,
+      fontSize: 10, bold: true, color: statusCol, fontFace: 'Outfit',
+      align: 'center', valign: 'middle'
+    });
+  });
+
+  // ==========================================
+  // SLIDE 5: QA Testing & Defects
+  // ==========================================
+  const slide5 = pptx.addSlide();
+  addSlideHeader(slide5, 'QA Testing & Defect Metrics');
+
+  // QA Summary Stats (4 cards)
+  const runRate = Math.round(((qaStatus.passed + qaStatus.failed + qaStatus.blocked) / qaStatus.totalTests) * 100);
+  const passRate = Math.round((qaStatus.passed / (qaStatus.passed + qaStatus.failed)) * 100);
+
+  const qaStats = [
+    { label: 'TOTAL E2E TESTS', val: qaStatus.totalTests, color: TEXT_WHITE },
+    { label: 'PASSED', val: qaStatus.passed, color: COLOR_GREEN },
+    { label: 'EXEC RUN RATE', val: `${runRate}%`, color: CYAN },
+    { label: 'QA PASS RATE', val: `${passRate}%`, color: passRate >= 85 ? COLOR_GREEN : COLOR_AMBER }
+  ];
+
+  qaStats.forEach((s, idx) => {
+    const xOffset = 0.5 + idx * 3.1;
+    slide5.addShape(pptx.ShapeType.rect, {
+      x: xOffset, y: 1.2, w: 2.9, h: 1.3,
+      fill: { color: CARD_BG },
+      line: { color: '1e293b', width: 1 }
+    });
+
+    slide5.addText(s.label, {
+      x: xOffset + 0.2, y: 1.3, w: 2.5, h: 0.3,
+      fontSize: 9, bold: true, color: TEXT_GRAY, fontFace: 'Outfit'
+    });
+
+    slide5.addText(String(s.val), {
+      x: xOffset + 0.2, y: 1.6, w: 2.5, h: 0.7,
+      fontSize: 28, bold: true, color: s.color, fontFace: 'Outfit'
+    });
+  });
+
+  // Defects section header
+  slide5.addText('CRITICAL & HIGH OPEN DEFECTS', {
+    x: 0.5, y: 2.8, w: 6.0, h: 0.3,
+    fontSize: 14, bold: true, color: CYAN, fontFace: 'Outfit'
+  });
+
+  // Filter and display key defects
+  const criticalDefects = defects.filter(d => d.severity === 'Critical' || d.severity === 'High');
+  
+  const defectTableRows: any[][] = [
+    [
+      { text: 'ID', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
+      { text: 'Defect Summary', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
+      { text: 'Severity', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
+      { text: 'Domain Owner', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
+      { text: 'Status', options: { bold: true, color: CYAN, fill: { color: '050812' } } }
+    ]
+  ];
+
+  criticalDefects.forEach(d => {
+    defectTableRows.push([
+      { text: d.id, options: { color: TEXT_WHITE, fill: { color: CARD_BG } } },
+      { text: d.title, options: { color: TEXT_WHITE, fill: { color: CARD_BG } } },
+      { 
+        text: d.severity, 
+        options: { color: d.severity === 'Critical' ? COLOR_RED : COLOR_AMBER, bold: true, fill: { color: CARD_BG } } 
+      },
+      { text: d.domain, options: { color: TEXT_GRAY, fill: { color: CARD_BG } } },
+      { text: d.status, options: { color: COLOR_AMBER, fill: { color: CARD_BG } } }
+    ]);
+  });
+
+  if (criticalDefects.length > 0) {
+    slide5.addTable(defectTableRows, {
+      x: 0.5, y: 3.2, w: 12.3, h: 3.3,
+      border: { type: 'solid', color: '1e293b', pt: 1 },
+      fontSize: 10, fontFace: 'Outfit',
+      align: 'left',
+      valign: 'middle'
+    });
+  } else {
+    slide5.addText('No critical/high open defects in active queues.', {
+      x: 0.5, y: 3.5, w: 12.3, h: 0.5,
+      fontSize: 12, color: COLOR_GREEN, fontFace: 'Outfit'
+    });
+  }
+
+  // ==========================================
+  // SLIDE 6: RAID Log & Risks Matrix
+  // ==========================================
+  const slide6 = pptx.addSlide();
+  addSlideHeader(slide6, 'RAID Log (Risks, Actions, Issues, Dependencies)');
+
+  const riskTableRows: any[][] = [
+    [
+      { text: 'Ref ID', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
+      { text: 'Type', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
+      { text: 'Risk Description / Trigger', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
+      { text: 'Impact', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
+      { text: 'Mitigation Plan / Action Owner', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
+      { text: 'Status', options: { bold: true, color: CYAN, fill: { color: '050812' } } }
+    ]
+  ];
+
+  risks.forEach(r => {
+    riskTableRows.push([
+      { text: r.id, options: { color: TEXT_WHITE, fill: { color: CARD_BG } } },
+      { text: r.type, options: { color: PURPLE, bold: true, fill: { color: CARD_BG } } },
+      { text: r.title, options: { color: TEXT_WHITE, fill: { color: CARD_BG } } },
+      { 
+        text: r.impact, 
+        options: { color: r.impact === 'Critical' || r.impact === 'High' ? COLOR_RED : COLOR_AMBER, bold: true, fill: { color: CARD_BG } } 
+      },
+      { text: r.mitigation, options: { color: TEXT_GRAY, fill: { color: CARD_BG } } },
+      { 
+        text: r.status.toUpperCase(), 
+        options: { color: r.status === 'Open' ? COLOR_RED : COLOR_GREEN, bold: true, fill: { color: CARD_BG } } 
+      }
+    ]);
+  });
+
+  slide6.addTable(riskTableRows, {
+    x: 0.5, y: 1.5, w: 12.3, h: 5.0,
+    border: { type: 'solid', color: '1e293b', pt: 1 },
+    fontSize: 10, fontFace: 'Outfit',
+    align: 'left',
+    valign: 'middle'
+  });
+
+  // Write presentation to file
+  pptx.writeFile({ fileName: 'TDM_SteerCo_Report.pptx' });
+};
