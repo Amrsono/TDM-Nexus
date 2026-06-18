@@ -545,13 +545,11 @@ export const exportPOAPToPPT = (
   const objectivesText = poapData.objectives.map(o => `• ${o}`).join('\n');
   slide.addText([
     { text: 'VISION & STRATEGIC OBJECTIVES', options: { fontSize: 11, bold: true, color: PURPLE, breakLine: true } },
-    { text: ' ', options: { fontSize: 4, breakLine: true } },
     { text: poapData.problemStatement, options: { fontSize: 8.5, color: TEXT_WHITE, italic: true, breakLine: true } },
-    { text: ' ', options: { fontSize: 4, breakLine: true } },
     { text: objectivesText, options: { fontSize: 8.5, color: TEXT_GRAY } }
   ], {
     x: 0.65, y: 1.45, w: 3.6, h: 1.65,
-    fontFace: 'Outfit', valign: 'top', lineSpacing: 13
+    fontFace: 'Outfit', valign: 'top', lineSpacing: 11
   });
 
   // Box 2: Scope (In/Out)
@@ -568,21 +566,19 @@ export const exportPOAPToPPT = (
   const inScopeText = poapData.inScope.slice(0, 4).map(s => `✓ ${s}`).join('\n');
   slide.addText([
     { text: '✓ IN SCOPE', options: { fontSize: 9, bold: true, color: COLOR_GREEN, breakLine: true } },
-    { text: ' ', options: { fontSize: 4, breakLine: true } },
     { text: inScopeText, options: { fontSize: 8, color: TEXT_WHITE } }
   ], {
     x: 0.65, y: 3.75, w: 1.7, h: 1.35,
-    fontFace: 'Outfit', valign: 'top', lineSpacing: 12
+    fontFace: 'Outfit', valign: 'top', lineSpacing: 11
   });
 
   const outOfScopeText = poapData.outOfScope.slice(0, 4).map(s => `✗ ${s}`).join('\n');
   slide.addText([
     { text: '✗ OUT OF SCOPE', options: { fontSize: 9, bold: true, color: COLOR_AMBER, breakLine: true } },
-    { text: ' ', options: { fontSize: 4, breakLine: true } },
     { text: outOfScopeText, options: { fontSize: 8, color: TEXT_WHITE } }
   ], {
     x: 2.5, y: 3.75, w: 1.7, h: 1.35,
-    fontFace: 'Outfit', valign: 'top', lineSpacing: 12
+    fontFace: 'Outfit', valign: 'top', lineSpacing: 11
   });
 
   // Middle Column: Success Criteria, Assumptions, Risks, Dependencies
@@ -596,15 +592,13 @@ export const exportPOAPToPPT = (
   const assumptionsText = poapData.assumptions.slice(0, 3).map(a => `• ${a}`).join('\n');
   slide.addText([
     { text: 'SUCCESS CRITERIA & ASSUMPTIONS', options: { fontSize: 11, bold: true, color: CYAN, breakLine: true } },
-    { text: ' ', options: { fontSize: 4, breakLine: true } },
     { text: 'SUCCESS CRITERIA', options: { fontSize: 9, bold: true, color: COLOR_GREEN, breakLine: true } },
     { text: criteriaText, options: { fontSize: 8, color: TEXT_WHITE, breakLine: true } },
-    { text: ' ', options: { fontSize: 6, breakLine: true } },
     { text: 'KEY ASSUMPTIONS', options: { fontSize: 9, bold: true, color: TEXT_GRAY, breakLine: true } },
     { text: assumptionsText, options: { fontSize: 8, color: TEXT_WHITE } }
   ], {
     x: 4.75, y: 1.45, w: 3.6, h: 1.65,
-    fontFace: 'Outfit', valign: 'top', lineSpacing: 12
+    fontFace: 'Outfit', valign: 'top', lineSpacing: 11
   });
 
   // Box 4: Key Risks & Dependencies
@@ -617,15 +611,13 @@ export const exportPOAPToPPT = (
   const dependenciesText = poapData.dependencies.slice(0, 3).map(d => `• ${d}`).join('\n');
   slide.addText([
     { text: 'KEY RISKS & DEPENDENCIES', options: { fontSize: 11, bold: true, color: COLOR_AMBER, breakLine: true } },
-    { text: ' ', options: { fontSize: 4, breakLine: true } },
     { text: 'TOP RISKS', options: { fontSize: 9, bold: true, color: COLOR_RED, breakLine: true } },
     { text: risksText, options: { fontSize: 8, color: TEXT_WHITE, breakLine: true } },
-    { text: ' ', options: { fontSize: 6, breakLine: true } },
     { text: 'DEPENDENCIES', options: { fontSize: 9, bold: true, color: PURPLE, breakLine: true } },
     { text: dependenciesText, options: { fontSize: 8, color: TEXT_WHITE } }
   ], {
     x: 4.75, y: 3.45, w: 3.6, h: 1.65,
-    fontFace: 'Outfit', valign: 'top', lineSpacing: 12
+    fontFace: 'Outfit', valign: 'top', lineSpacing: 11
   });
 
   // Right Column: Budget, Stakeholders, Next Steps
@@ -638,19 +630,17 @@ export const exportPOAPToPPT = (
   const variance = poapData.totalBudget - poapData.forecastToComplete;
   slide.addText([
     { text: 'BUDGET SUMMARY', options: { fontSize: 10, bold: true, color: COLOR_AMBER, breakLine: true } },
-    { text: ' ', options: { fontSize: 4, breakLine: true } },
     { text: 'Total Budget: ', options: { fontSize: 8.5, bold: true, color: TEXT_GRAY } },
     { text: `$${poapData.totalBudget.toLocaleString()}   `, options: { fontSize: 8.5, color: TEXT_WHITE } },
     { text: 'Spent to Date: ', options: { fontSize: 8.5, bold: true, color: TEXT_GRAY } },
     { text: `$${poapData.spentToDate.toLocaleString()}`, options: { fontSize: 8.5, color: TEXT_WHITE, breakLine: true } },
-    { text: ' ', options: { fontSize: 6, breakLine: true } },
     { text: 'Forecast: ', options: { fontSize: 8.5, bold: true, color: TEXT_GRAY } },
     { text: `$${poapData.forecastToComplete.toLocaleString()}   `, options: { fontSize: 8.5, color: TEXT_WHITE } },
     { text: 'Variance: ', options: { fontSize: 8.5, bold: true, color: TEXT_GRAY } },
     { text: `$${variance.toLocaleString()}`, options: { fontSize: 8.5, color: variance >= 0 ? COLOR_GREEN : COLOR_RED, bold: true } }
   ], {
     x: 8.85, y: 1.45, w: 3.8, h: 1.05,
-    fontFace: 'Outfit', valign: 'top', lineSpacing: 15
+    fontFace: 'Outfit', valign: 'top', lineSpacing: 13
   });
 
   // Box 6: Stakeholders
@@ -659,14 +649,12 @@ export const exportPOAPToPPT = (
     fill: { color: CARD_BG },
     line: { color: '1E293B', width: 1 }
   });
-  const stakeholdersText = poapData.stakeholders.slice(0, 3).map(s => `• ${s.name} (${s.role}) - ${s.engagement}`).join('\n');
   slide.addText([
     { text: 'KEY STAKEHOLDERS', options: { fontSize: 10, bold: true, color: CYAN, breakLine: true } },
-    { text: ' ', options: { fontSize: 4, breakLine: true } },
     { text: stakeholdersText, options: { fontSize: 8, color: TEXT_WHITE } }
   ], {
     x: 8.85, y: 2.8, w: 3.8, h: 1.0,
-    fontFace: 'Outfit', valign: 'top', lineSpacing: 13
+    fontFace: 'Outfit', valign: 'top', lineSpacing: 11
   });
 
   // Box 7: Next Steps
@@ -678,11 +666,10 @@ export const exportPOAPToPPT = (
   const actionsText = poapData.nextActions.slice(0, 3).map(a => `• ${a.description} [${a.owner} - ${a.dueDate}]`).join('\n');
   slide.addText([
     { text: 'NEXT STEPS & ACTIONS', options: { fontSize: 10, bold: true, color: PURPLE, breakLine: true } },
-    { text: ' ', options: { fontSize: 4, breakLine: true } },
     { text: actionsText, options: { fontSize: 8, color: TEXT_WHITE } }
   ], {
     x: 8.85, y: 4.1, w: 3.8, h: 1.0,
-    fontFace: 'Outfit', valign: 'top', lineSpacing: 13
+    fontFace: 'Outfit', valign: 'top', lineSpacing: 11
   });
 
   // ==========================================
