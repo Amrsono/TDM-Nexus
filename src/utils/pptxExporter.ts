@@ -21,7 +21,7 @@ export const exportToPPT = (
   ragStatus: { schedule: string; budget: string; scope: string; quality: string; overall: string }
 ) => {
   const pptx = new pptxgen();
-  pptx.layout = 'LAYOUT_16x9';
+  pptx.layout = 'LAYOUT_WIDE';
 
   // Theme colors
   const BG_COLOR = '070B19';
@@ -444,7 +444,7 @@ export const exportPOAPToPPT = (
   ragStatus: { schedule: string; budget: string; scope: string; quality: string; overall: string }
 ) => {
   const pptx = new pptxgen();
-  pptx.layout = 'LAYOUT_16x9';
+  pptx.layout = 'LAYOUT_WIDE';
 
   // Theme colors
   const BG_COLOR = '070B19';
