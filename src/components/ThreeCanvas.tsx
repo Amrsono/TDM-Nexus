@@ -71,12 +71,13 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({ activePhase, onPhaseSe
     // 5. Phase Nodes configurations
     const phases = [
       { id: 'initiation', name: 'Initiation & BC', angle: 0, radius: 10, color: 0x00f5a0 },
-      { id: 'analysis', name: 'Analysis & Design', angle: (Math.PI * 2) / 7, radius: 10, color: 0x00f2fe },
-      { id: 'build', name: 'Build & Delivery', angle: ((Math.PI * 2) / 7) * 2, radius: 10, color: 0xbd00ff },
-      { id: 'finances', name: 'Finances & Budget', angle: ((Math.PI * 2) / 7) * 3, radius: 10, color: 0xf59e0b },
-      { id: 'testing', name: 'QA & Testing', angle: ((Math.PI * 2) / 7) * 4, radius: 10, color: 0xf43f5e },
-      { id: 'governance', name: 'Governance', angle: ((Math.PI * 2) / 7) * 5, radius: 10, color: 0x60a5fa },
-      { id: 'closure', name: 'Closure & Hypercare', angle: ((Math.PI * 2) / 7) * 6, radius: 10, color: 0xa855f7 },
+      { id: 'analysis', name: 'Analysis & Design', angle: (Math.PI * 2) / 8, radius: 10, color: 0x00f2fe },
+      { id: 'build', name: 'Build & Delivery', angle: ((Math.PI * 2) / 8) * 2, radius: 10, color: 0xbd00ff },
+      { id: 'finances', name: 'Finances & Budget', angle: ((Math.PI * 2) / 8) * 3, radius: 10, color: 0xf59e0b },
+      { id: 'testing', name: 'QA & Testing', angle: ((Math.PI * 2) / 8) * 4, radius: 10, color: 0xf43f5e },
+      { id: 'governance', name: 'Governance', angle: ((Math.PI * 2) / 8) * 5, radius: 10, color: 0x60a5fa },
+      { id: 'closure', name: 'Closure & Hypercare', angle: ((Math.PI * 2) / 8) * 6, radius: 10, color: 0xa855f7 },
+      { id: 'poap', name: 'Plan on a Page', angle: ((Math.PI * 2) / 8) * 7, radius: 10, color: 0x2dd4bf },
     ];
 
     const nodesGroup = new THREE.Group();

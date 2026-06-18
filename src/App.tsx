@@ -8,7 +8,8 @@ import {
   Scale, 
   ShieldCheck, 
   FileSpreadsheet, 
-  Presentation
+  Presentation,
+  LayoutTemplate
 } from 'lucide-react';
 import { ThreeCanvas } from './components/ThreeCanvas';
 import { Initiation } from './views/Initiation';
@@ -18,6 +19,7 @@ import { Finances } from './views/Finances';
 import { Testing } from './views/Testing';
 import { Governance } from './views/Governance';
 import { Closure } from './views/Closure';
+import { POAP } from './views/POAP';
 import { exportToExcel } from './utils/excelExporter';
 import { exportToPPT } from './utils/pptxExporter';
 import {
@@ -33,6 +35,7 @@ import {
   initialRisks,
   initialChecklist,
   initialHypercare,
+  initialPOAPData,
   ProjectFinancials,
   Requirement,
   DomainBuild,
@@ -43,10 +46,11 @@ import {
   Defect,
   RiskIssue,
   ChecklistItem,
-  HypercareTicket
+  HypercareTicket,
+  POAPData
 } from './utils/mockData';
 
-type PhaseId = 'initiation' | 'analysis' | 'build' | 'finances' | 'testing' | 'governance' | 'closure';
+type PhaseId = 'initiation' | 'analysis' | 'build' | 'finances' | 'testing' | 'governance' | 'closure' | 'poap';
 
 interface PhaseMetadata {
   id: PhaseId;
@@ -71,6 +75,7 @@ export default function App() {
   const [risks, setRisks] = useState<RiskIssue[]>(initialRisks);
   const [checklist, setChecklist] = useState<ChecklistItem[]>(initialChecklist);
   const [hypercare, setHypercare] = useState<HypercareTicket[]>(initialHypercare);
+  const [poapData, setPoapData] = useState<POAPData>(initialPOAPData);
   
   const [ragStatus, setRagStatus] = useState({
     schedule: 'Green',
@@ -87,7 +92,8 @@ export default function App() {
     { id: 'finances', name: 'Finances & Budget', icon: CircleDollarSign, color: 'var(--color-amber)' },
     { id: 'testing', name: 'QA & Testing', icon: Bug, color: 'var(--color-magenta)' },
     { id: 'governance', name: 'Project Governance', icon: Scale, color: '#60a5fa' },
-    { id: 'closure', name: 'Closure & Hypercare', icon: ShieldCheck, color: '#a855f7' }
+    { id: 'closure', name: 'Closure & Hypercare', icon: ShieldCheck, color: '#a855f7' },
+    { id: 'poap', name: 'Plan on a Page', icon: LayoutTemplate, color: '#2dd4bf' }
   ];
 
   const activeMetadata = useMemo(() => {
@@ -207,6 +213,14 @@ export default function App() {
             setChecklist={setChecklist} 
             hypercare={hypercare} 
             setHypercare={setHypercare} 
+          />
+        );
+      case 'poap':
+        return (
+          <POAP 
+            poapData={poapData}
+            setPoapData={setPoapData}
+            ragStatus={ragStatus}
           />
         );
       default:

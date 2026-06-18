@@ -202,3 +202,154 @@ export const initialHypercare: HypercareTicket[] = [
   { id: 'HYP-02', title: 'Bill detail CSV exporter failing', severity: 'P3', status: 'Open', reportedAt: '2026-09-02T10:45:00', slaMinutes: 240 },
   { id: 'HYP-03', title: 'eSIM key validation database deadlock', severity: 'P1', status: 'Resolved', reportedAt: '2026-09-01T23:30:00', slaMinutes: 30 }
 ];
+
+// ─── POAP (Plan on a Page) Data ─────────────────────────────────────────────
+
+export interface POAPStakeholder {
+  id: string;
+  name: string;
+  role: string;
+  engagement: 'Accountable' | 'Consulted' | 'Informed';
+}
+
+export interface POAPMilestone {
+  id: string;
+  name: string;
+  date: string;
+  status: 'Not Started' | 'In Progress' | 'Completed';
+}
+
+export interface POAPAction {
+  id: string;
+  description: string;
+  owner: string;
+  dueDate: string;
+}
+
+export interface POAPData {
+  // Project Identity
+  projectName: string;
+  projectCode: string;
+  projectManager: string;
+  executiveSponsor: string;
+  reportingDate: string;
+  projectPhase: string;
+
+  // Vision & Objectives
+  problemStatement: string;
+  objectives: string[];
+
+  // Scope
+  inScope: string[];
+  outOfScope: string[];
+
+  // Assumptions
+  assumptions: string[];
+
+  // Budget
+  totalBudget: number;
+  spentToDate: number;
+  forecastToComplete: number;
+
+  // Key Milestones
+  milestones: POAPMilestone[];
+
+  // Key Risks (free-text top 3)
+  keyRisks: string[];
+
+  // Stakeholders
+  stakeholders: POAPStakeholder[];
+
+  // Success Criteria
+  successCriteria: string[];
+
+  // Key Dependencies
+  dependencies: string[];
+
+  // Next Steps / Actions
+  nextActions: POAPAction[];
+}
+
+export const initialPOAPData: POAPData = {
+  projectName: 'PROJECT VELOCITY',
+  projectCode: 'PRJ-2026-VEL',
+  projectManager: 'Aaron Vance',
+  executiveSponsor: 'Chief Technology Officer',
+  reportingDate: new Date().toISOString().split('T')[0],
+  projectPhase: 'Build & Delivery',
+
+  problemStatement:
+    'Legacy SIM card provisioning and manual carrier-billing processes are unable to scale with growing demand for instant digital connectivity. A unified eSIM and carrier-billing platform is required to unlock new revenue streams and reduce operational costs.',
+
+  objectives: [
+    'Launch unified eSIM activation & carrier-billing platform by Q3 2026',
+    'Enable instant OTA eSIM provisioning with <200ms latency SLA',
+    'Deliver $12.5M NPV benefit over 5 years through new streaming partner integrations',
+  ],
+
+  inScope: [
+    'eSIM profile download and OTA provisioning handler',
+    'Carrier-billing integration for third-party streaming partners',
+    'SSO federated account integration across B2C channels',
+    'Dynamic bundle rating engine with 5G data packet support',
+    'Real-time usage notification triggers',
+  ],
+  outOfScope: [
+    'Legacy 2G/3G SIM card management systems',
+    'International roaming billing negotiations',
+    'Physical SIM card inventory and logistics',
+  ],
+
+  assumptions: [
+    'Carrier partner APIs will be available and stable by July 2026',
+    'Security compliance sign-off will be granted before UAT',
+    'Infrastructure provisioning in staging environment remains available',
+  ],
+
+  totalBudget: 4150000,
+  spentToDate: 1980000,
+  forecastToComplete: 2050000,
+
+  milestones: [
+    { id: 'pm-1', name: 'eSIM API Spec Approved', date: '2026-02-15', status: 'Completed' },
+    { id: 'pm-2', name: 'Carrier Gateway Sandbox', date: '2026-03-01', status: 'Completed' },
+    { id: 'pm-3', name: 'Profile Download Handler', date: '2026-05-10', status: 'Completed' },
+    { id: 'pm-4', name: 'Dynamic Rating Integration Tests', date: '2026-07-20', status: 'In Progress' },
+    { id: 'pm-5', name: 'E2E UAT Sign-off', date: '2026-08-15', status: 'Not Started' },
+    { id: 'pm-6', name: 'Market Launch', date: '2026-09-01', status: 'Not Started' },
+  ],
+
+  keyRisks: [
+    'Carrier gateway SLA delays could push UAT beyond Aug 15 deadline',
+    'Loss of senior OSS/BSS developer reduces integration throughput',
+    'eSIM provisioning handshake timeout defect remains unresolved',
+  ],
+
+  stakeholders: [
+    { id: 'st-1', name: 'Aaron Vance', role: 'Project Manager', engagement: 'Accountable' },
+    { id: 'st-2', name: 'Sarah Jenkins', role: 'Billing Lead', engagement: 'Accountable' },
+    { id: 'st-3', name: 'CTO Office', role: 'Executive Sponsor', engagement: 'Informed' },
+    { id: 'st-4', name: 'Carrier Partner Ops', role: 'Technical Counterpart', engagement: 'Consulted' },
+  ],
+
+  successCriteria: [
+    'eSIM provisioning latency consistently below 200ms in production',
+    'Zero Critical defects open at market launch',
+    'First streaming partner billing integration live within 30 days of go-live',
+    'Customer self-service portal adoption rate >60% within 90 days',
+  ],
+
+  dependencies: [
+    'Carrier partner technical team providing stable gateway API by July 2026',
+    'Security audit completion prior to UAT phase',
+    'Cloud infrastructure capacity approved by platform team',
+    'Legal sign-off on streaming partner billing contracts',
+  ],
+
+  nextActions: [
+    { id: 'na-1', description: 'Resolve eSIM provisioning handshake timeout (DEF-001)', owner: 'Marcus Brody', dueDate: '2026-06-25' },
+    { id: 'na-2', description: 'Complete penetration testing and obtain security sign-off', owner: 'Security Lead', dueDate: '2026-07-05' },
+    { id: 'na-3', description: 'Finalise UAT test scripts and schedule stakeholder walkthroughs', owner: 'QA Lead', dueDate: '2026-07-15' },
+    { id: 'na-4', description: 'Engage carrier partner for API staging environment access', owner: 'David Chen', dueDate: '2026-06-28' },
+  ],
+};

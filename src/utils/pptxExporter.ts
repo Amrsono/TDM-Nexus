@@ -6,7 +6,8 @@ import {
   FinancialAllocation, 
   QAStatus, 
   Defect, 
-  RiskIssue 
+  RiskIssue,
+  POAPData
 } from './mockData';
 
 export const exportToPPT = (
@@ -436,4 +437,331 @@ export const exportToPPT = (
 
   // Write presentation to file
   pptx.writeFile({ fileName: 'TDM_SteerCo_Report.pptx' });
+};
+
+export const exportPOAPToPPT = (
+  poapData: POAPData,
+  ragStatus: { schedule: string; budget: string; scope: string; quality: string; overall: string }
+) => {
+  const pptx = new pptxgen();
+  pptx.layout = 'LAYOUT_16x9';
+
+  // Theme colors
+  const BG_COLOR = '070B19';
+  const CARD_BG = '0D162F';
+  const CYAN = '00F2FE';
+  const PURPLE = 'BD00FF';
+  const TEXT_WHITE = 'F8FAFC';
+  const TEXT_GRAY = '94A3B8';
+  
+  // Status Colors
+  const COLOR_GREEN = '00F5A0';
+  const COLOR_AMBER = 'F59E0B';
+  const COLOR_RED = 'EF4444';
+
+  const getRagHex = (val: string) => {
+    if (val.toLowerCase() === 'green') return COLOR_GREEN;
+    if (val.toLowerCase() === 'amber') return COLOR_AMBER;
+    return COLOR_RED;
+  };
+
+  const slide = pptx.addSlide();
+  slide.background = { color: BG_COLOR };
+
+  // ==========================================
+  // HEADER BANNER (y: 0.2 to 1.1)
+  // ==========================================
+  // Header background shape
+  slide.addShape(pptx.ShapeType.rect, {
+    x: 0.5, y: 0.2, w: 12.33, h: 1.0,
+    fill: { color: CARD_BG },
+    line: { color: CYAN, width: 1 }
+  });
+
+  // Project Title & Subtitle
+  slide.addText(poapData.projectName.toUpperCase(), {
+    x: 0.7, y: 0.3, w: 4.0, h: 0.4,
+    fontSize: 20, bold: true, color: TEXT_WHITE, fontFace: 'Outfit'
+  });
+  slide.addText('PLAN ON A PAGE (POAP) SUMMARY', {
+    x: 0.7, y: 0.7, w: 4.0, h: 0.3,
+    fontSize: 10, bold: true, color: CYAN, fontFace: 'Outfit'
+  });
+
+  // Metadata block (middle section of header)
+  slide.addText([
+    { text: 'PM: ', options: { bold: true, color: CYAN } },
+    { text: poapData.projectManager + '   ', options: { color: TEXT_WHITE } },
+    { text: 'Sponsor: ', options: { bold: true, color: CYAN } },
+    { text: poapData.executiveSponsor + '\n', options: { color: TEXT_WHITE } },
+    { text: 'Code: ', options: { bold: true, color: CYAN } },
+    { text: poapData.projectCode + '   ', options: { color: TEXT_WHITE } },
+    { text: 'Phase: ', options: { bold: true, color: CYAN } },
+    { text: poapData.projectPhase + '   ', options: { color: TEXT_WHITE } },
+    { text: 'Date: ', options: { bold: true, color: CYAN } },
+    { text: poapData.reportingDate, options: { color: TEXT_WHITE } }
+  ], {
+    x: 5.0, y: 0.25, w: 4.5, h: 0.9,
+    fontSize: 10, fontFace: 'Outfit', lineSpacing: 18
+  });
+
+  // RAG status indicators
+  const ragKeys = ['schedule', 'budget', 'scope', 'quality', 'overall'] as const;
+  ragKeys.forEach((key, idx) => {
+    const xOffset = 9.8 + idx * 0.58;
+    const val = ragStatus[key];
+    const colorHex = getRagHex(val);
+
+    // Label above status badge
+    slide.addText(key.toUpperCase().substring(0, 3), {
+      x: xOffset, y: 0.25, w: 0.5, h: 0.2,
+      fontSize: 8, bold: true, color: TEXT_GRAY, fontFace: 'Outfit', align: 'center'
+    });
+
+    // RAG Status Badge indicator
+    slide.addShape(pptx.ShapeType.rect, {
+      x: xOffset, y: 0.48, w: 0.5, h: 0.6,
+      fill: { color: colorHex + '22' },
+      line: { color: colorHex, width: 1 }
+    });
+
+    slide.addText(val.toUpperCase().substring(0, 3), {
+      x: xOffset, y: 0.48, w: 0.5, h: 0.6,
+      fontSize: 10, bold: true, color: colorHex, fontFace: 'Outfit',
+      align: 'center', valign: 'middle'
+    });
+  });
+
+  // ==========================================
+  // BODY COLUMNS
+  // ==========================================
+  // Left Column: Vision/Objectives & Scope
+  // Box 1: Problem Statement & Objectives
+  slide.addShape(pptx.ShapeType.rect, {
+    x: 0.5, y: 1.35, w: 3.9, h: 1.85,
+    fill: { color: CARD_BG },
+    line: { color: '1E293B', width: 1 }
+  });
+  slide.addText('VISION & STRATEGIC OBJECTIVES', {
+    x: 0.65, y: 1.45, w: 3.6, h: 0.3,
+    fontSize: 11, bold: true, color: PURPLE, fontFace: 'Outfit'
+  });
+  slide.addText(poapData.problemStatement, {
+    x: 0.65, y: 1.75, w: 3.6, h: 0.55,
+    fontSize: 8.5, color: TEXT_WHITE, fontFace: 'Outfit', italic: true, lineSpacing: 13
+  });
+  
+  // Bullet point list for objectives
+  const objectivesText = poapData.objectives.map(o => `• ${o}`).join('\n');
+  slide.addText(objectivesText, {
+    x: 0.65, y: 2.35, w: 3.6, h: 0.75,
+    fontSize: 8.5, color: TEXT_GRAY, fontFace: 'Outfit', lineSpacing: 13
+  });
+
+  // Box 2: Scope (In/Out)
+  slide.addShape(pptx.ShapeType.rect, {
+    x: 0.5, y: 3.35, w: 3.9, h: 1.85,
+    fill: { color: CARD_BG },
+    line: { color: '1E293B', width: 1 }
+  });
+  slide.addText('PROJECT SCOPE', {
+    x: 0.65, y: 3.45, w: 3.6, h: 0.3,
+    fontSize: 11, bold: true, color: COLOR_GREEN, fontFace: 'Outfit'
+  });
+  
+  const inScopeText = poapData.inScope.slice(0, 4).map(s => `✓ ${s}`).join('\n');
+  slide.addText('✓ IN SCOPE', {
+    x: 0.65, y: 3.75, w: 1.7, h: 0.2,
+    fontSize: 9, bold: true, color: COLOR_GREEN, fontFace: 'Outfit'
+  });
+  slide.addText(inScopeText, {
+    x: 0.65, y: 3.95, w: 1.7, h: 1.15,
+    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 12
+  });
+
+  const outOfScopeText = poapData.outOfScope.slice(0, 4).map(s => `✗ ${s}`).join('\n');
+  slide.addText('✗ OUT OF SCOPE', {
+    x: 2.5, y: 3.75, w: 1.7, h: 0.2,
+    fontSize: 9, bold: true, color: COLOR_AMBER, fontFace: 'Outfit'
+  });
+  slide.addText(outOfScopeText, {
+    x: 2.5, y: 3.95, w: 1.7, h: 1.15,
+    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 12
+  });
+
+  // Middle Column: Success Criteria, Assumptions, Risks, Dependencies
+  // Box 3: Success Criteria & Assumptions
+  slide.addShape(pptx.ShapeType.rect, {
+    x: 4.6, y: 1.35, w: 3.9, h: 1.85,
+    fill: { color: CARD_BG },
+    line: { color: '1E293B', width: 1 }
+  });
+  slide.addText('SUCCESS CRITERIA & ASSUMPTIONS', {
+    x: 4.75, y: 1.45, w: 3.6, h: 0.3,
+    fontSize: 11, bold: true, color: CYAN, fontFace: 'Outfit'
+  });
+  
+  const criteriaText = poapData.successCriteria.slice(0, 3).map(c => `• ${c}`).join('\n');
+  slide.addText('SUCCESS CRITERIA', {
+    x: 4.75, y: 1.75, w: 3.6, h: 0.2,
+    fontSize: 9, bold: true, color: COLOR_GREEN, fontFace: 'Outfit'
+  });
+  slide.addText(criteriaText, {
+    x: 4.75, y: 1.95, w: 3.6, h: 0.5,
+    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 12
+  });
+
+  const assumptionsText = poapData.assumptions.slice(0, 3).map(a => `• ${a}`).join('\n');
+  slide.addText('KEY ASSUMPTIONS', {
+    x: 4.75, y: 2.45, w: 3.6, h: 0.2,
+    fontSize: 9, bold: true, color: TEXT_GRAY, fontFace: 'Outfit'
+  });
+  slide.addText(assumptionsText, {
+    x: 4.75, y: 2.65, w: 3.6, h: 0.5,
+    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 12
+  });
+
+  // Box 4: Key Risks & Dependencies
+  slide.addShape(pptx.ShapeType.rect, {
+    x: 4.6, y: 3.35, w: 3.9, h: 1.85,
+    fill: { color: CARD_BG },
+    line: { color: '1E293B', width: 1 }
+  });
+  slide.addText('KEY RISKS & DEPENDENCIES', {
+    x: 4.75, y: 3.45, w: 3.6, h: 0.3,
+    fontSize: 11, bold: true, color: COLOR_AMBER, fontFace: 'Outfit'
+  });
+
+  const risksText = poapData.keyRisks.slice(0, 3).map(r => `• ${r}`).join('\n');
+  slide.addText('TOP RISKS', {
+    x: 4.75, y: 3.75, w: 3.6, h: 0.2,
+    fontSize: 9, bold: true, color: COLOR_RED, fontFace: 'Outfit'
+  });
+  slide.addText(risksText, {
+    x: 4.75, y: 3.95, w: 3.6, h: 0.5,
+    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 12
+  });
+
+  const dependenciesText = poapData.dependencies.slice(0, 3).map(d => `• ${d}`).join('\n');
+  slide.addText('DEPENDENCIES', {
+    x: 4.75, y: 4.45, w: 3.6, h: 0.2,
+    fontSize: 9, bold: true, color: PURPLE, fontFace: 'Outfit'
+  });
+  slide.addText(dependenciesText, {
+    x: 4.75, y: 4.65, w: 3.6, h: 0.5,
+    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 12
+  });
+
+  // Right Column: Budget, Stakeholders, Next Steps
+  // Box 5: Budget Summary
+  slide.addShape(pptx.ShapeType.rect, {
+    x: 8.7, y: 1.35, w: 4.1, h: 1.25,
+    fill: { color: CARD_BG },
+    line: { color: '1E293B', width: 1 }
+  });
+  slide.addText('BUDGET SUMMARY', {
+    x: 8.85, y: 1.45, w: 3.8, h: 0.25,
+    fontSize: 10, bold: true, color: COLOR_AMBER, fontFace: 'Outfit'
+  });
+
+  const variance = poapData.totalBudget - poapData.forecastToComplete;
+  slide.addText([
+    { text: 'Total Budget: ', options: { bold: true, color: TEXT_GRAY } },
+    { text: `$${poapData.totalBudget.toLocaleString()}   `, options: { color: TEXT_WHITE } },
+    { text: 'Spent to Date: ', options: { bold: true, color: TEXT_GRAY } },
+    { text: `$${poapData.spentToDate.toLocaleString()}\n`, options: { color: TEXT_WHITE } },
+    { text: 'Forecast: ', options: { bold: true, color: TEXT_GRAY } },
+    { text: `$${poapData.forecastToComplete.toLocaleString()}   `, options: { color: TEXT_WHITE } },
+    { text: 'Variance: ', options: { bold: true, color: TEXT_GRAY } },
+    { text: `$${variance.toLocaleString()}`, options: { color: variance >= 0 ? COLOR_GREEN : COLOR_RED, bold: true } }
+  ], {
+    x: 8.85, y: 1.75, w: 3.8, h: 0.7,
+    fontSize: 8.5, fontFace: 'Outfit', lineSpacing: 15
+  });
+
+  // Box 6: Stakeholders
+  slide.addShape(pptx.ShapeType.rect, {
+    x: 8.7, y: 2.7, w: 4.1, h: 1.2,
+    fill: { color: CARD_BG },
+    line: { color: '1E293B', width: 1 }
+  });
+  slide.addText('KEY STAKEHOLDERS', {
+    x: 8.85, y: 2.8, w: 3.8, h: 0.25,
+    fontSize: 10, bold: true, color: CYAN, fontFace: 'Outfit'
+  });
+  const stakeholdersText = poapData.stakeholders.slice(0, 3).map(s => `• ${s.name} (${s.role}) - ${s.engagement}`).join('\n');
+  slide.addText(stakeholdersText, {
+    x: 8.85, y: 3.1, w: 3.8, h: 0.7,
+    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 13
+  });
+
+  // Box 7: Next Steps
+  slide.addShape(pptx.ShapeType.rect, {
+    x: 8.7, y: 4.0, w: 4.1, h: 1.2,
+    fill: { color: CARD_BG },
+    line: { color: '1E293B', width: 1 }
+  });
+  slide.addText('NEXT STEPS & ACTIONS', {
+    x: 8.85, y: 4.1, w: 3.8, h: 0.25,
+    fontSize: 10, bold: true, color: PURPLE, fontFace: 'Outfit'
+  });
+  const actionsText = poapData.nextActions.slice(0, 3).map(a => `• ${a.description} [${a.owner} - ${a.dueDate}]`).join('\n');
+  slide.addText(actionsText, {
+    x: 8.85, y: 4.4, w: 3.8, h: 0.7,
+    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 13
+  });
+
+  // ==========================================
+  // BOTTOM ROW: TIMELINE & KEY MILESTONES (y: 5.35 to 7.15)
+  // ==========================================
+  slide.addShape(pptx.ShapeType.rect, {
+    x: 0.5, y: 5.35, w: 12.3, h: 1.8,
+    fill: { color: CARD_BG },
+    line: { color: CYAN, width: 1 }
+  });
+  slide.addText('KEY MILESTONES & TIMELINE', {
+    x: 0.65, y: 5.45, w: 5.0, h: 0.3,
+    fontSize: 11, bold: true, color: CYAN, fontFace: 'Outfit'
+  });
+
+  // Horizontal line for timeline
+  slide.addShape(pptx.ShapeType.line, {
+    x: 1.0, y: 6.25, w: 11.3, h: 0,
+    line: { color: '1E293B', width: 2 }
+  });
+
+  const totalMs = poapData.milestones.length;
+  if (totalMs > 0) {
+    poapData.milestones.slice(0, 6).forEach((m, idx) => {
+      // Calculate position
+      const xPos = 1.0 + (idx * (11.3 / Math.max(1, totalMs - 1)));
+      
+      const statusColor = m.status === 'Completed' ? COLOR_GREEN : m.status === 'In Progress' ? CYAN : TEXT_GRAY;
+      
+      // Node point (torus or circle)
+      slide.addShape(pptx.ShapeType.ellipse, {
+        x: xPos - 0.065, y: 6.185, w: 0.13, h: 0.13,
+        fill: { color: statusColor },
+        line: { color: BG_COLOR, width: 1.5 }
+      });
+
+      // Name & Date Labels (alternating top/bottom or just top and bottom aligned)
+      const isTop = idx % 2 === 0;
+      const yText = isTop ? 5.75 : 6.45;
+
+      // Small line connecting to the dot
+      slide.addShape(pptx.ShapeType.line, {
+        x: xPos, y: isTop ? 5.95 : 6.25, w: 0, h: 0.3,
+        line: { color: statusColor, width: 1, dashType: 'dash' }
+      });
+
+      slide.addText(`${m.name}\n${m.date}`, {
+        x: xPos - 0.85, y: yText, w: 1.7, h: 0.45,
+        fontSize: 7.5, bold: true, color: TEXT_WHITE, fontFace: 'Outfit',
+        align: 'center', lineSpacing: 10
+      });
+    });
+  }
+
+  pptx.writeFile({ fileName: 'TDM_POAP.pptx' });
 };
