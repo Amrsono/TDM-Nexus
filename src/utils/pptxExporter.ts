@@ -548,14 +548,14 @@ export const exportPOAPToPPT = (
   });
   slide.addText(poapData.problemStatement, {
     x: 0.65, y: 1.75, w: 3.6, h: 0.55,
-    fontSize: 8.5, color: TEXT_WHITE, fontFace: 'Outfit', italic: true, lineSpacing: 13
+    fontSize: 8.5, color: TEXT_WHITE, fontFace: 'Outfit', italic: true, lineSpacing: 13, valign: 'top'
   });
   
   // Bullet point list for objectives
   const objectivesText = poapData.objectives.map(o => `• ${o}`).join('\n');
   slide.addText(objectivesText, {
     x: 0.65, y: 2.35, w: 3.6, h: 0.75,
-    fontSize: 8.5, color: TEXT_GRAY, fontFace: 'Outfit', lineSpacing: 13
+    fontSize: 8.5, color: TEXT_GRAY, fontFace: 'Outfit', lineSpacing: 13, valign: 'top'
   });
 
   // Box 2: Scope (In/Out)
@@ -576,7 +576,7 @@ export const exportPOAPToPPT = (
   });
   slide.addText(inScopeText, {
     x: 0.65, y: 3.95, w: 1.7, h: 1.15,
-    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 12
+    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 12, valign: 'top'
   });
 
   const outOfScopeText = poapData.outOfScope.slice(0, 4).map(s => `✗ ${s}`).join('\n');
@@ -586,7 +586,7 @@ export const exportPOAPToPPT = (
   });
   slide.addText(outOfScopeText, {
     x: 2.5, y: 3.95, w: 1.7, h: 1.15,
-    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 12
+    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 12, valign: 'top'
   });
 
   // Middle Column: Success Criteria, Assumptions, Risks, Dependencies
@@ -608,7 +608,7 @@ export const exportPOAPToPPT = (
   });
   slide.addText(criteriaText, {
     x: 4.75, y: 1.95, w: 3.6, h: 0.5,
-    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 12
+    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 12, valign: 'top'
   });
 
   const assumptionsText = poapData.assumptions.slice(0, 3).map(a => `• ${a}`).join('\n');
@@ -618,7 +618,7 @@ export const exportPOAPToPPT = (
   });
   slide.addText(assumptionsText, {
     x: 4.75, y: 2.65, w: 3.6, h: 0.5,
-    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 12
+    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 12, valign: 'top'
   });
 
   // Box 4: Key Risks & Dependencies
@@ -639,7 +639,7 @@ export const exportPOAPToPPT = (
   });
   slide.addText(risksText, {
     x: 4.75, y: 3.95, w: 3.6, h: 0.5,
-    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 12
+    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 12, valign: 'top'
   });
 
   const dependenciesText = poapData.dependencies.slice(0, 3).map(d => `• ${d}`).join('\n');
@@ -649,7 +649,7 @@ export const exportPOAPToPPT = (
   });
   slide.addText(dependenciesText, {
     x: 4.75, y: 4.65, w: 3.6, h: 0.5,
-    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 12
+    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 12, valign: 'top'
   });
 
   // Right Column: Budget, Stakeholders, Next Steps
@@ -676,7 +676,7 @@ export const exportPOAPToPPT = (
     { text: `$${variance.toLocaleString()}`, options: { color: variance >= 0 ? COLOR_GREEN : COLOR_RED, bold: true } }
   ], {
     x: 8.85, y: 1.75, w: 3.8, h: 0.7,
-    fontSize: 8.5, fontFace: 'Outfit', lineSpacing: 15
+    fontSize: 8.5, fontFace: 'Outfit', lineSpacing: 15, valign: 'top'
   });
 
   // Box 6: Stakeholders
@@ -692,7 +692,7 @@ export const exportPOAPToPPT = (
   const stakeholdersText = poapData.stakeholders.slice(0, 3).map(s => `• ${s.name} (${s.role}) - ${s.engagement}`).join('\n');
   slide.addText(stakeholdersText, {
     x: 8.85, y: 3.1, w: 3.8, h: 0.7,
-    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 13
+    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 13, valign: 'top'
   });
 
   // Box 7: Next Steps
@@ -708,7 +708,7 @@ export const exportPOAPToPPT = (
   const actionsText = poapData.nextActions.slice(0, 3).map(a => `• ${a.description} [${a.owner} - ${a.dueDate}]`).join('\n');
   slide.addText(actionsText, {
     x: 8.85, y: 4.4, w: 3.8, h: 0.7,
-    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 13
+    fontSize: 8, color: TEXT_WHITE, fontFace: 'Outfit', lineSpacing: 13, valign: 'top'
   });
 
   // ==========================================
@@ -726,7 +726,7 @@ export const exportPOAPToPPT = (
 
   // Horizontal line for timeline
   slide.addShape(pptx.ShapeType.line, {
-    x: 1.0, y: 6.25, w: 11.3, h: 0,
+    x: 1.5, y: 6.25, w: 10.3, h: 0,
     line: { color: '1E293B', width: 2 }
   });
 
@@ -734,7 +734,7 @@ export const exportPOAPToPPT = (
   if (totalMs > 0) {
     poapData.milestones.slice(0, 6).forEach((m, idx) => {
       // Calculate position
-      const xPos = 1.0 + (idx * (11.3 / Math.max(1, totalMs - 1)));
+      const xPos = 1.5 + (idx * (10.3 / Math.max(1, totalMs - 1)));
       
       const statusColor = m.status === 'Completed' ? COLOR_GREEN : m.status === 'In Progress' ? CYAN : TEXT_GRAY;
       
@@ -756,9 +756,9 @@ export const exportPOAPToPPT = (
       });
 
       slide.addText(`${m.name}\n${m.date}`, {
-        x: xPos - 0.85, y: yText, w: 1.7, h: 0.45,
+        x: xPos - 0.75, y: yText, w: 1.5, h: 0.45,
         fontSize: 7.5, bold: true, color: TEXT_WHITE, fontFace: 'Outfit',
-        align: 'center', lineSpacing: 10
+        align: 'center', lineSpacing: 10, valign: 'top'
       });
     });
   }
