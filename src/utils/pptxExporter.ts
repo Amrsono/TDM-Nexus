@@ -649,6 +649,7 @@ export const exportPOAPToPPT = (
     fill: { color: CARD_BG },
     line: { color: '1E293B', width: 1 }
   });
+  const stakeholdersText = poapData.stakeholders.slice(0, 3).map(s => `• ${s.name} (${s.role}) - ${s.engagement}`).join('\n');
   slide.addText([
     { text: 'KEY STAKEHOLDERS', options: { fontSize: 10, bold: true, color: CYAN, breakLine: true } },
     { text: stakeholdersText, options: { fontSize: 8, color: TEXT_WHITE } }
