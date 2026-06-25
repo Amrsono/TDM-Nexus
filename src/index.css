@@ -4,6 +4,7 @@
 :root {
   --bg-primary: #070b19;
   --bg-secondary: #0c1328;
+  --bg-bottom: #03050c;
   --bg-card: rgba(13, 22, 47, 0.75);
   --bg-card-hover: rgba(20, 32, 68, 0.85);
   
@@ -24,11 +25,64 @@
   --shadow-glow-green: 0 0 15px rgba(0, 255, 160, 0.3);
   --shadow-glow-red: 0 0 15px rgba(239, 68, 68, 0.3);
   
+  --body-bg-image: 
+    radial-gradient(at 10% 20%, rgba(189, 0, 255, 0.1) 0px, transparent 50%),
+    radial-gradient(at 90% 80%, rgba(0, 242, 254, 0.08) 0px, transparent 50%),
+    linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-bottom) 100%);
+    
   --font-sans: 'Outfit', sans-serif;
   --font-mono: 'Share Tech Mono', monospace;
   
   --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-bottom: #e2e8f0;
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-card-hover: rgba(255, 255, 255, 1);
+  
+  --color-cyan: #e60000;
+  --color-purple: #4a4a4a;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-border: rgba(230, 0, 0, 0.2);
+  --color-border-hover: rgba(230, 0, 0, 0.5);
+  --color-border-purple: rgba(74, 74, 74, 0.2);
+  
+  --shadow-glow-cyan: 0 4px 15px rgba(230, 0, 0, 0.15);
+  --shadow-glow-purple: 0 4px 15px rgba(0, 0, 0, 0.05);
+
+  --body-bg-image: 
+    radial-gradient(at 10% 20%, rgba(230, 0, 0, 0.03) 0px, transparent 50%),
+    radial-gradient(at 90% 80%, rgba(74, 74, 74, 0.03) 0px, transparent 50%),
+    linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-bottom) 100%);
+}
+
+[data-theme="medium"] {
+  --bg-primary: #1e3a8a;
+  --bg-secondary: #1e40af;
+  --bg-bottom: #172554;
+  --bg-card: rgba(30, 58, 138, 0.85);
+  --bg-card-hover: rgba(30, 64, 175, 0.95);
+  
+  --color-cyan: #60a5fa;
+  --color-purple: #93c5fd;
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #bfdbfe;
+  --color-border: rgba(96, 165, 250, 0.3);
+  --color-border-hover: rgba(96, 165, 250, 0.6);
+  --color-border-purple: rgba(147, 197, 253, 0.3);
+
+  --shadow-glow-cyan: 0 0 15px rgba(96, 165, 250, 0.3);
+  --shadow-glow-purple: 0 0 15px rgba(147, 197, 253, 0.3);
+
+  --body-bg-image: 
+    radial-gradient(at 10% 20%, rgba(147, 197, 253, 0.1) 0px, transparent 50%),
+    radial-gradient(at 90% 80%, rgba(96, 165, 250, 0.1) 0px, transparent 50%),
+    linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-bottom) 100%);
 }
 
 /* Reset and base styles */
@@ -44,11 +98,9 @@ body {
   font-family: var(--font-sans);
   overflow-x: hidden;
   height: 100vh;
-  background-image: 
-    radial-gradient(at 10% 20%, rgba(189, 0, 255, 0.1) 0px, transparent 50%),
-    radial-gradient(at 90% 80%, rgba(0, 242, 254, 0.08) 0px, transparent 50%),
-    linear-gradient(180deg, var(--bg-primary) 0%, #03050c 100%);
+  background-image: var(--body-bg-image);
   background-attachment: fixed;
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 /* Webkit Scrollbars */
@@ -281,6 +333,7 @@ h1, h2, h3, h4 {
   flex-direction: column;
   gap: 0.5rem;
   flex-grow: 1;
+  overflow-y: auto;
 }
 
 .nav-item {

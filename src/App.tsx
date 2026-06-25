@@ -9,7 +9,8 @@ import {
   ShieldCheck, 
   FileSpreadsheet, 
   Presentation,
-  LayoutTemplate
+  LayoutTemplate,
+  Settings as SettingsIcon
 } from 'lucide-react';
 import { ThreeCanvas } from './components/ThreeCanvas';
 import { FunnelReviewing } from './views/FunnelReviewing';
@@ -20,6 +21,7 @@ import { TestingQuality } from './views/TestingQuality';
 import { ReleaseGovernance } from './views/ReleaseGovernance';
 import { PostLaunchELS } from './views/PostLaunchELS';
 import { POAP } from './views/POAP';
+import { Settings as SettingsView, ThemeMode } from './views/Settings';
 import { exportToExcel } from './utils/excelExporter';
 import { exportToPPT } from './utils/pptxExporter';
 import {
@@ -50,7 +52,7 @@ import {
   POAPData
 } from './utils/mockData';
 
-type PhaseId = 'funnel' | 'analysing' | 'build' | 'finances' | 'testing' | 'governance' | 'postlaunch' | 'poap';
+type PhaseId = 'funnel' | 'analysing' | 'build' | 'finances' | 'testing' | 'governance' | 'postlaunch' | 'poap' | 'settings';
 
 interface PhaseMetadata {
   id: PhaseId;
@@ -61,6 +63,11 @@ interface PhaseMetadata {
 
 export default function App() {
   const [activePhase, setActivePhase] = useState<PhaseId>('funnel');
+  const [theme, setTheme] = useState<ThemeMode>('dark');
+
+  React.useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   // Shared Data States
   const [financials, setFinancials] = useState<ProjectFinancials>(initialFinancials);
@@ -93,7 +100,8 @@ export default function App() {
     { id: 'testing', name: 'Testing & Quality', icon: Bug, color: 'var(--color-magenta)' },
     { id: 'governance', name: 'Release & Governance', icon: Scale, color: '#60a5fa' },
     { id: 'postlaunch', name: 'Go-Live & ELS', icon: ShieldCheck, color: '#a855f7' },
-    { id: 'poap', name: 'Digital POAP', icon: LayoutTemplate, color: '#2dd4bf' }
+    { id: 'poap', name: 'Digital POAP', icon: LayoutTemplate, color: '#2dd4bf' },
+    { id: 'settings', name: 'Settings', icon: SettingsIcon, color: '#94a3b8' }
   ];
 
   const activeMetadata = useMemo(() => {
@@ -223,6 +231,8 @@ export default function App() {
             ragStatus={ragStatus}
           />
         );
+      case 'settings':
+        return <SettingsView theme={theme} setTheme={setTheme} />;
       default:
         return <FunnelReviewing financials={financials} setFinancials={setFinancials} />;
     }
