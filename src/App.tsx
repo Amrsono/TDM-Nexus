@@ -12,37 +12,37 @@ import {
   LayoutTemplate
 } from 'lucide-react';
 import { ThreeCanvas } from './components/ThreeCanvas';
-import { Initiation } from './views/Initiation';
-import { Analysis } from './views/Analysis';
-import { BuildDelivery } from './views/BuildDelivery';
-import { Finances } from './views/Finances';
-import { Testing } from './views/Testing';
-import { Governance } from './views/Governance';
-import { Closure } from './views/Closure';
+import { FunnelReviewing } from './views/FunnelReviewing';
+import { Analysing } from './views/Analysing';
+import { ImplementingBuild } from './views/ImplementingBuild';
+import { FinancesApprovals } from './views/FinancesApprovals';
+import { TestingQuality } from './views/TestingQuality';
+import { ReleaseGovernance } from './views/ReleaseGovernance';
+import { PostLaunchELS } from './views/PostLaunchELS';
 import { POAP } from './views/POAP';
 import { exportToExcel } from './utils/excelExporter';
 import { exportToPPT } from './utils/pptxExporter';
 import {
   initialFinancials,
-  initialRequirements,
-  initialDomains,
+  initialADOWorkItems,
+  initialSquads,
   initialMilestones,
   initialAllocations,
   initialForecastMonths,
   initialTransfers,
-  initialQAStatus,
+  initialQAGates,
   initialDefects,
   initialRisks,
   initialChecklist,
   initialHypercare,
   initialPOAPData,
   ProjectFinancials,
-  Requirement,
-  DomainBuild,
+  ADOWorkItem,
+  PortfolioSquad,
   Milestone,
   FinancialAllocation,
   FundTransfer,
-  QAStatus,
+  QAGate,
   Defect,
   RiskIssue,
   ChecklistItem,
@@ -50,7 +50,7 @@ import {
   POAPData
 } from './utils/mockData';
 
-type PhaseId = 'initiation' | 'analysis' | 'build' | 'finances' | 'testing' | 'governance' | 'closure' | 'poap';
+type PhaseId = 'funnel' | 'analysing' | 'build' | 'finances' | 'testing' | 'governance' | 'postlaunch' | 'poap';
 
 interface PhaseMetadata {
   id: PhaseId;
@@ -60,17 +60,17 @@ interface PhaseMetadata {
 }
 
 export default function App() {
-  const [activePhase, setActivePhase] = useState<PhaseId>('initiation');
+  const [activePhase, setActivePhase] = useState<PhaseId>('funnel');
 
   // Shared Data States
   const [financials, setFinancials] = useState<ProjectFinancials>(initialFinancials);
-  const [requirements, setRequirements] = useState<Requirement[]>(initialRequirements);
-  const [domains, setDomains] = useState<DomainBuild[]>(initialDomains);
+  const [adoWorkItems, setAdoWorkItems] = useState<ADOWorkItem[]>(initialADOWorkItems);
+  const [squads, setSquads] = useState<PortfolioSquad[]>(initialSquads);
   const [milestones, setMilestones] = useState<Milestone[]>(initialMilestones);
   const [allocations, setAllocations] = useState<FinancialAllocation[]>(initialAllocations);
   const [transfers, setTransfers] = useState<FundTransfer[]>(initialTransfers);
   const [forecastMonths] = useState(initialForecastMonths);
-  const [qaStatus, setQaStatus] = useState<QAStatus>(initialQAStatus);
+  const [qaGates, setQaGates] = useState<QAGate[]>(initialQAGates);
   const [defects, setDefects] = useState<Defect[]>(initialDefects);
   const [risks, setRisks] = useState<RiskIssue[]>(initialRisks);
   const [checklist, setChecklist] = useState<ChecklistItem[]>(initialChecklist);
@@ -86,14 +86,14 @@ export default function App() {
   });
 
   const phases: PhaseMetadata[] = [
-    { id: 'initiation', name: 'Project Initiation', icon: FolderOpen, color: 'var(--color-green)' },
-    { id: 'analysis', name: 'Project Analysis', icon: Compass, color: 'var(--color-cyan)' },
-    { id: 'build', name: 'Build & Delivery', icon: Wrench, color: 'var(--color-purple)' },
-    { id: 'finances', name: 'Finances & Budget', icon: CircleDollarSign, color: 'var(--color-amber)' },
-    { id: 'testing', name: 'QA & Testing', icon: Bug, color: 'var(--color-magenta)' },
-    { id: 'governance', name: 'Project Governance', icon: Scale, color: '#60a5fa' },
-    { id: 'closure', name: 'Closure & Hypercare', icon: ShieldCheck, color: '#a855f7' },
-    { id: 'poap', name: 'Plan on a Page', icon: LayoutTemplate, color: '#2dd4bf' }
+    { id: 'funnel', name: 'Funnel & Reviewing', icon: FolderOpen, color: 'var(--color-green)' },
+    { id: 'analysing', name: 'Analysing & PI Readiness', icon: Compass, color: 'var(--color-cyan)' },
+    { id: 'finances', name: 'Finances & Approvals', icon: CircleDollarSign, color: 'var(--color-amber)' },
+    { id: 'build', name: 'Implementing & Build', icon: Wrench, color: 'var(--color-purple)' },
+    { id: 'testing', name: 'Testing & Quality', icon: Bug, color: 'var(--color-magenta)' },
+    { id: 'governance', name: 'Release & Governance', icon: Scale, color: '#60a5fa' },
+    { id: 'postlaunch', name: 'Go-Live & ELS', icon: ShieldCheck, color: '#a855f7' },
+    { id: 'poap', name: 'Digital POAP', icon: LayoutTemplate, color: '#2dd4bf' }
   ];
 
   const activeMetadata = useMemo(() => {
@@ -106,10 +106,11 @@ export default function App() {
     return Math.min(100, Math.round((financials.totalSpent / limit) * 100));
   }, [financials]);
 
-  const qaPassRatePercent = useMemo(() => {
-    if (qaStatus.totalTests === 0) return 0;
-    return Math.round((qaStatus.passed / qaStatus.totalTests) * 100);
-  }, [qaStatus]);
+  const sitProgressPercent = useMemo(() => {
+    const sit = qaGates.find(q => q.name === 'SIT');
+    if (!sit || sit.totalTests === 0) return 0;
+    return Math.round((sit.passed / sit.totalTests) * 100);
+  }, [qaGates]);
 
   const checklistPercent = useMemo(() => {
     if (checklist.length === 0) return 0;
@@ -123,60 +124,50 @@ export default function App() {
     }
   };
 
-  const renameDomain = (id: string, newName: string) => {
+  const renameSquad = (id: string, newName: string) => {
     if (!newName.trim()) return;
 
-    const domainToRename = domains.find(d => d.id === id);
-    if (!domainToRename) return;
-    const oldName = domainToRename.name;
+    const squadToRename = squads.find(s => s.id === id);
+    if (!squadToRename) return;
+    const oldName = squadToRename.name;
     if (oldName === newName) return;
 
-    // 1. Update domains name
-    setDomains(prev => prev.map(d => d.id === id ? { ...d, name: newName } : d));
+    // 1. Update squads name
+    setSquads(prev => prev.map(s => s.id === id ? { ...s, name: newName } : s));
 
-    // 2. Update requirements linked to this domain name
-    setRequirements(prev => prev.map(r => r.domain === oldName ? { ...r, domain: newName } : r));
+    // 2. Update allocations squadName
+    setAllocations(prev => prev.map(a => a.squadId === id ? { ...a, squadName: newName } : a));
 
-    // 3. Update allocations domainName
-    setAllocations(prev => prev.map(a => a.domainId === id ? { ...a, domainName: newName } : a));
-
-    // 4. Update transfers fromDomain / toDomain names
+    // 3. Update transfers fromSquad / toSquad names
     setTransfers(prev => prev.map(t => {
       let updated = { ...t };
-      if (t.fromDomain === oldName) updated.fromDomain = newName;
-      if (t.toDomain === oldName) updated.toDomain = newName;
+      if (t.fromSquad === oldName) updated.fromSquad = newName;
+      if (t.toSquad === oldName) updated.toSquad = newName;
       return updated;
     }));
 
-    // 5. Update defects domain name
-    setDefects(prev => prev.map(d => d.domain === oldName ? { ...d, domain: newName } : d));
+    // 4. Update defects squad name
+    setDefects(prev => prev.map(d => d.squad === oldName ? { ...d, squad: newName } : d));
   };
 
   const renderActiveView = () => {
     switch (activePhase) {
-      case 'initiation':
-        return <Initiation financials={financials} setFinancials={setFinancials} />;
-      case 'analysis':
+      case 'funnel':
+        return <FunnelReviewing financials={financials} setFinancials={setFinancials} />;
+      case 'analysing':
         return (
-          <Analysis 
-            requirements={requirements} 
-            setRequirements={setRequirements} 
-            domains={domains} 
-            renameDomain={renameDomain} 
-          />
-        );
-      case 'build':
-        return (
-          <BuildDelivery 
-            domains={domains} 
-            setDomains={setDomains} 
-            milestones={milestones} 
-            setMilestones={setMilestones} 
+          <Analysing 
+            adoWorkItems={adoWorkItems} 
+            setAdoWorkItems={setAdoWorkItems} 
+            squads={squads} 
+            renameSquad={renameSquad} 
           />
         );
       case 'finances':
         return (
-          <Finances 
+          <FinancesApprovals 
+            financials={financials}
+            setFinancials={setFinancials}
             allocations={allocations} 
             setAllocations={setAllocations} 
             transfers={transfers} 
@@ -184,33 +175,42 @@ export default function App() {
             forecastMonths={forecastMonths} 
           />
         );
+      case 'build':
+        return (
+          <ImplementingBuild 
+            squads={squads} 
+            setSquads={setSquads} 
+            milestones={milestones} 
+            setMilestones={setMilestones} 
+          />
+        );
       case 'testing':
         return (
-          <Testing 
-            qaStatus={qaStatus} 
-            setQaStatus={setQaStatus} 
+          <TestingQuality 
+            qaGates={qaGates} 
+            setQaGates={setQaGates} 
             defects={defects} 
             setDefects={setDefects} 
-            domains={domains} 
+            squads={squads} 
           />
         );
       case 'governance':
         return (
-          <Governance 
+          <ReleaseGovernance 
             risks={risks} 
             setRisks={setRisks} 
             ragStatus={ragStatus} 
             setRagStatus={setRagStatus} 
             financials={financials} 
-            domains={domains} 
-            defects={defects} 
+            squads={squads} 
+            defects={defects}
+            checklist={checklist}
+            setChecklist={setChecklist}
           />
         );
-      case 'closure':
+      case 'postlaunch':
         return (
-          <Closure 
-            checklist={checklist} 
-            setChecklist={setChecklist} 
+          <PostLaunchELS 
             hypercare={hypercare} 
             setHypercare={setHypercare} 
           />
@@ -224,18 +224,18 @@ export default function App() {
           />
         );
       default:
-        return <Initiation financials={financials} setFinancials={setFinancials} />;
+        return <FunnelReviewing financials={financials} setFinancials={setFinancials} />;
     }
   };
 
   const handleExcelExport = () => {
     exportToExcel(
       financials,
-      requirements,
-      domains,
+      adoWorkItems,
+      squads,
       allocations,
       transfers,
-      qaStatus,
+      qaGates,
       defects,
       risks
     );
@@ -244,10 +244,10 @@ export default function App() {
   const handlePPTExport = () => {
     exportToPPT(
       financials,
-      requirements,
-      domains,
+      adoWorkItems,
+      squads,
       allocations,
-      qaStatus,
+      qaGates,
       defects,
       risks,
       ragStatus
@@ -308,9 +308,9 @@ export default function App() {
           {/* Top HUD Banner */}
           <header className="hud-banner glass-panel">
             <div className="hud-stat">
-              <span className="hud-stat-label">Project Domain</span>
+              <span className="hud-stat-label">Project / Increment</span>
               <span className="hud-stat-value mono" style={{ color: 'var(--color-cyan)', fontSize: '1.1rem' }}>
-                PROJECT VELOCITY
+                PRJ-VELOCITY (PI40)
               </span>
             </div>
 
@@ -323,21 +323,21 @@ export default function App() {
               </div>
 
               <div className="hud-stat">
-                <span className="hud-stat-label">Budget Spent</span>
+                <span className="hud-stat-label">Budget vs Actuals</span>
                 <span className="hud-stat-value mono">
                   ${(financials.totalSpent / 1000000).toFixed(2)}M / ${( (financials.capexLimit + financials.opexLimit) / 1000000 ).toFixed(2)}M ({budgetProgressPercent}%)
                 </span>
               </div>
 
               <div className="hud-stat">
-                <span className="hud-stat-label">QA Pass Rate</span>
-                <span className="hud-stat-value mono" style={{ color: qaPassRatePercent > 70 ? 'var(--color-green)' : 'var(--color-amber)' }}>
-                  {qaPassRatePercent}%
+                <span className="hud-stat-label">SIT Pass Rate</span>
+                <span className="hud-stat-value mono" style={{ color: sitProgressPercent > 70 ? 'var(--color-green)' : 'var(--color-amber)' }}>
+                  {sitProgressPercent}%
                 </span>
               </div>
 
               <div className="hud-stat">
-                <span className="hud-stat-label">Checklist Readiness</span>
+                <span className="hud-stat-label">Governance Readiness</span>
                 <span className="hud-stat-value mono">
                   {checklistPercent}%
                 </span>

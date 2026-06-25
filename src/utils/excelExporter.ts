@@ -1,22 +1,22 @@
 import * as XLSX from 'xlsx';
 import { 
   ProjectFinancials, 
-  Requirement, 
-  DomainBuild, 
+  ADOWorkItem, 
+  PortfolioSquad, 
   FinancialAllocation, 
   FundTransfer, 
-  QAStatus, 
+  QAGate, 
   Defect, 
   RiskIssue 
 } from './mockData';
 
 export const exportToExcel = (
   financials: ProjectFinancials,
-  requirements: Requirement[],
-  domains: DomainBuild[],
+  adoWorkItems: ADOWorkItem[],
+  squads: PortfolioSquad[],
   allocations: FinancialAllocation[],
   transfers: FundTransfer[],
-  qaStatus: QAStatus,
+  qaGates: QAGate[],
   defects: Defect[],
   risks: RiskIssue[]
 ) => {
@@ -24,9 +24,8 @@ export const exportToExcel = (
 
   // Sheet 1: Project Overview & Finances
   const overviewData = [
-    { Parameter: 'Project Name', Value: 'Project Velocity (eSIM & Carrier Billing Launch)' },
-    { Parameter: 'Current Phase', Value: 'Testing & QA Integration' },
-    { Parameter: 'Business Case Summary', Value: 'Launch the new Unified Mobile & Digital Proposition platform, enabling instant eSIM activation and carrier-billing. Estimated benefit: $12.5M over 5 years.' },
+    { Parameter: 'Project Name', Value: 'Project Velocity' },
+    { Parameter: 'Current Phase', Value: 'Funnel & Mobilisation' },
     { Parameter: '', Value: '' },
     { Parameter: 'FINANCIAL VIABILITY INDICATORS', Value: '' },
     { Parameter: 'Net Present Value (NPV)', Value: `$${financials.NPV.toLocaleString()}` },
@@ -37,14 +36,20 @@ export const exportToExcel = (
     { Parameter: 'Total CAPEX Allocated Limit', Value: `$${financials.capexLimit.toLocaleString()}` },
     { Parameter: 'Total OPEX Allocated Limit', Value: `$${financials.opexLimit.toLocaleString()}` },
     { Parameter: 'Total Combined Budget Spent', Value: `$${financials.totalSpent.toLocaleString()}` },
-    { Parameter: 'Remaining Variance Budget', Value: `$${(financials.capexLimit + financials.opexLimit - financials.totalSpent).toLocaleString()}` }
+    { Parameter: 'Remaining Variance Budget', Value: `$${(financials.capexLimit + financials.opexLimit - financials.totalSpent).toLocaleString()}` },
+    { Parameter: '', Value: '' },
+    { Parameter: 'APPROVAL STATUS', Value: '' },
+    { Parameter: 'PE Demand Sized', Value: financials.peDemandSized ? 'Yes' : 'No' },
+    { Parameter: 'VROM Approved', Value: financials.vromApproved ? 'Yes' : 'No' },
+    { Parameter: 'ITRB Approved', Value: financials.itrbApproved ? 'Yes' : 'No' },
+    { Parameter: 'ICAR Status', Value: financials.icarStatus }
   ];
   const wsOverview = XLSX.utils.json_to_sheet(overviewData);
   XLSX.utils.book_append_sheet(wb, wsOverview, 'Project Overview');
 
   // Sheet 2: Domain Finance Breakdown
   const financeBreakdown = allocations.map(a => ({
-    'Domain Name': a.domainName,
+    'Squad / Portfolio Name': a.squadName,
     'CAPEX Allocated': a.capexAllocated,
     'CAPEX Spent': a.capexSpent,
     'CAPEX Forecast': a.capexForecast,
@@ -55,64 +60,65 @@ export const exportToExcel = (
     'OPEX Variance': a.opexAllocated - a.opexSpent,
   }));
   const wsFinance = XLSX.utils.json_to_sheet(financeBreakdown);
-  XLSX.utils.book_append_sheet(wb, wsFinance, 'Domain Finances');
+  XLSX.utils.book_append_sheet(wb, wsFinance, 'Squad Finances');
 
   // Sheet 3: Budget Transfers
   const transferData = transfers.map(t => ({
     'Transfer ID': t.id,
-    'Source Domain': t.fromDomain,
-    'Target Domain': t.toDomain,
+    'Source Squad': t.fromSquad,
+    'Target Squad': t.toSquad,
     'Amount ($)': t.amount,
     'Reason/Justification': t.reason,
     'Date Requested': t.date,
     'Approval Status': t.status
   }));
   const wsTransfers = XLSX.utils.json_to_sheet(transferData);
-  XLSX.utils.book_append_sheet(wb, wsTransfers, 'Budget Transfers');
+  XLSX.utils.book_append_sheet(wb, wsTransfers, 'Fund Transfers');
 
-  // Sheet 4: Requirements Backlog
-  const reqData = requirements.map(r => ({
-    'Requirement ID': r.id,
-    'Title': r.title,
+  // Sheet 4: Requirements Backlog -> ADO Work Items
+  const reqData = adoWorkItems.map(r => ({
+    'ADO ID': r.id,
     'Type': r.type,
-    'Priority': r.priority,
-    'Approval Status': r.status,
-    'Impacted System Domain': r.domain
+    'Title': r.title,
+    'Status': r.status,
+    'Portfolio': r.portfolio
   }));
   const wsReq = XLSX.utils.json_to_sheet(reqData);
-  XLSX.utils.book_append_sheet(wb, wsReq, 'Requirements Backlog');
+  XLSX.utils.book_append_sheet(wb, wsReq, 'ADO Work Items');
 
-  // Sheet 5: Build & Release Tracker
-  const buildData = domains.map(d => ({
-    'Domain Name': d.name,
-    'Lead Engineer': d.lead,
-    'Build Progress (%)': d.progress,
-    'Status': d.status,
-    'Release Version': d.releaseVersion,
-    'Scope Details': d.description
+  // Sheet 5: Build & Release Tracker -> Squads
+  const buildData = squads.map(s => ({
+    'Squad / Portfolio': s.name,
+    'Lead': s.lead,
+    'Progress (%)': s.progress,
+    'Status': s.status,
+    'Target Release': s.targetRelease,
+    'Description': s.description
   }));
   const wsBuild = XLSX.utils.json_to_sheet(buildData);
-  XLSX.utils.book_append_sheet(wb, wsBuild, 'Build & Releases');
+  XLSX.utils.book_append_sheet(wb, wsBuild, 'Portfolio Squads');
 
   // Sheet 6: QA Metrics & Defects
-  const qaOverview = [
-    { Metric: 'Total Tests Planned', Count: qaStatus.totalTests },
-    { Metric: 'Tests Passed', Count: qaStatus.passed },
-    { Metric: 'Tests Failed', Count: qaStatus.failed },
-    { Metric: 'Tests Blocked', Count: qaStatus.blocked },
-    { Metric: 'Execution Run Rate (%)', Count: Math.round(((qaStatus.passed + qaStatus.failed + qaStatus.blocked) / qaStatus.totalTests) * 100) },
-    { Metric: 'Defect Pass Rate (%)', Count: Math.round((qaStatus.passed / (qaStatus.passed + qaStatus.failed)) * 100) }
-  ];
+  const qaOverview = qaGates.map(g => ({
+    Gate: g.name,
+    Status: g.status,
+    'Total Tests': g.totalTests,
+    'Passed': g.passed,
+    'Failed': g.failed,
+    'Blocked': g.blocked,
+    'Pass Rate (%)': g.totalTests > 0 ? Math.round((g.passed / g.totalTests) * 100) : 0
+  }));
   const wsQA = XLSX.utils.json_to_sheet(qaOverview);
-  XLSX.utils.book_append_sheet(wb, wsQA, 'QA Overview');
+  XLSX.utils.book_append_sheet(wb, wsQA, 'QA Gates');
 
   const defectData = defects.map(d => ({
     'Defect ID': d.id,
     'Title': d.title,
     'Severity': d.severity,
     'Status': d.status,
-    'Domain Owner': d.domain,
-    'Detailed Description': d.description
+    'Squad': d.squad,
+    'Phase': d.phase,
+    'Description': d.description
   }));
   const wsDefects = XLSX.utils.json_to_sheet(defectData);
   XLSX.utils.book_append_sheet(wb, wsDefects, 'Defects Log');
