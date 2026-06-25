@@ -96,6 +96,8 @@ body {
   background-color: var(--bg-primary);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
   height: 100vh;
   background-image: var(--body-bg-image);
@@ -214,12 +216,13 @@ h1, h2, h3, h4 {
 
 /* Cyber Input controls */
 .cyber-input {
-  background: rgba(7, 11, 25, 0.6);
+  background: var(--bg-secondary);
   border: 1px solid var(--color-border);
   border-radius: 6px;
   color: var(--color-text-primary);
   padding: 0.6rem 0.8rem;
   font-family: var(--font-sans);
+  font-weight: 500;
   transition: all var(--transition-fast);
   outline: none;
 }
@@ -227,7 +230,7 @@ h1, h2, h3, h4 {
 .cyber-input:focus {
   border-color: var(--color-cyan);
   box-shadow: var(--shadow-glow-cyan);
-  background: rgba(13, 22, 47, 0.8);
+  background: var(--bg-card);
 }
 
 /* Glowing RAG badges */
@@ -281,6 +284,13 @@ h1, h2, h3, h4 {
   pointer-events: none;
 }
 
+[data-theme="light"] .scanlines-overlay,
+[data-theme="medium"] .scanlines-overlay,
+[data-theme="light"] .grid-bg-overlay,
+[data-theme="medium"] .grid-bg-overlay {
+  display: none;
+}
+
 /* Dashboard Layout styles */
 .dashboard-container {
   display: grid;
@@ -297,7 +307,7 @@ h1, h2, h3, h4 {
   flex-direction: column;
   justify-content: space-between;
   z-index: 10;
-  background: rgba(7, 11, 25, 0.85);
+  background: var(--bg-card);
   backdrop-filter: blur(16px);
 }
 
@@ -436,9 +446,9 @@ h1, h2, h3, h4 {
   max-width: 1000px;
   align-self: flex-start;
   width: calc(100% - 3rem);
-  box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.15);
   animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  background: rgba(7, 12, 28, 0.82);
+  background: var(--bg-card);
 }
 
 /* Smooth content transition */
@@ -510,7 +520,7 @@ h1, h2, h3, h4 {
   overflow-x: auto;
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: rgba(8, 15, 34, 0.4);
+  background: var(--bg-secondary);
 }
 
 .cyber-table {
@@ -524,6 +534,7 @@ h1, h2, h3, h4 {
   background: rgba(0, 242, 254, 0.05);
   color: var(--color-cyan);
   font-family: var(--font-mono);
+  font-weight: 700;
   text-transform: uppercase;
   font-size: 0.75rem;
   letter-spacing: 1px;
@@ -536,6 +547,7 @@ h1, h2, h3, h4 {
   border-bottom: 1px solid rgba(0, 242, 254, 0.05);
   color: var(--color-text-primary);
   vertical-align: middle;
+  font-weight: 500;
 }
 
 .cyber-table tr:last-child td {
@@ -577,7 +589,7 @@ h1, h2, h3, h4 {
 }
 
 .icon-button {
-  background: rgba(7, 11, 25, 0.75);
+  background: var(--bg-secondary);
   border: 1px solid var(--color-border);
   color: var(--color-text-secondary);
   padding: 0.5rem;
@@ -593,7 +605,7 @@ h1, h2, h3, h4 {
   color: var(--color-cyan);
   border-color: var(--color-cyan);
   box-shadow: var(--shadow-glow-cyan);
-  background: rgba(13, 22, 47, 0.85);
+  background: var(--bg-card-hover);
 }
 
 /* Finance overview widgets */
@@ -681,7 +693,7 @@ h1, h2, h3, h4 {
   padding: 0.75rem 1.25rem;
   border-radius: 8px;
   border: 1.5px solid var(--color-border);
-  background: rgba(7, 12, 28, 0.9);
+  background: var(--bg-card);
   text-align: center;
   cursor: pointer;
   transition: all var(--transition-fast);
