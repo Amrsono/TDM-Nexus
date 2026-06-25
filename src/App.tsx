@@ -10,7 +10,8 @@ import {
   FileSpreadsheet, 
   Presentation,
   LayoutTemplate,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  SlidersHorizontal
 } from 'lucide-react';
 import { ThreeCanvas } from './components/ThreeCanvas';
 import { FunnelReviewing } from './views/FunnelReviewing';
@@ -22,6 +23,7 @@ import { ReleaseGovernance } from './views/ReleaseGovernance';
 import { PostLaunchELS } from './views/PostLaunchELS';
 import { POAP } from './views/POAP';
 import { Settings as SettingsView, ThemeMode } from './views/Settings';
+import { POAPSlideBuilder } from './views/POAPSlideBuilder';
 import { exportToExcel } from './utils/excelExporter';
 import { exportToPPT } from './utils/pptxExporter';
 import {
@@ -52,7 +54,7 @@ import {
   POAPData
 } from './utils/mockData';
 
-type PhaseId = 'funnel' | 'analysing' | 'build' | 'finances' | 'testing' | 'governance' | 'postlaunch' | 'poap' | 'settings';
+type PhaseId = 'funnel' | 'analysing' | 'build' | 'finances' | 'testing' | 'governance' | 'postlaunch' | 'poap' | 'slidebuilder' | 'settings';
 
 interface PhaseMetadata {
   id: PhaseId;
@@ -101,6 +103,7 @@ export default function App() {
     { id: 'governance', name: 'Release & Governance', icon: Scale, color: '#60a5fa' },
     { id: 'postlaunch', name: 'Go-Live & ELS', icon: ShieldCheck, color: '#a855f7' },
     { id: 'poap', name: 'Digital POAP', icon: LayoutTemplate, color: '#2dd4bf' },
+    { id: 'slidebuilder', name: 'POAP Slide Builder', icon: SlidersHorizontal, color: '#f472b6' },
     { id: 'settings', name: 'Settings', icon: SettingsIcon, color: '#94a3b8' }
   ];
 
@@ -231,6 +234,8 @@ export default function App() {
             ragStatus={ragStatus}
           />
         );
+      case 'slidebuilder':
+        return <POAPSlideBuilder />;
       case 'settings':
         return <SettingsView theme={theme} setTheme={setTheme} />;
       default:
