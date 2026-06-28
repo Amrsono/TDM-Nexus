@@ -11,7 +11,8 @@ import {
   Presentation,
   LayoutTemplate,
   Settings as SettingsIcon,
-  SlidersHorizontal
+  SlidersHorizontal,
+  ClipboardList
 } from 'lucide-react';
 import { ThreeCanvas } from './components/ThreeCanvas';
 import { FunnelReviewing } from './views/FunnelReviewing';
@@ -24,6 +25,7 @@ import { PostLaunchELS } from './views/PostLaunchELS';
 import { POAP } from './views/POAP';
 import { Settings as SettingsView, ThemeMode } from './views/Settings';
 import { POAPSlideBuilder } from './views/POAPSlideBuilder';
+import { ReleasePlanningMeeting } from './views/ReleasePlanningMeeting';
 import { exportToExcel } from './utils/excelExporter';
 import { exportToPPT } from './utils/pptxExporter';
 import {
@@ -51,10 +53,12 @@ import {
   RiskIssue,
   ChecklistItem,
   HypercareTicket,
-  POAPData
+  POAPData,
+  GovernanceGateDetail,
+  initialGovernanceGates
 } from './utils/mockData';
 
-type PhaseId = 'funnel' | 'analysing' | 'build' | 'finances' | 'testing' | 'governance' | 'postlaunch' | 'poap' | 'slidebuilder' | 'settings';
+type PhaseId = 'funnel' | 'analysing' | 'build' | 'finances' | 'testing' | 'releaseplanning' | 'governance' | 'postlaunch' | 'poap' | 'slidebuilder' | 'settings';
 
 interface PhaseMetadata {
   id: PhaseId;
@@ -85,6 +89,7 @@ export default function App() {
   const [checklist, setChecklist] = useState<ChecklistItem[]>(initialChecklist);
   const [hypercare, setHypercare] = useState<HypercareTicket[]>(initialHypercare);
   const [poapData, setPoapData] = useState<POAPData>(initialPOAPData);
+  const [governanceGates, setGovernanceGates] = useState<GovernanceGateDetail[]>(initialGovernanceGates);
   
   const [ragStatus, setRagStatus] = useState({
     schedule: 'Green',
@@ -100,6 +105,7 @@ export default function App() {
     { id: 'finances', name: 'Finances & Approvals', icon: CircleDollarSign, color: 'var(--color-amber)' },
     { id: 'build', name: 'Implementing & Build', icon: Wrench, color: 'var(--color-purple)' },
     { id: 'testing', name: 'Testing & Quality', icon: Bug, color: 'var(--color-magenta)' },
+    { id: 'releaseplanning', name: 'Release Planning & Gates', icon: ClipboardList, color: '#ef4444' },
     { id: 'governance', name: 'Release & Governance', icon: Scale, color: '#60a5fa' },
     { id: 'postlaunch', name: 'Go-Live & ELS', icon: ShieldCheck, color: '#a855f7' },
     { id: 'poap', name: 'Digital POAP', icon: LayoutTemplate, color: '#2dd4bf' },
@@ -232,6 +238,13 @@ export default function App() {
             poapData={poapData}
             setPoapData={setPoapData}
             ragStatus={ragStatus}
+          />
+        );
+      case 'releaseplanning':
+        return (
+          <ReleasePlanningMeeting 
+            gates={governanceGates}
+            setGates={setGovernanceGates}
           />
         );
       case 'slidebuilder':

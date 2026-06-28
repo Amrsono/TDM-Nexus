@@ -7,7 +7,8 @@ import {
   QAGate, 
   Defect, 
   RiskIssue,
-  POAPData
+  POAPData,
+  GovernanceGateDetail
 } from './mockData';
 
 export const exportToPPT = (
@@ -163,4 +164,227 @@ export const exportPOAPToPPT = (
   ragStatus: { schedule: string; budget: string; scope: string; quality: string; overall: string }
 ) => {
   // Stubbed implementation for POAP pptx
+};
+
+// Export Governance Gates (RPM, CP1, CP2, Change Requests) to PowerPoint
+export const exportGovernanceGatesToPPT = (
+  gates: GovernanceGateDetail[],
+  singleGateId?: string
+) => {
+  const pptx = new pptxgen();
+  pptx.layout = 'LAYOUT_WIDE';
+
+  // Filter gates if we only want to export a single slide
+  const gatesToExport = singleGateId 
+    ? gates.filter(g => g.id === singleGateId) 
+    : gates;
+
+  gatesToExport.forEach(gate => {
+    const slide = pptx.addSlide();
+    
+    // Set slide background to white
+    slide.background = { color: 'FFFFFF' };
+
+    // Slide Title
+    slide.addText(gate.title.toUpperCase(), {
+      x: 0.5,
+      y: 0.3,
+      w: 12.3,
+      h: 0.6,
+      fontSize: 24,
+      bold: true,
+      color: 'E60000',
+      fontFace: 'Outfit'
+    });
+
+    // Objective Box
+    slide.addText([
+      { text: 'Objective: ', options: { bold: true, color: 'E60000' } },
+      { text: gate.objective, options: { color: 'E60000' } }
+    ], {
+      x: 0.5,
+      y: 1.1,
+      w: 4.8,
+      h: 1.2,
+      line: { color: 'E60000', width: 2 },
+      fill: { color: 'FFFFFF' },
+      valign: 'middle',
+      fontSize: 11,
+      fontFace: 'Outfit',
+      margin: 10
+    });
+
+    // Entry Criteria
+    slide.addText('Entry criteria:', {
+      x: 0.5,
+      y: 2.5,
+      w: 4.8,
+      h: 0.3,
+      fontSize: 12,
+      bold: true,
+      color: '000000',
+      fontFace: 'Outfit'
+    });
+
+    const entryText = gate.entryCriteria.map((item, idx) => ({
+      text: item + (idx === gate.entryCriteria.length - 1 ? '' : '\n'),
+      options: { bullet: true, color: '000000', fontSize: 10 }
+    }));
+    slide.addText(entryText, {
+      x: 0.5,
+      y: 2.8,
+      w: 4.8,
+      h: 1.3,
+      fontSize: 10,
+      fontFace: 'Outfit',
+      lineSpacing: 14
+    });
+
+    // Output
+    slide.addText('Output:', {
+      x: 0.5,
+      y: 4.2,
+      w: 4.8,
+      h: 0.3,
+      fontSize: 12,
+      bold: true,
+      color: '000000',
+      fontFace: 'Outfit'
+    });
+
+    const outputText = gate.outputs.map((item, idx) => ({
+      text: item + (idx === gate.outputs.length - 1 ? '' : '\n'),
+      options: { bullet: true, color: '000000', fontSize: 10 }
+    }));
+    slide.addText(outputText, {
+      x: 0.5,
+      y: 4.5,
+      w: 4.8,
+      h: 1.0,
+      fontSize: 10,
+      fontFace: 'Outfit',
+      lineSpacing: 14
+    });
+
+    // Audience position based on CR
+    const isCR = gate.id === 'cr';
+    const audienceY = isCR ? 5.4 : 5.6;
+
+    const audienceText: any[] = [
+      { text: 'Mandatory Audience: ', options: { bold: true, color: '000000' } },
+      { text: gate.mandatoryAudience + '\n\n', options: { color: '333333' } }
+    ];
+    if (gate.optionalAudience) {
+      audienceText.push({ text: 'Optional Audience: ', options: { bold: true, color: '000000' } });
+      audienceText.push({ text: gate.optionalAudience, options: { color: '333333' } });
+    }
+    
+    slide.addText(audienceText, {
+      x: 0.5,
+      y: audienceY,
+      w: 4.8,
+      h: isCR ? 0.7 : 1.0,
+      fontSize: 10,
+      fontFace: 'Outfit'
+    });
+
+    // For Change Requests: Types Considered and Not Considered at the bottom
+    if (isCR && gate.typesConsidered && gate.typesNotConsidered) {
+      // Considered (Green)
+      slide.addText('The following types of CRs will be considered:', {
+        x: 0.5,
+        y: 6.1,
+        w: 5.8,
+        h: 0.25,
+        fontSize: 12,
+        bold: true,
+        color: '008000',
+        fontFace: 'Outfit'
+      });
+      const consText = gate.typesConsidered.map((item, idx) => ({
+        text: item + (idx === gate.typesConsidered!.length - 1 ? '' : '\n'),
+        options: { bullet: { code: '2022' }, color: '333333', fontSize: 10 }
+      }));
+      slide.addText(consText, {
+        x: 0.5,
+        y: 6.4,
+        w: 5.8,
+        h: 0.9,
+        fontSize: 10,
+        fontFace: 'Outfit',
+        lineSpacing: 14
+      });
+
+      // Not Considered (Red)
+      slide.addText('The following types of CRs will not be considered:', {
+        x: 6.8,
+        y: 6.1,
+        w: 6.0,
+        h: 0.25,
+        fontSize: 12,
+        bold: true,
+        color: 'E60000',
+        fontFace: 'Outfit'
+      });
+      const notConsText = gate.typesNotConsidered.map((item, idx) => ({
+        text: item + (idx === gate.typesNotConsidered!.length - 1 ? '' : '\n'),
+        options: { bullet: { code: '2022' }, color: '333333', fontSize: 10 }
+      }));
+      slide.addText(notConsText, {
+        x: 6.8,
+        y: 6.4,
+        w: 6.0,
+        h: 0.9,
+        fontSize: 10,
+        fontFace: 'Outfit',
+        lineSpacing: 14
+      });
+    }
+
+    // Right Side Table (Participants)
+    const tableHeader = [
+      { text: 'Participant', options: { bold: true, color: 'FFFFFF', fill: { color: 'E60000' }, align: 'left', valign: 'middle' } },
+      { text: 'Input (Actions Done)', options: { bold: true, color: 'FFFFFF', fill: { color: 'E60000' }, align: 'left', valign: 'middle' } },
+      { text: 'Output (Actions to do)', options: { bold: true, color: 'FFFFFF', fill: { color: 'E60000' }, align: 'left', valign: 'middle' } }
+    ];
+
+    const tableRows: any[][] = [tableHeader];
+
+    const formatCellWithBullets = (items: string[]) => {
+      if (items.length === 0 || (items.length === 1 && items[0].trim() === 'N/A')) {
+        return [{ text: 'N/A', options: { color: '333333', fontSize: 9 } }];
+      }
+      return items.map((item, idx) => ({
+        text: item + (idx === items.length - 1 ? '' : '\n'),
+        options: { bullet: true, color: '333333', fontSize: 9 }
+      }));
+    };
+
+    gate.participants.forEach(p => {
+      tableRows.push([
+        { text: [{ text: p.participant, options: { bold: true, color: '000000', fontSize: 10 } }], options: { fill: { color: 'FCE4E4' }, valign: 'middle' } },
+        { text: formatCellWithBullets(p.inputs), options: { fill: { color: 'FCE4E4' }, valign: 'middle' } },
+        { text: formatCellWithBullets(p.outputs), options: { fill: { color: 'FCE4E4' }, valign: 'middle' } }
+      ]);
+    });
+
+    const tableH = isCR ? 4.3 : 5.0;
+    slide.addTable(tableRows, {
+      x: 5.6,
+      y: 1.1,
+      w: 7.2,
+      h: tableH,
+      border: { type: 'solid', color: 'FFFFFF', pt: 2 },
+      fontSize: 9,
+      fontFace: 'Outfit',
+      valign: 'middle',
+      margin: 6
+    });
+  });
+
+  const fileName = singleGateId 
+    ? `${gatesToExport[0].title.replace(/[^\w\s-]/g, '').replace(/\s+/g, '_')}_Report.pptx`
+    : 'TDM_Release_Governance_Gate_Deck.pptx';
+
+  pptx.writeFile({ fileName });
 };
