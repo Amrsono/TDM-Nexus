@@ -27,7 +27,7 @@ import { POAP } from './views/POAP';
 import { Settings as SettingsView, ThemeMode } from './views/Settings';
 import { POAPSlideBuilder } from './views/POAPSlideBuilder';
 import { ReleasePlanningMeeting } from './views/ReleasePlanningMeeting';
-import { PIReadinessWizard } from './views/PIReadinessWizard';
+import { WalkthroughWizard } from './views/WalkthroughWizard';
 import { exportToExcel } from './utils/excelExporter';
 import { exportToPPT } from './utils/pptxExporter';
 import {
@@ -62,7 +62,7 @@ import {
   initialPIWizardData
 } from './utils/mockData';
 
-type PhaseId = 'funnel' | 'analysing' | 'build' | 'finances' | 'testing' | 'releaseplanning' | 'piprocess' | 'governance' | 'postlaunch' | 'poap' | 'slidebuilder' | 'settings';
+type PhaseId = 'funnel' | 'analysing' | 'build' | 'finances' | 'testing' | 'releaseplanning' | 'walkthrough' | 'governance' | 'postlaunch' | 'poap' | 'slidebuilder' | 'settings';
 
 interface PhaseMetadata {
   id: PhaseId;
@@ -111,7 +111,7 @@ export default function App() {
     { id: 'build', name: 'Implementing & Build', icon: Wrench, color: 'var(--color-purple)' },
     { id: 'testing', name: 'Testing & Quality', icon: Bug, color: 'var(--color-magenta)' },
     { id: 'releaseplanning', name: 'Release Planning & Gates', icon: ClipboardList, color: '#ef4444' },
-    { id: 'piprocess', name: 'Digital PI Process', icon: BookOpen, color: '#e60000' },
+    { id: 'walkthrough', name: 'Walkthrough Wizard', icon: BookOpen, color: '#e60000' },
     { id: 'governance', name: 'Release & Governance', icon: Scale, color: '#60a5fa' },
     { id: 'postlaunch', name: 'Go-Live & ELS', icon: ShieldCheck, color: '#a855f7' },
     { id: 'poap', name: 'Digital POAP', icon: LayoutTemplate, color: '#2dd4bf' },
@@ -253,13 +253,8 @@ export default function App() {
             setGates={setGovernanceGates}
           />
         );
-      case 'piprocess':
-        return (
-          <PIReadinessWizard 
-            data={piWizardData}
-            setData={setPiWizardData}
-          />
-        );
+      case 'walkthrough':
+        return <WalkthroughWizard />;
       case 'slidebuilder':
         return <POAPSlideBuilder />;
       case 'settings':

@@ -533,12 +533,36 @@ export interface PICheckpointItem {
 }
 
 export interface PIWizardData {
+  piName: string;
+  startDate: string;
+  endDate: string;
+  sprints: number;
+  selectedWorkItemIds: string[];
   reviewChecklist: PIChecklistItem[];
   analyseChecklist: PIChecklistItem[];
   postKickoffCheckpoints: PICheckpointItem[];
+  ragStatus: {
+    schedule: string;
+    budget: string;
+    scope: string;
+    quality: string;
+    overall: string;
+  };
 }
 
 export const initialPIWizardData: PIWizardData = {
+  piName: 'PI 40',
+  startDate: '2026-07-01',
+  endDate: '2026-09-30',
+  sprints: 6,
+  selectedWorkItemIds: [],
+  ragStatus: {
+    schedule: 'Green',
+    budget: 'Green',
+    scope: 'Green',
+    quality: 'Green',
+    overall: 'Green'
+  },
   reviewChecklist: [
     { id: 'rv-1', text: 'Budget Approved – Funding secured', checked: false },
     { id: 'rv-2', text: 'Tech PM Assigned – Accountability', checked: false },
