@@ -243,6 +243,8 @@ export function ReleasePlanningMeeting({ gates, setGates }: ReleasePlanningMeeti
         }
 
         .slide-preview-container {
+          container-type: inline-size;
+          container-name: slide;
           width: 100%;
           aspect-ratio: 16 / 9;
           background: #ffffff;
@@ -259,7 +261,7 @@ export function ReleasePlanningMeeting({ gates, setGates }: ReleasePlanningMeeti
         }
 
         .slide-title {
-          font-size: 2.2vw;
+          font-size: 3.5cqw;
           font-weight: 700;
           color: #E60000;
           margin: 0 0 1.5% 0;
@@ -268,44 +270,52 @@ export function ReleasePlanningMeeting({ gates, setGates }: ReleasePlanningMeeti
         }
 
         .slide-content {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          min-height: 0;
+          gap: 2%;
+        }
+
+        .slide-main-columns {
           display: grid;
-          grid-template-columns: 1fr 1.5fr;
+          grid-template-columns: 1fr 1.45fr;
           gap: 3%;
           flex: 1;
-          min-height: 0; /* Important for scroll containment */
+          min-height: 0;
         }
 
         .slide-left {
           display: flex;
           flex-direction: column;
-          gap: 3%;
+          gap: 2%;
           min-height: 0;
         }
 
         .slide-objective-box {
           border: 2px solid #E60000;
-          padding: 3% 4%;
-          font-size: 1vw;
+          padding: 2.5% 3.5%;
+          font-size: 1.5cqw;
           line-height: 1.3;
           color: #E60000;
           font-weight: 500;
           border-radius: 2px;
-          margin-bottom: 2%;
+          margin-bottom: 1.5%;
         }
 
         .slide-section-header {
-          font-size: 1vw;
+          font-size: 1.4cqw;
           font-weight: 700;
           color: #000000;
-          margin: 2% 0 1% 0;
+          margin: 1.5% 0 0.5% 0;
           text-transform: capitalize;
         }
 
         .slide-bullets {
           list-style-type: disc;
-          padding-left: 1.2vw;
+          padding-left: 1.8cqw;
           margin: 0;
-          font-size: 0.85vw;
+          font-size: 1.2cqw;
           line-height: 1.3;
           color: #333333;
         }
@@ -316,11 +326,11 @@ export function ReleasePlanningMeeting({ gates, setGates }: ReleasePlanningMeeti
 
         .slide-audience-section {
           margin-top: auto;
-          font-size: 0.8vw;
+          font-size: 1.2cqw;
           line-height: 1.4;
           color: #000000;
           border-top: 1px solid #ddd;
-          padding-top: 3%;
+          padding-top: 2%;
         }
 
         /* Right Column Table */
@@ -339,7 +349,7 @@ export function ReleasePlanningMeeting({ gates, setGates }: ReleasePlanningMeeti
         .slide-table th {
           background: #E60000;
           color: #ffffff;
-          font-size: 0.85vw;
+          font-size: 1.25cqw;
           font-weight: 700;
           text-align: left;
           padding: 1.2% 1.8%;
@@ -349,7 +359,7 @@ export function ReleasePlanningMeeting({ gates, setGates }: ReleasePlanningMeeti
         .slide-table td {
           background: #FCE4E4;
           color: #333333;
-          font-size: 0.75vw;
+          font-size: 1.1cqw;
           vertical-align: middle;
           padding: 1.2% 1.8%;
           border: 1.5px solid #ffffff;
@@ -367,17 +377,16 @@ export function ReleasePlanningMeeting({ gates, setGates }: ReleasePlanningMeeti
 
         /* CR bottom lists */
         .slide-cr-bottom {
-          grid-column: span 2;
           display: grid;
-          grid-template-columns: 1fr 1.05fr;
-          gap: 4%;
-          margin-top: auto;
-          padding-top: 2%;
+          grid-template-columns: 1fr 1.45fr;
+          gap: 3%;
+          padding-top: 1.5%;
           border-top: 1px solid #ddd;
+          margin-top: auto;
         }
 
         .slide-cr-list-title {
-          font-size: 0.95vw;
+          font-size: 1.3cqw;
           font-weight: 700;
           margin-bottom: 1%;
         }
@@ -584,80 +593,85 @@ export function ReleasePlanningMeeting({ gates, setGates }: ReleasePlanningMeeti
               {/* Slide Body */}
               <div className="slide-content">
                 
-                {/* Left Side Info */}
-                <div className="slide-left">
-                  <div className="slide-objective-box">
-                    <strong>Objective:</strong> {activeGate.objective}
-                  </div>
+                {/* Main 2-Column Content */}
+                <div className="slide-main-columns">
                   
-                  <div>
-                    <div className="slide-section-header">Entry criteria:</div>
-                    <ul className="slide-bullets">
-                      {activeGate.entryCriteria.filter(item => item.trim() !== '').map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
+                  {/* Left Side Info */}
+                  <div className="slide-left">
+                    <div className="slide-objective-box">
+                      <strong>Objective:</strong> {activeGate.objective}
+                    </div>
+                    
+                    <div>
+                      <div className="slide-section-header">Entry criteria:</div>
+                      <ul className="slide-bullets">
+                        {activeGate.entryCriteria.filter(item => item.trim() !== '').map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Outputs */}
+                    <div>
+                      <div className="slide-section-header">Output:</div>
+                      <ul className="slide-bullets">
+                        {activeGate.outputs.filter(item => item.trim() !== '').map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Audience */}
+                    <div className="slide-audience-section">
+                      <div><strong>Mandatory Audience:</strong> {activeGate.mandatoryAudience}</div>
+                      {activeGate.optionalAudience && (
+                        <div style={{ marginTop: '0.2cqw' }}><strong>Optional Audience:</strong> {activeGate.optionalAudience}</div>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Outputs */}
-                  <div>
-                    <div className="slide-section-header">Output:</div>
-                    <ul className="slide-bullets">
-                      {activeGate.outputs.filter(item => item.trim() !== '').map((item, idx) => (
-                        <li key={idx}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Audience */}
-                  <div className="slide-audience-section">
-                    <div><strong>Mandatory Audience:</strong> {activeGate.mandatoryAudience}</div>
-                    {activeGate.optionalAudience && (
-                      <div style={{ marginTop: '0.2vw' }}><strong>Optional Audience:</strong> {activeGate.optionalAudience}</div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Right Side Table */}
-                <div className="slide-right">
-                  <table className="slide-table">
-                    <thead>
-                      <tr>
-                        <th style={{ width: '22%' }}>Participant</th>
-                        <th style={{ width: '38%' }}>Input (Actions Done)</th>
-                        <th style={{ width: '40%' }}>Output (Actions to do)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {activeGate.participants.map((p, idx) => (
-                        <tr key={idx}>
-                          <td className="slide-table-participant">{p.participant}</td>
-                          <td>
-                            {p.inputs.length === 0 || (p.inputs.length === 1 && p.inputs[0].trim() === 'N/A') ? (
-                              'N/A'
-                            ) : (
-                              <ul style={{ listStyleType: 'disc', paddingLeft: '1.1vw', margin: 0 }}>
-                                {p.inputs.filter(item => item.trim() !== '').map((item, i) => (
-                                  <li key={i}>{item}</li>
-                                ))}
-                              </ul>
-                            )}
-                          </td>
-                          <td>
-                            {p.outputs.length === 0 || (p.outputs.length === 1 && p.outputs[0].trim() === 'N/A') ? (
-                              'N/A'
-                            ) : (
-                              <ul style={{ listStyleType: 'disc', paddingLeft: '1.1vw', margin: 0 }}>
-                                {p.outputs.filter(item => item.trim() !== '').map((item, i) => (
-                                  <li key={i}>{item}</li>
-                                ))}
-                              </ul>
-                            )}
-                          </td>
+                  {/* Right Side Table */}
+                  <div className="slide-right">
+                    <table className="slide-table">
+                      <thead>
+                        <tr>
+                          <th style={{ width: '22%' }}>Participant</th>
+                          <th style={{ width: '38%' }}>Input (Actions Done)</th>
+                          <th style={{ width: '40%' }}>Output (Actions to do)</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {activeGate.participants.map((p, idx) => (
+                          <tr key={idx}>
+                            <td className="slide-table-participant">{p.participant}</td>
+                            <td>
+                              {p.inputs.length === 0 || (p.inputs.length === 1 && p.inputs[0].trim() === 'N/A') ? (
+                                'N/A'
+                              ) : (
+                                <ul style={{ listStyleType: 'disc', paddingLeft: '1.5cqw', margin: 0 }}>
+                                  {p.inputs.filter(item => item.trim() !== '').map((item, i) => (
+                                    <li key={i}>{item}</li>
+                                  ))}
+                                </ul>
+                              )}
+                            </td>
+                            <td>
+                              {p.outputs.length === 0 || (p.outputs.length === 1 && p.outputs[0].trim() === 'N/A') ? (
+                                'N/A'
+                              ) : (
+                                <ul style={{ listStyleType: 'disc', paddingLeft: '1.5cqw', margin: 0 }}>
+                                  {p.outputs.filter(item => item.trim() !== '').map((item, i) => (
+                                    <li key={i}>{item}</li>
+                                  ))}
+                                </ul>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
                 </div>
 
                 {/* Bottom Considered/Not Considered section if Change Requests */}
@@ -665,7 +679,7 @@ export function ReleasePlanningMeeting({ gates, setGates }: ReleasePlanningMeeti
                   <div className="slide-cr-bottom">
                     <div>
                       <div className="slide-cr-list-title considered">The following types of CRs will be considered:</div>
-                      <ul className="slide-bullets" style={{ paddingLeft: '1.1vw' }}>
+                      <ul className="slide-bullets" style={{ paddingLeft: '1.5cqw' }}>
                         {activeGate.typesConsidered.filter(item => item.trim() !== '').map((item, idx) => (
                           <li key={idx}>{item}</li>
                         ))}
@@ -673,7 +687,7 @@ export function ReleasePlanningMeeting({ gates, setGates }: ReleasePlanningMeeti
                     </div>
                     <div>
                       <div className="slide-cr-list-title not-considered">The following types of CRs will not be considered:</div>
-                      <ul className="slide-bullets" style={{ paddingLeft: '1.1vw' }}>
+                      <ul className="slide-bullets" style={{ paddingLeft: '1.5cqw' }}>
                         {activeGate.typesNotConsidered.filter(item => item.trim() !== '').map((item, idx) => (
                           <li key={idx}>{item}</li>
                         ))}
