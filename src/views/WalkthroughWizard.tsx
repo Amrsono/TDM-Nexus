@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { WalkthroughData } from '../utils/mockData';
+import { exportWalkthroughToExcel, exportWalkthroughToPPT } from '../utils/walkthroughExporter';
 import {
   ChevronRight,
   ChevronLeft,
@@ -8,11 +10,14 @@ import {
   Wrench,
   Rocket,
   CheckCircle2,
-  Info,
-  Clock,
-  FileText,
-  Activity
+  FileSpreadsheet,
+  Presentation
 } from 'lucide-react';
+
+interface WalkthroughWizardProps {
+  data: WalkthroughData;
+  setData: React.Dispatch<React.SetStateAction<WalkthroughData>>;
+}
 
 const WIZARD_STEPS = [
   { id: 1, title: 'Funnel', icon: Filter },
@@ -22,11 +27,15 @@ const WIZARD_STEPS = [
   { id: 5, title: 'Post Launch', icon: Rocket },
 ];
 
-export function WalkthroughWizard() {
+export function WalkthroughWizard({ data, setData }: WalkthroughWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
 
   const goNext = () => setCurrentStep(prev => Math.min(prev + 1, 5));
   const goPrev = () => setCurrentStep(prev => Math.max(prev - 1, 1));
+
+  const handleChange = (field: keyof WalkthroughData, value: any) => {
+    setData(prev => ({ ...prev, [field]: value }));
+  };
 
   return (
     <div className="pi-wizard-view">
@@ -42,6 +51,7 @@ export function WalkthroughWizard() {
         .pi-wizard-topbar {
           display: flex;
           align-items: center;
+          justify-content: space-between;
           gap: 1rem;
           border-bottom: 1px solid var(--color-border);
           padding-bottom: 0.75rem;
@@ -110,6 +120,11 @@ export function WalkthroughWizard() {
           color: #000;
         }
 
+        .pi-export-actions {
+          display: flex;
+          gap: 0.5rem;
+        }
+
         .pi-step-content {
           flex: 1;
           overflow-y: auto;
@@ -153,58 +168,61 @@ export function WalkthroughWizard() {
           gap: 0.5rem;
         }
 
-        .pi-panel p, .pi-panel li {
+        .pi-panel p {
           font-size: 0.9rem;
           line-height: 1.6;
           color: var(--color-text-secondary);
         }
 
-        .pi-panel strong {
-          color: var(--color-text-primary);
+        .form-group {
+          margin-bottom: 1rem;
         }
-
-        .pi-panel ul {
-          padding-left: 1.25rem;
-          margin: 0.5rem 0;
-        }
-
-        .pi-panel li {
-          margin-bottom: 0.3rem;
-        }
-
-        .pi-highlight-box {
-          border: 2px solid #e60000;
-          border-radius: 8px;
-          padding: 1rem 1.25rem;
-          margin: 0.75rem 0;
-          background: rgba(230, 0, 0, 0.04);
-        }
-
-        .pi-highlight-box p {
-          color: var(--color-text-primary);
-        }
-
-        .pi-callout {
-          display: flex;
-          align-items: flex-start;
-          gap: 0.75rem;
-          padding: 0.75rem 1rem;
-          border-radius: 8px;
-          background: rgba(0, 242, 254, 0.06);
-          border: 1px solid rgba(0, 242, 254, 0.15);
-          margin: 0.75rem 0;
-        }
-
-        .pi-callout-icon {
-          flex-shrink: 0;
-          margin-top: 2px;
-          color: var(--color-cyan);
-        }
-
-        .pi-callout p {
-          margin: 0;
-          color: var(--color-text-secondary);
+        
+        .form-group label {
+          display: block;
           font-size: 0.85rem;
+          color: var(--color-text-secondary);
+          margin-bottom: 0.4rem;
+          font-weight: 500;
+        }
+
+        .form-control {
+          width: 100%;
+          background: var(--bg-primary);
+          border: 1px solid var(--color-border);
+          color: var(--color-text-primary);
+          padding: 0.6rem 0.8rem;
+          border-radius: 6px;
+          font-family: var(--font-sans);
+          font-size: 0.9rem;
+          transition: border-color var(--transition-fast);
+        }
+
+        .form-control:focus {
+          outline: none;
+          border-color: var(--color-cyan);
+        }
+
+        textarea.form-control {
+          resize: vertical;
+          min-height: 80px;
+        }
+
+        .checkbox-label {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          cursor: pointer;
+          font-size: 0.9rem;
+          color: var(--color-text-primary);
+          user-select: none;
+          margin-bottom: 0.75rem;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+          width: 1.1rem;
+          height: 1.1rem;
+          accent-color: var(--color-cyan);
         }
 
         .pi-step-progress-bar {
@@ -222,26 +240,10 @@ export function WalkthroughWizard() {
           transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .grid-cards {
+        .grid-2 {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-          gap: 1rem;
-          margin-top: 1rem;
-        }
-
-        .info-card {
-          background: rgba(255,255,255,0.02);
-          border: 1px solid var(--color-border);
-          padding: 1rem;
-          border-radius: 8px;
-        }
-
-        .info-card h4 {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          color: var(--color-cyan);
-          margin-bottom: 0.5rem;
+          grid-template-columns: 1fr 1fr;
+          gap: 1.25rem;
         }
       `}</style>
 
@@ -265,6 +267,16 @@ export function WalkthroughWizard() {
             );
           })}
         </div>
+        <div className="pi-export-actions">
+          <button className="cyber-button" onClick={() => exportWalkthroughToExcel(data)} title="Extract Excel Report">
+            <FileSpreadsheet size={16} />
+            <span>Excel</span>
+          </button>
+          <button className="cyber-button secondary" onClick={() => exportWalkthroughToPPT(data)} title="Extract PPT Report">
+            <Presentation size={16} />
+            <span>PPT</span>
+          </button>
+        </div>
       </div>
 
       {/* Step progress bar */}
@@ -274,11 +286,11 @@ export function WalkthroughWizard() {
 
       {/* Step Content */}
       <div className="pi-step-content">
-        {currentStep === 1 && renderStep1()}
-        {currentStep === 2 && renderStep2()}
-        {currentStep === 3 && renderStep3()}
-        {currentStep === 4 && renderStep4()}
-        {currentStep === 5 && renderStep5()}
+        {currentStep === 1 && renderStep1(data, handleChange)}
+        {currentStep === 2 && renderStep2(data, handleChange)}
+        {currentStep === 3 && renderStep3(data, handleChange)}
+        {currentStep === 4 && renderStep4(data, handleChange)}
+        {currentStep === 5 && renderStep5(data, handleChange)}
       </div>
 
       {/* Navigation Footer */}
@@ -299,237 +311,337 @@ export function WalkthroughWizard() {
   );
 }
 
-function renderStep1() {
+function renderStep1(data: WalkthroughData, handleChange: Function) {
   return (
-    <>
-      <div className="pi-panel">
-        <div className="pi-panel-title">
-          <Filter size={22} /> The Funnel Phase
+    <div className="pi-panel">
+      <div className="pi-panel-title">
+        <Filter size={22} /> Phase 1: Funnel
+      </div>
+      <p style={{ marginBottom: '1.5rem' }}>Capture ideas, scope demands, and evaluate high-level resourcing before investing heavily into design.</p>
+      
+      <div className="form-group">
+        <label>Epic / Initiative Name</label>
+        <input 
+          type="text" 
+          className="form-control" 
+          value={data.epicName} 
+          onChange={(e) => handleChange('epicName', e.target.value)} 
+          placeholder="e.g., MVO iPhone Upgrade Journey" 
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Idea Description</label>
+        <textarea 
+          className="form-control" 
+          value={data.ideaDescription} 
+          onChange={(e) => handleChange('ideaDescription', e.target.value)} 
+          placeholder="Briefly describe the demand and business value." 
+        />
+      </div>
+
+      <div className="grid-2">
+        <div className="form-group">
+          <label>Target Portfolio / Channel</label>
+          <select 
+            className="form-control"
+            value={data.portfolio}
+            onChange={(e) => handleChange('portfolio', e.target.value)}
+          >
+            <option value="">Select a Portfolio...</option>
+            <option value="MVO (eShop)">MVO (eShop)</option>
+            <option value="eCare">eCare</option>
+            <option value="My Vodafone App (MVA)">My Vodafone App (MVA)</option>
+            <option value="TOBi">TOBi</option>
+            <option value="Platform">Platform / Shared</option>
+          </select>
         </div>
-        <div className="pi-highlight-box">
-          <p>
-            The Funnel phase is the starting point of the epic lifecycle, where ideas are captured, scoped, and prioritized. Here, product owners refine propositions and bring demands for portfolio consultation.
-          </p>
+        <div className="form-group">
+          <label>Resource Assessment</label>
+          <select 
+            className="form-control"
+            value={data.resourceAssessment}
+            onChange={(e) => handleChange('resourceAssessment', e.target.value)}
+          >
+            <option value="">Select...</option>
+            <option value="Low">Low Effort</option>
+            <option value="Medium">Medium Effort</option>
+            <option value="High">High Effort</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function renderStep2(data: WalkthroughData, handleChange: Function) {
+  return (
+    <div className="pi-panel">
+      <div className="pi-panel-title">
+        <Eye size={22} /> Phase 2: Reviewing
+      </div>
+      <p style={{ marginBottom: '1.5rem' }}>Validate the concept, create a high-level business case, and make the Stop/Go decision for mobilization.</p>
+      
+      <div className="grid-2">
+        <div>
+          <label className="checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={data.impactAssessmentDone} 
+              onChange={(e) => handleChange('impactAssessmentDone', e.target.checked)} 
+            />
+            Impact Assessment Completed
+          </label>
+          
+          <label className="checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={data.vvromCreated} 
+              onChange={(e) => handleChange('vvromCreated', e.target.checked)} 
+            />
+            VVROM Created
+          </label>
+
+          <label className="checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={data.lrpUpdated} 
+              onChange={(e) => handleChange('lrpUpdated', e.target.checked)} 
+            />
+            LRP Updated
+          </label>
         </div>
         
-        <div className="grid-cards">
-          <div className="info-card">
-            <h4><Activity size={18} /> Key Activities</h4>
-            <ul>
-              <li>Capturing and scoping ideas</li>
-              <li>Reviewing epics for strategic alignment</li>
-              <li>Prioritizing based on business value</li>
-              <li>Assessing resources at a high level</li>
-              <li>Engaging stakeholders early</li>
-            </ul>
-          </div>
-          <div className="info-card">
-            <h4><FileText size={18} /> Artifacts & Output</h4>
-            <ul>
-              <li>There are typically <strong>no formal artifacts</strong> at this stage.</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="pi-callout">
-          <Clock size={18} className="pi-callout-icon" />
-          <div>
-            <p><strong>Indicative Timeline:</strong> This phase usually takes 1–2 months.</p>
-          </div>
+        <div className="form-group">
+          <label>Stop/Go Decision for Mobilization</label>
+          <select 
+            className="form-control"
+            value={data.stopGoDecision}
+            onChange={(e) => handleChange('stopGoDecision', e.target.value)}
+            style={{ 
+              borderColor: data.stopGoDecision === 'Go' ? 'var(--color-green)' : 
+                           data.stopGoDecision === 'Stop' ? 'var(--color-amber)' : ''
+            }}
+          >
+            <option value="Pending">Pending Review</option>
+            <option value="Stop">Stop (Do not mobilize)</option>
+            <option value="Go">Go (Approved for Analysing)</option>
+          </select>
         </div>
       </div>
-    </>
+
+      <div className="form-group" style={{ marginTop: '1rem' }}>
+        <label>High-Level Business Case</label>
+        <textarea 
+          className="form-control" 
+          value={data.highLevelBusinessCase} 
+          onChange={(e) => handleChange('highLevelBusinessCase', e.target.value)} 
+          placeholder="Provide high-level ROI or customer impact metrics." 
+        />
+      </div>
+
+      <div className="form-group">
+        <label>Mobilization Plan</label>
+        <textarea 
+          className="form-control" 
+          value={data.mobilizationPlan} 
+          onChange={(e) => handleChange('mobilizationPlan', e.target.value)} 
+          placeholder="Detail which teams/squads are mobilizing." 
+        />
+      </div>
+    </div>
   );
 }
 
-function renderStep2() {
+function renderStep3(data: WalkthroughData, handleChange: Function) {
   return (
-    <>
-      <div className="pi-panel">
-        <div className="pi-panel-title">
-          <Eye size={22} /> The Reviewing Phase
-        </div>
-        <div className="pi-highlight-box">
-          <p>
-            The Reviewing phase is a checkpoint where the epic concept is validated and prepared for deeper analysis.
-          </p>
-        </div>
+    <div className="pi-panel">
+      <div className="pi-panel-title">
+        <Search size={22} /> Phase 3: Analysing
+      </div>
+      <p style={{ marginBottom: '1.5rem' }}>Refine the scope, blueprint designs, and sign-off on detailed specifications prior to build.</p>
+      
+      <div className="grid-2">
+        <div>
+          <label className="checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={data.brsSignedOff} 
+              onChange={(e) => handleChange('brsSignedOff', e.target.checked)} 
+            />
+            Business Requirement Spec (BRS) Signed Off
+          </label>
+          
+          <label className="checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={data.hldStarted} 
+              onChange={(e) => handleChange('hldStarted', e.target.checked)} 
+            />
+            High Level Design (HLD) Started
+          </label>
 
-        <div className="grid-cards">
-          <div className="info-card">
-            <h4><Activity size={18} /> Key Activities</h4>
-            <ul>
-              <li>Defining the epic's description and business value</li>
-              <li>Outlining solution capabilities</li>
-              <li>Aligning resources</li>
-              <li>Conducting impact assessments</li>
-              <li>Creating a high-level business case</li>
-              <li>Developing a mobilization plan</li>
-              <li>Making a Stop/Go decision for mobilization</li>
-            </ul>
-          </div>
-          <div className="info-card">
-            <h4><FileText size={18} /> Artifacts & Output</h4>
-            <ul>
-              <li>Shaping documents</li>
-              <li>Impact assessments</li>
-              <li>Delivery timelines</li>
-              <li>VVROM</li>
-              <li>Updated LRP</li>
-            </ul>
-          </div>
+          <label className="checkbox-label">
+            <input 
+              type="checkbox" 
+              checked={data.tilSpecsComplete} 
+              onChange={(e) => handleChange('tilSpecsComplete', e.target.checked)} 
+            />
+            TIL SOA Specs Complete
+          </label>
         </div>
-
-        <div className="pi-callout">
-          <Clock size={18} className="pi-callout-icon" />
-          <div>
-            <p><strong>Indicative Timeline:</strong> 4–6 weeks, depending on work in progress.</p>
-          </div>
+        
+        <div className="form-group">
+          <label>Estimated Timeline (Weeks)</label>
+          <input 
+            type="number" 
+            className="form-control" 
+            value={data.timelineWeeks} 
+            onChange={(e) => handleChange('timelineWeeks', parseInt(e.target.value) || 0)} 
+          />
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
-function renderStep3() {
+function renderStep4(data: WalkthroughData, handleChange: Function) {
   return (
-    <>
-      <div className="pi-panel">
-        <div className="pi-panel-title">
-          <Search size={22} /> The Analysing Phase
-        </div>
-        <div className="pi-highlight-box">
-          <p>
-            The Analyzing phase is critical for refining the idea into a well-defined scope, ensuring all impacted areas understand requirements.
-          </p>
-        </div>
-
-        <div className="grid-cards">
-          <div className="info-card">
-            <h4><Activity size={18} /> Key Activities</h4>
-            <ul>
-              <li>Creating high-level solution designs</li>
-              <li>Blueprinting readiness (Service Design, BRS, Digital Solution)</li>
-              <li>Engaging stakeholders</li>
-              <li>Estimating timelines and resource needs</li>
-              <li>Developing a detailed business case</li>
-              <li>Assessing GTM impact</li>
-              <li>Portfolio Sync & Stop/Go validation</li>
-            </ul>
-          </div>
-          <div className="info-card">
-            <h4><FileText size={18} /> Artifacts & Output</h4>
-            <ul>
-              <li>BRS documents & UX designs</li>
-              <li>HLDs & TIL specs</li>
-              <li>Digital blueprints</li>
-              <li>Feature definitions & Dependency maps</li>
-              <li>POAPs</li>
-            </ul>
-          </div>
+    <div className="pi-panel">
+      <div className="pi-panel-title">
+        <Wrench size={22} /> Phase 4: Implementing
+      </div>
+      <p style={{ marginBottom: '1.5rem' }}>Build the solution and progress through quality assurance (SIT, UAT, PAT, PEN, CJT).</p>
+      
+      <div className="grid-2">
+        <div className="form-group">
+          <label>MVP Build Status</label>
+          <select 
+            className="form-control"
+            value={data.mvpBuildStatus}
+            onChange={(e) => handleChange('mvpBuildStatus', e.target.value)}
+          >
+            <option value="Not Started">Not Started</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Complete">Complete</option>
+          </select>
         </div>
 
-        <div className="pi-callout">
-          <Clock size={18} className="pi-callout-icon" />
+        <div className="form-group">
+          <label>Commercial Go/No-Go Decision</label>
+          <select 
+            className="form-control"
+            value={data.commercialGoNoGo}
+            onChange={(e) => handleChange('commercialGoNoGo', e.target.value)}
+            style={{ 
+              borderColor: data.commercialGoNoGo === 'Go' ? 'var(--color-green)' : 
+                           data.commercialGoNoGo === 'No-Go' ? '#e60000' : ''
+            }}
+          >
+            <option value="Pending">Pending Validation</option>
+            <option value="No-Go">No-Go (Issues remaining)</option>
+            <option value="Go">Go (Ready for launch!)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--color-border)' }}>
+        <h4 style={{ color: 'var(--color-cyan)', fontSize: '0.95rem', marginBottom: '1rem' }}>Testing Checkpoints</h4>
+        <div className="grid-2">
           <div>
-            <p><strong>Indicative Timeline:</strong> 8–20 weeks, depending on project size.</p>
+            <label className="checkbox-label">
+              <input 
+                type="checkbox" 
+                checked={data.sitTesting} 
+                onChange={(e) => handleChange('sitTesting', e.target.checked)} 
+              />
+              SIT Completed (System Integration)
+            </label>
+            <label className="checkbox-label">
+              <input 
+                type="checkbox" 
+                checked={data.uatTesting} 
+                onChange={(e) => handleChange('uatTesting', e.target.checked)} 
+              />
+              UAT Completed (User Acceptance)
+            </label>
+            <label className="checkbox-label">
+              <input 
+                type="checkbox" 
+                checked={data.patTesting} 
+                onChange={(e) => handleChange('patTesting', e.target.checked)} 
+              />
+              PAT Completed (Performance)
+            </label>
+          </div>
+          <div>
+            <label className="checkbox-label">
+              <input 
+                type="checkbox" 
+                checked={data.cjtTesting} 
+                onChange={(e) => handleChange('cjtTesting', e.target.checked)} 
+              />
+              CJT Completed (Customer Journey)
+            </label>
+            <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '0.5rem', lineHeight: 1.4 }}>
+              * Note: Any P1/P2 defects identified during CJT must be resolved before Commercial Launch.
+            </p>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
-function renderStep4() {
+function renderStep5(data: WalkthroughData, handleChange: Function) {
   return (
-    <>
-      <div className="pi-panel">
-        <div className="pi-panel-title">
-          <Wrench size={22} /> The Implementing Phase
+    <div className="pi-panel">
+      <div className="pi-panel-title">
+        <Rocket size={22} /> Phase 5: Post Launch
+      </div>
+      <p style={{ marginBottom: '1.5rem' }}>Monitor performance, resolve issues in Early Life Support (ELS), and document learnings.</p>
+      
+      <div className="grid-2">
+        <div className="form-group">
+          <label>P1/P2 Defects Remaining</label>
+          <input 
+            type="number" 
+            className="form-control" 
+            value={data.p1p2DefectsRemaining} 
+            onChange={(e) => handleChange('p1p2DefectsRemaining', parseInt(e.target.value) || 0)} 
+          />
         </div>
-        <div className="pi-highlight-box">
-          <p>
-            In the Implementing phase, the approved epic moves into solution build and delivery, following SAFe Agile methodology.
-          </p>
-        </div>
-
-        <div className="grid-cards">
-          <div className="info-card">
-            <h4><Activity size={18} /> Key Activities</h4>
-            <ul>
-              <li>Building and evaluating MVPs</li>
-              <li>Engaging stakeholders</li>
-              <li>System (SIT), UAT, PAT, PEN, and CJT testing</li>
-              <li>Monitoring budgets and compliance</li>
-              <li>Managing change and risks</li>
-              <li>Go/No Go validation for commercial launch</li>
-            </ul>
-          </div>
-          <div className="info-card">
-            <h4><FileText size={18} /> Artifacts & Output</h4>
-            <ul>
-              <li>Updated delivery plans</li>
-              <li>RAID logs</li>
-              <li>Lessons learned</li>
-              <li>Hyper-care plans</li>
-              <li>Go/No Go documentation</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="pi-callout">
-          <Clock size={18} className="pi-callout-icon" />
-          <div>
-            <p><strong>Indicative Timeline:</strong> Varies by scope, typically 8–20 weeks.</p>
-          </div>
+        
+        <div>
+          <label className="checkbox-label" style={{ marginTop: '1.4rem' }}>
+            <input 
+              type="checkbox" 
+              checked={data.elsActive} 
+              onChange={(e) => handleChange('elsActive', e.target.checked)} 
+            />
+            Early Life Support (ELS) Currently Active
+          </label>
         </div>
       </div>
-    </>
-  );
-}
 
-function renderStep5() {
-  return (
-    <>
-      <div className="pi-panel">
-        <div className="pi-panel-title">
-          <Rocket size={22} /> The Post Launch Phase
-        </div>
-        <div className="pi-highlight-box">
-          <p>
-            After launch, the focus shifts to performance review, issue resolution, and continuous improvement. Early Life Support (ELS) is activated to ensure stability.
-          </p>
-        </div>
-
-        <div className="grid-cards">
-          <div className="info-card">
-            <h4><Activity size={18} /> Key Activities</h4>
-            <ul>
-              <li>Early Life Support (ELS) for rapid issue resolution</li>
-              <li>Updating risk registers</li>
-              <li>Holding retrospective meetings</li>
-              <li>Documenting lessons learned</li>
-              <li>Managing backlog for future releases</li>
-              <li>Final portfolio sync for epic closure</li>
-            </ul>
-          </div>
-          <div className="info-card">
-            <h4><Info size={18} /> Exit Criteria</h4>
-            <ul>
-              <li>No P1/P2 defects remain</li>
-              <li>Performance and analytics dashboard metrics meet baseline</li>
-              <li>Typically lasts 2 weeks post go-live</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="pi-callout">
-          <CheckCircle2 size={18} className="pi-callout-icon" />
-          <div>
-            <p><strong>Goal:</strong> Ensures customers do not encounter major failures during the initial usage period, protecting the customer experience.</p>
-          </div>
-        </div>
+      <div className="form-group" style={{ marginTop: '1rem' }}>
+        <label>Retrospective Notes & Lessons Learned</label>
+        <textarea 
+          className="form-control" 
+          value={data.retrospectiveNotes} 
+          onChange={(e) => handleChange('retrospectiveNotes', e.target.value)} 
+          placeholder="Document what went well and what could be improved for next time." 
+        />
       </div>
-    </>
+
+      {data.p1p2DefectsRemaining === 0 && !data.elsActive && data.commercialGoNoGo === 'Go' && (
+        <div className="pi-highlight-box" style={{ borderColor: 'var(--color-green)', background: 'rgba(0,245,160,0.05)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--color-green)' }}>
+            <CheckCircle2 size={24} />
+            <span style={{ fontWeight: 600 }}>Project Complete & Handed Over to BAU</span>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

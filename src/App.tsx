@@ -59,7 +59,9 @@ import {
   GovernanceGateDetail,
   initialGovernanceGates,
   PIWizardData,
-  initialPIWizardData
+  initialPIWizardData,
+  WalkthroughData,
+  initialWalkthroughData
 } from './utils/mockData';
 
 type PhaseId = 'funnel' | 'analysing' | 'build' | 'finances' | 'testing' | 'releaseplanning' | 'walkthrough' | 'governance' | 'postlaunch' | 'poap' | 'slidebuilder' | 'settings';
@@ -95,6 +97,7 @@ export default function App() {
   const [poapData, setPoapData] = useState<POAPData>(initialPOAPData);
   const [governanceGates, setGovernanceGates] = useState<GovernanceGateDetail[]>(initialGovernanceGates);
   const [piWizardData, setPiWizardData] = useState<PIWizardData>(initialPIWizardData);
+  const [walkthroughData, setWalkthroughData] = useState<WalkthroughData>(initialWalkthroughData);
   
   const [ragStatus, setRagStatus] = useState({
     schedule: 'Green',
@@ -254,7 +257,12 @@ export default function App() {
           />
         );
       case 'walkthrough':
-        return <WalkthroughWizard />;
+        return (
+          <WalkthroughWizard 
+            data={walkthroughData}
+            setData={setWalkthroughData}
+          />
+        );
       case 'slidebuilder':
         return <POAPSlideBuilder />;
       case 'settings':

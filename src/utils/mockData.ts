@@ -619,3 +619,67 @@ export const initialPIWizardData: PIWizardData = {
     },
   ],
 };
+
+// ─── E2E Demand Journey (Walkthrough) Data ───────────────────────────────────
+
+export interface WalkthroughData {
+  // Funnel
+  epicName: string;
+  ideaDescription: string;
+  portfolio: string;
+  resourceAssessment: 'High' | 'Medium' | 'Low' | '';
+  // Reviewing
+  impactAssessmentDone: boolean;
+  highLevelBusinessCase: string;
+  vvromCreated: boolean;
+  lrpUpdated: boolean;
+  mobilizationPlan: string;
+  stopGoDecision: 'Pending' | 'Stop' | 'Go';
+  // Analysing
+  brsSignedOff: boolean;
+  hldStarted: boolean;
+  tilSpecsComplete: boolean;
+  timelineWeeks: number;
+  // Implementing
+  mvpBuildStatus: 'Not Started' | 'In Progress' | 'Complete';
+  sitTesting: boolean;
+  uatTesting: boolean;
+  patTesting: boolean;
+  cjtTesting: boolean;
+  commercialGoNoGo: 'Pending' | 'Go' | 'No-Go';
+  // Post Launch
+  elsActive: boolean;
+  p1p2DefectsRemaining: number;
+  retrospectiveNotes: string;
+}
+
+export const initialWalkthroughData: WalkthroughData = {
+  epicName: 'New Digital Checkout Journey',
+  ideaDescription: 'Revamp the checkout journey for eShop to increase conversion rate by 15%.',
+  portfolio: 'MVO (eShop)',
+  resourceAssessment: 'Medium',
+  
+  impactAssessmentDone: true,
+  highLevelBusinessCase: 'Projected to increase sales conversion and improve NPS by 12 points.',
+  vvromCreated: false,
+  lrpUpdated: false,
+  mobilizationPlan: 'Form a squad comprised of UX, Frontend, Backend, and Test engineers.',
+  stopGoDecision: 'Pending',
+  
+  brsSignedOff: false,
+  hldStarted: false,
+  tilSpecsComplete: false,
+  timelineWeeks: 12,
+  
+  mvpBuildStatus: 'Not Started',
+  sitTesting: false,
+  uatTesting: false,
+  patTesting: false,
+  cjtTesting: false,
+  commercialGoNoGo: 'Pending',
+  
+  elsActive: false,
+  p1p2DefectsRemaining: 0,
+  retrospectiveNotes: ''
+};
+
