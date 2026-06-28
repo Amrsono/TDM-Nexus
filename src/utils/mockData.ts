@@ -517,3 +517,81 @@ export const initialGovernanceGates: GovernanceGateDetail[] = [
   }
 ];
 
+// ─── Digital PI Process Guide & Wizard ──────────────────────────────────────
+
+export interface PIChecklistItem {
+  id: string;
+  text: string;
+  checked: boolean;
+}
+
+export interface PICheckpointItem {
+  id: string;
+  title: string;
+  description: string;
+  checked: boolean;
+}
+
+export interface PIWizardData {
+  reviewChecklist: PIChecklistItem[];
+  analyseChecklist: PIChecklistItem[];
+  postKickoffCheckpoints: PICheckpointItem[];
+}
+
+export const initialPIWizardData: PIWizardData = {
+  reviewChecklist: [
+    { id: 'rv-1', text: 'Budget Approved – Funding secured', checked: false },
+    { id: 'rv-2', text: 'Tech PM Assigned – Accountability', checked: false },
+    { id: 'rv-3', text: 'Digital Solution Architect Assigned – Technical leadership', checked: false },
+    { id: 'rv-4', text: 'Product Manager & UX Resource Assigned – Expertise secured', checked: false },
+    { id: 'rv-5', text: 'BRS Complete – Requirements finalized', checked: false },
+    { id: 'rv-6', text: 'HLD Started (if required)', checked: false },
+    { id: 'rv-7', text: 'Discovery Complete (if required)', checked: false },
+    { id: 'rv-8', text: 'Low-Level UX Fidelity Started', checked: false },
+    { id: 'rv-9', text: 'DP2 Complete', checked: false },
+    { id: 'rv-10', text: 'LRP & Tags Attached', checked: false },
+    { id: 'rv-11', text: 'ADO Hierarchy Correct (P2D > Digital Epic)', checked: false },
+  ],
+  analyseChecklist: [
+    { id: 'an-1', text: 'Requirements Run-through & Kick-off Call', checked: false },
+    { id: 'an-2', text: 'UX Designs Finalised & Signed Off', checked: false },
+    { id: 'an-3', text: 'Solution Blueprint & Walkthrough Complete', checked: false },
+    { id: 'an-4', text: 'TIL SOA Specs Complete', checked: false },
+    { id: 'an-5', text: 'Features Refined', checked: false },
+    { id: 'an-6', text: 'Dependencies Mapped', checked: false },
+    { id: 'an-7', text: 'Digital VROMs Raised', checked: false },
+    { id: 'an-8', text: 'Digital LRP Updated', checked: false },
+  ],
+  postKickoffCheckpoints: [
+    {
+      id: 'pk-1',
+      title: 'PI Planning Kick-off Call',
+      description: 'Align TPMs on assigned work, scope, and key delivery dates. Raise risks and clarify missing prerequisites.',
+      checked: false,
+    },
+    {
+      id: 'pk-2',
+      title: 'Delivery Reviews & Approvals',
+      description: 'Validate designs, UX, and solution recommendations with cross-functional teams. Ensure dependencies are mapped.',
+      checked: false,
+    },
+    {
+      id: 'pk-3',
+      title: 'Weekly Readiness Check-ins',
+      description: 'Review progress and risks using the Readiness Dashboard. Highlight blockers and seek support.',
+      checked: false,
+    },
+    {
+      id: 'pk-4',
+      title: 'D&IT TPM Readiness Working Group',
+      description: 'Stay updated on key dates and processes. Use the channel for questions and clarifications outside meetings.',
+      checked: false,
+    },
+    {
+      id: 'pk-5',
+      title: 'PI Hardlock',
+      description: 'Final checkpoint before PI Kick-off. Confirm all deliverables with Product Lead and Tech Portfolio Lead.',
+      checked: false,
+    },
+  ],
+};

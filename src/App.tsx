@@ -12,7 +12,8 @@ import {
   LayoutTemplate,
   Settings as SettingsIcon,
   SlidersHorizontal,
-  ClipboardList
+  ClipboardList,
+  BookOpen
 } from 'lucide-react';
 import { ThreeCanvas } from './components/ThreeCanvas';
 import { FunnelReviewing } from './views/FunnelReviewing';
@@ -26,6 +27,7 @@ import { POAP } from './views/POAP';
 import { Settings as SettingsView, ThemeMode } from './views/Settings';
 import { POAPSlideBuilder } from './views/POAPSlideBuilder';
 import { ReleasePlanningMeeting } from './views/ReleasePlanningMeeting';
+import { PIReadinessWizard } from './views/PIReadinessWizard';
 import { exportToExcel } from './utils/excelExporter';
 import { exportToPPT } from './utils/pptxExporter';
 import {
@@ -55,10 +57,12 @@ import {
   HypercareTicket,
   POAPData,
   GovernanceGateDetail,
-  initialGovernanceGates
+  initialGovernanceGates,
+  PIWizardData,
+  initialPIWizardData
 } from './utils/mockData';
 
-type PhaseId = 'funnel' | 'analysing' | 'build' | 'finances' | 'testing' | 'releaseplanning' | 'governance' | 'postlaunch' | 'poap' | 'slidebuilder' | 'settings';
+type PhaseId = 'funnel' | 'analysing' | 'build' | 'finances' | 'testing' | 'releaseplanning' | 'piprocess' | 'governance' | 'postlaunch' | 'poap' | 'slidebuilder' | 'settings';
 
 interface PhaseMetadata {
   id: PhaseId;
@@ -90,6 +94,7 @@ export default function App() {
   const [hypercare, setHypercare] = useState<HypercareTicket[]>(initialHypercare);
   const [poapData, setPoapData] = useState<POAPData>(initialPOAPData);
   const [governanceGates, setGovernanceGates] = useState<GovernanceGateDetail[]>(initialGovernanceGates);
+  const [piWizardData, setPiWizardData] = useState<PIWizardData>(initialPIWizardData);
   
   const [ragStatus, setRagStatus] = useState({
     schedule: 'Green',
@@ -106,6 +111,7 @@ export default function App() {
     { id: 'build', name: 'Implementing & Build', icon: Wrench, color: 'var(--color-purple)' },
     { id: 'testing', name: 'Testing & Quality', icon: Bug, color: 'var(--color-magenta)' },
     { id: 'releaseplanning', name: 'Release Planning & Gates', icon: ClipboardList, color: '#ef4444' },
+    { id: 'piprocess', name: 'Digital PI Process', icon: BookOpen, color: '#e60000' },
     { id: 'governance', name: 'Release & Governance', icon: Scale, color: '#60a5fa' },
     { id: 'postlaunch', name: 'Go-Live & ELS', icon: ShieldCheck, color: '#a855f7' },
     { id: 'poap', name: 'Digital POAP', icon: LayoutTemplate, color: '#2dd4bf' },
@@ -245,6 +251,13 @@ export default function App() {
           <ReleasePlanningMeeting 
             gates={governanceGates}
             setGates={setGovernanceGates}
+          />
+        );
+      case 'piprocess':
+        return (
+          <PIReadinessWizard 
+            data={piWizardData}
+            setData={setPiWizardData}
           />
         );
       case 'slidebuilder':
