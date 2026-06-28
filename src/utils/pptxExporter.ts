@@ -226,10 +226,12 @@ export const exportGovernanceGatesToPPT = (
       fontFace: 'Outfit'
     });
 
-    const entryText = gate.entryCriteria.map((item, idx) => ({
-      text: item + (idx === gate.entryCriteria.length - 1 ? '' : '\n'),
-      options: { bullet: true, color: '000000', fontSize: 10 }
-    }));
+    const entryText = gate.entryCriteria
+      .filter(item => item.trim() !== '')
+      .map(item => ({
+        text: item,
+        options: { bullet: true, color: '000000', fontSize: 10 }
+      }));
     slide.addText(entryText, {
       x: 0.5,
       y: 2.8,
@@ -252,10 +254,12 @@ export const exportGovernanceGatesToPPT = (
       fontFace: 'Outfit'
     });
 
-    const outputText = gate.outputs.map((item, idx) => ({
-      text: item + (idx === gate.outputs.length - 1 ? '' : '\n'),
-      options: { bullet: true, color: '000000', fontSize: 10 }
-    }));
+    const outputText = gate.outputs
+      .filter(item => item.trim() !== '')
+      .map(item => ({
+        text: item,
+        options: { bullet: true, color: '000000', fontSize: 10 }
+      }));
     slide.addText(outputText, {
       x: 0.5,
       y: 4.5,
@@ -301,10 +305,12 @@ export const exportGovernanceGatesToPPT = (
         color: '008000',
         fontFace: 'Outfit'
       });
-      const consText = gate.typesConsidered.map((item, idx) => ({
-        text: item + (idx === gate.typesConsidered!.length - 1 ? '' : '\n'),
-        options: { bullet: { code: '2022' }, color: '333333', fontSize: 10 }
-      }));
+      const consText = gate.typesConsidered
+        .filter(item => item.trim() !== '')
+        .map(item => ({
+          text: item,
+          options: { bullet: { code: '2022' }, color: '333333', fontSize: 10 }
+        }));
       slide.addText(consText, {
         x: 0.5,
         y: 6.4,
@@ -326,10 +332,12 @@ export const exportGovernanceGatesToPPT = (
         color: 'E60000',
         fontFace: 'Outfit'
       });
-      const notConsText = gate.typesNotConsidered.map((item, idx) => ({
-        text: item + (idx === gate.typesNotConsidered!.length - 1 ? '' : '\n'),
-        options: { bullet: { code: '2022' }, color: '333333', fontSize: 10 }
-      }));
+      const notConsText = gate.typesNotConsidered
+        .filter(item => item.trim() !== '')
+        .map(item => ({
+          text: item,
+          options: { bullet: { code: '2022' }, color: '333333', fontSize: 10 }
+        }));
       slide.addText(notConsText, {
         x: 6.8,
         y: 6.4,
@@ -351,11 +359,12 @@ export const exportGovernanceGatesToPPT = (
     const tableRows: any[][] = [tableHeader];
 
     const formatCellWithBullets = (items: string[]) => {
-      if (items.length === 0 || (items.length === 1 && items[0].trim() === 'N/A')) {
+      const activeItems = items.filter(item => item.trim() !== '');
+      if (activeItems.length === 0 || (activeItems.length === 1 && activeItems[0].trim() === 'N/A')) {
         return [{ text: 'N/A', options: { color: '333333', fontSize: 9 } }];
       }
-      return items.map((item, idx) => ({
-        text: item + (idx === items.length - 1 ? '' : '\n'),
+      return activeItems.map(item => ({
+        text: item,
         options: { bullet: true, color: '333333', fontSize: 9 }
       }));
     };
