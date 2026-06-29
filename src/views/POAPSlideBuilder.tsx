@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { FileSliders, Plus, Trash2, FileDown, Eye } from 'lucide-react';
 import pptxgen from 'pptxgenjs';
 
@@ -399,22 +399,24 @@ function SlidePreview({ form, activeSlide }: { form: POAPSlideData; activeSlide:
       return { left: `${left}%`, width: `${width}%` };
     };
 
+    // ── Official Vodafone brand palette mapped to POAP phases ─────────────
     const phaseColorMap: Record<string, { border: string; text: string; bg: string; bgLight: string }> = {
-      Inception:    { border: '#C55A11', text: '#C55A11', bg: '#FBE4D5', bgLight: '#FEF3EC' },
-      Elaboration:  { border: '#2E75B6', text: '#2E75B6', bg: '#DAE9F7', bgLight: '#EBF4FB' },
-      Construction: { border: '#548235', text: '#548235', bg: '#E2EFDA', bgLight: '#EEF7E9' },
-      Transition:   { border: '#70AD47', text: '#70AD47', bg: '#E2EFDA', bgLight: '#F0F8E8' },
+      Inception:    { border: '#EB9800', text: '#EB9800', bg: '#FEF0CC', bgLight: '#FEF7E4' }, // Vodafone Orange
+      Elaboration:  { border: '#00B0CA', text: '#007C92', bg: '#CCF0F5', bgLight: '#E5F8FB' }, // Vodafone Cerulean
+      Construction: { border: '#007C92', text: '#007C92', bg: '#CCE8ED', bgLight: '#E0F4F7' }, // Vodafone Blue Lagoon
+      Transition:   { border: '#9C2AA0', text: '#9C2AA0', bg: '#F0D9F1', bgLight: '#F8EEF8' }, // Vodafone Seance
     };
     const getPhaseColor = (phase: string) =>
-      phaseColorMap[phase] ?? { border: '#7F7F7F', text: '#7F7F7F', bg: '#F2F2F2', bgLight: '#F9F9F9' };
+      phaseColorMap[phase] ?? { border: '#4A4D4E', text: '#4A4D4E', bg: '#F2F2F2', bgLight: '#F9F9F9' }; // Vodafone Abbey
 
     const getTaskColor = (ms: MilestoneRow): string => {
-      if (ms.track === 'Governance') return '#4472C4';
-      if (ms.track === 'Sprints' || ms.track === 'Support') return '#548235';
-      if (ms.track === 'Testing' || ms.track === 'Transition') return '#2E75B6';
-      if (ms.phase === 'Inception') return '#C55A11';
-      if (ms.phase === 'Elaboration') return '#2E75B6';
-      return '#2E75B6';
+      if (ms.track === 'Governance') return '#E60000';       // Vodafone Red
+      if (ms.track === 'Sprints' || ms.track === 'Support') return '#007C92'; // Vodafone Blue Lagoon
+      if (ms.track === 'Testing') return '#00B0CA';           // Vodafone Cerulean
+      if (ms.track === 'Transition') return '#9C2AA0';        // Vodafone Seance
+      if (ms.phase === 'Inception') return '#EB9800';         // Vodafone Orange
+      if (ms.phase === 'Elaboration') return '#00B0CA';       // Vodafone Cerulean
+      return '#4A4D4E';                                       // Vodafone Abbey
     };
 
     // Compute phase overlay positions (% of chart width)
@@ -441,11 +443,11 @@ function SlidePreview({ form, activeSlide }: { form: POAPSlideData; activeSlide:
           marginBottom: '0.7%', paddingBottom: '0.4%',
           borderBottom: '2px solid #E60000', flexShrink: 0
         }}>
-          <span style={{ fontWeight: 700, fontSize: '1.2em', color: '#000' }}>Example :</span>
-          <span style={{ fontWeight: 700, fontSize: '1.2em', color: '#2E75B6' }}>
+          <span style={{ fontWeight: 700, fontSize: '1.2em', color: '#4A4D4E' }}>Example :</span>
+          <span style={{ fontWeight: 700, fontSize: '1.2em', color: '#E60000' }}>
             {form.projectName || 'MS Dynamics AX'}
           </span>
-          <span style={{ fontSize: '1.1em', color: '#2E75B6' }}>
+          <span style={{ fontSize: '1.1em', color: '#4A4D4E' }}>
             {'– Indicative Plan on a Page –'}
           </span>
           <span style={{ fontSize: '1em', color: '#7F7F7F', fontStyle: 'italic' }}>
@@ -613,7 +615,7 @@ function SlidePreview({ form, activeSlide }: { form: POAPSlideData; activeSlide:
                                 top: '10%', height: '80%', display: 'flex', alignItems: 'stretch',
                               }}>
                                 <div style={{
-                                  background: '#548235', color: '#fff', padding: '0 4px',
+                                  background: '#007C92', color: '#fff', padding: '0 4px',
                                   fontSize: '0.68em', fontWeight: 700, whiteSpace: 'nowrap',
                                   display: 'flex', alignItems: 'center', flexShrink: 0,
                                   borderRadius: '2px 0 0 2px',
@@ -622,8 +624,8 @@ function SlidePreview({ form, activeSlide }: { form: POAPSlideData; activeSlide:
                                 </div>
                                 <div style={{
                                   flexGrow: 1,
-                                  background: 'repeating-linear-gradient(90deg,#548235,#548235 13px,#3d6023 13px,#3d6023 14px)',
-                                  border: '1px solid #2d4a1a', borderLeft: 'none',
+                                  background: 'repeating-linear-gradient(90deg,#007C92,#007C92 13px,#005f70 13px,#005f70 14px)',
+                                  border: '1px solid #004a58', borderLeft: 'none',
                                   display: 'flex', alignItems: 'center', paddingLeft: '5px',
                                   borderRadius: '0 2px 2px 0', overflow: 'hidden',
                                 }}>
@@ -706,10 +708,12 @@ function SlidePreview({ form, activeSlide }: { form: POAPSlideData; activeSlide:
           </div>
           <div style={{ display: 'flex', gap: '5px', fontSize: '0.65em', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
             {[
-              { l: 'Inception (Orange)', c: '#C55A11' },
-              { l: 'Elaboration/Gov (Blue)', c: '#2E75B6' },
-              { l: 'Construction/Sprints (Green)', c: '#548235' },
-              { l: 'Sign-Off', c: '#0070C0', icon: '♦' },
+              { l: 'Inception', c: '#EB9800' },
+              { l: 'Elaboration', c: '#00B0CA' },
+              { l: 'Construction / Sprints', c: '#007C92' },
+              { l: 'Governance', c: '#E60000' },
+              { l: 'Transition', c: '#9C2AA0' },
+              { l: 'Sign-Off', c: '#E60000', icon: '♦' },
             ].map((lg, i) => (
               <span key={i} style={{ display: 'flex', alignItems: 'center', gap: '3px', background: '#F2F2F2', padding: '1px 5px', borderRadius: '3px' }}>
                 {lg.icon
@@ -1060,12 +1064,12 @@ export function POAPSlideBuilder() {
       const xPos = colStartX + i * colW;
       const phase = getMonthPhase(m.dateStart, phaseRanges);
       
-      let pColor = '7F7F7F';
+      let pColor = '4A4D4E'; // Vodafone Abbey
       let pBg = 'F2F2F2';
-      if (phase === 'Inception') { pColor = 'C55A11'; pBg = 'FDF2E9'; }
-      else if (phase === 'Elaboration') { pColor = '2F5597'; pBg = 'EDF2F8'; }
-      else if (phase === 'Construction') { pColor = '548235'; pBg = 'EBF5EC'; }
-      else if (phase === 'Transition') { pColor = '70AD47'; pBg = 'F2F9EE'; }
+      if (phase === 'Inception')    { pColor = 'EB9800'; pBg = 'FEF0CC'; } // Vodafone Orange
+      else if (phase === 'Elaboration')  { pColor = '00B0CA'; pBg = 'CCF0F5'; } // Vodafone Cerulean
+      else if (phase === 'Construction') { pColor = '007C92'; pBg = 'CCE8ED'; } // Vodafone Blue Lagoon
+      else if (phase === 'Transition')   { pColor = '9C2AA0'; pBg = 'F0D9F1'; } // Vodafone Seance
 
       s3.addShape(pptx.ShapeType.rect, {
         x: xPos, y: 0.8, w: colW, h: 5.4,
@@ -1141,11 +1145,13 @@ export function POAPSlideBuilder() {
           if (taskX + taskW > colStartX + colAreaWidth) taskW = colStartX + colAreaWidth - taskX;
           if (taskW < 0.15) taskW = 0.15;
 
-          let colorHex = '2F5597';
-          if (ms.track === 'Governance') colorHex = '2F5597';
-          else if (ms.track === 'Sprints' || ms.track === 'Support' || ms.name.toLowerCase().includes('sprint')) colorHex = '385723';
-          else if (ms.phase === 'Inception') colorHex = 'C55A11';
-          else if (ms.phase === 'Elaboration') colorHex = '2F5597';
+          let colorHex = '4A4D4E'; // Vodafone Abbey (default)
+          if (ms.track === 'Governance') colorHex = 'E60000'; // Vodafone Red
+          else if (ms.track === 'Sprints' || ms.track === 'Support' || ms.name.toLowerCase().includes('sprint')) colorHex = '007C92'; // Vodafone Blue Lagoon
+          else if (ms.track === 'Testing') colorHex = '00B0CA'; // Vodafone Cerulean
+          else if (ms.track === 'Transition') colorHex = '9C2AA0'; // Vodafone Seance
+          else if (ms.phase === 'Inception') colorHex = 'EB9800'; // Vodafone Orange
+          else if (ms.phase === 'Elaboration') colorHex = '00B0CA'; // Vodafone Cerulean
 
           const shapeH = rowH * 0.75;
           const shapeY = rowY + (rowH - shapeH) / 2;
@@ -1153,7 +1159,7 @@ export function POAPSlideBuilder() {
           if (ms.type === 'Milestone') {
             s3.addShape(pptx.ShapeType.diamond, {
               x: taskX + taskW / 2 - 0.06, y: shapeY + shapeH / 2 - 0.06,
-              w: 0.12, h: 0.12, fill: { color: '0070C0' }
+              w: 0.12, h: 0.12, fill: { color: 'E60000' }
             });
             s3.addText(ms.name, {
               x: taskX + taskW / 2 + 0.1, y: shapeY,
@@ -1174,7 +1180,7 @@ export function POAPSlideBuilder() {
             const diaX = taskX + barW + 0.02;
             s3.addShape(pptx.ShapeType.diamond, {
               x: diaX, y: shapeY + shapeH / 2 - 0.04,
-              w: 0.08, h: 0.08, fill: { color: '0070C0' }
+              w: 0.08, h: 0.08, fill: { color: 'E60000' }
             });
             s3.addText('sign off', {
               x: diaX - 0.15, y: shapeY + shapeH - 0.05, w: 0.4, h: 0.1,
@@ -1184,7 +1190,7 @@ export function POAPSlideBuilder() {
           else if (ms.type === 'Sprint') {
             s3.addShape(pptx.ShapeType.rect, {
               x: taskX, y: shapeY, w: taskW, h: shapeH,
-              fill: { color: colorHex }, line: { color: '2E471D', width: 0.5 }
+              fill: { color: colorHex }, line: { color: '004a58', width: 0.5 }
             });
             s3.addText(ms.name, {
               x: taskX, y: shapeY, w: taskW, h: shapeH,
@@ -1213,17 +1219,23 @@ export function POAPSlideBuilder() {
     });
 
     const legX = 5.0;
-    s3.addShape(pptx.ShapeType.rect, { x: legX, y: 6.4, w: 0.15, h: 0.1, fill: { color: 'C55A11' } });
+    s3.addShape(pptx.ShapeType.rect, { x: legX, y: 6.4, w: 0.15, h: 0.1, fill: { color: 'EB9800' } }); // VF Orange
     s3.addText('Inception', { x: legX + 0.2, y: 6.35, w: 0.8, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
 
-    s3.addShape(pptx.ShapeType.rect, { x: legX + 1.1, y: 6.4, w: 0.15, h: 0.1, fill: { color: '2F5597' } });
-    s3.addText('Elaboration/Gov', { x: legX + 1.3, y: 6.35, w: 1.0, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
+    s3.addShape(pptx.ShapeType.rect, { x: legX + 1.1, y: 6.4, w: 0.15, h: 0.1, fill: { color: '00B0CA' } }); // VF Cerulean
+    s3.addText('Elaboration', { x: legX + 1.3, y: 6.35, w: 1.0, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
 
-    s3.addShape(pptx.ShapeType.rect, { x: legX + 2.4, y: 6.4, w: 0.15, h: 0.1, fill: { color: '385723' } });
-    s3.addText('Construction/Sprints', { x: legX + 2.6, y: 6.35, w: 1.2, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
+    s3.addShape(pptx.ShapeType.rect, { x: legX + 2.4, y: 6.4, w: 0.15, h: 0.1, fill: { color: '007C92' } }); // VF Blue Lagoon
+    s3.addText('Construction / Sprints', { x: legX + 2.6, y: 6.35, w: 1.2, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
 
-    s3.addShape(pptx.ShapeType.diamond, { x: legX + 4.0, y: 6.4, w: 0.1, h: 0.1, fill: { color: '0070C0' } });
-    s3.addText('Sign-Off Diamond', { x: legX + 4.15, y: 6.35, w: 1.2, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
+    s3.addShape(pptx.ShapeType.rect, { x: legX + 3.9, y: 6.4, w: 0.15, h: 0.1, fill: { color: 'E60000' } }); // VF Red
+    s3.addText('Governance', { x: legX + 4.1, y: 6.35, w: 0.8, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
+
+    s3.addShape(pptx.ShapeType.rect, { x: legX + 5.0, y: 6.4, w: 0.15, h: 0.1, fill: { color: '9C2AA0' } }); // VF Seance
+    s3.addText('Transition', { x: legX + 5.2, y: 6.35, w: 0.8, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
+
+    s3.addShape(pptx.ShapeType.diamond, { x: legX + 6.1, y: 6.4, w: 0.1, h: 0.1, fill: { color: 'E60000' } }); // VF Red
+    s3.addText('Sign-Off', { x: legX + 6.25, y: 6.35, w: 0.8, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
 
     s3.addText('VOIS', {
       x: 11.0, y: 6.2, w: 2.0, h: 0.4, fontSize: 20, bold: true, color: DARK_RED, fontFace: 'Arial', align: 'right'
