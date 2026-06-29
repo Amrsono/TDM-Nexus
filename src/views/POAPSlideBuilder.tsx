@@ -671,6 +671,54 @@ const tdStyle: React.CSSProperties = {
   fontSize: '0.85em',
 };
 
+/* ─── Scaled Slide Preview Wrapper for Mobile ─── */
+function ScaledSlidePreview({ form, activeSlide }: { form: POAPSlideData; activeSlide: 1 | 2 | 3 }) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        const width = entry.contentRect.width;
+        const newScale = Math.min(1, width / 700);
+        setScale(newScale);
+      }
+    });
+    resizeObserver.observe(containerRef.current);
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  const scaledHeight = 394 * scale;
+
+  return (
+    <div 
+      ref={containerRef} 
+      style={{ 
+        width: '100%', 
+        height: scaledHeight, 
+        overflow: 'hidden', 
+        position: 'relative',
+        borderRadius: '4px'
+      }}
+    >
+      <div 
+        style={{ 
+          width: 700, 
+          height: 394, 
+          transform: `scale(${scale})`, 
+          transformOrigin: 'top left',
+          position: 'absolute',
+          top: 0,
+          left: 0
+        }}
+      >
+        <SlidePreview form={form} activeSlide={activeSlide} />
+      </div>
+    </div>
+  );
+}
+
 /* ─── Main Component ──────────────────────────────────────────────────────── */
 export function POAPSlideBuilder() {
   const [form, setForm] = useState<POAPSlideData>({
@@ -1050,9 +1098,9 @@ export function POAPSlideBuilder() {
 
   /* ── Render ─────────────────────────────────────────────────────────────── */
   return (
-    <div style={{ display: 'flex', gap: '1.25rem', height: '100%' }}>
+    <div className="poap-slide-builder-layout">
       {/* ═══ LEFT: Form ═══ */}
-      <div style={{ flex: '0 0 50%', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingRight: '0.5rem' }}>
+      <div className="poap-slide-builder-form-pane">
         {/* Header Info */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -1062,7 +1110,7 @@ export function POAPSlideBuilder() {
             </span>
           </div>
           <button className="cyber-button" onClick={generateSlide} style={{ fontSize: '0.8rem' }}>
-            <FileDown size={14} /> Make as Slide
+            <FileDown size={14} /> <span className="cyber-btn-text">Make as Slide</span>
           </button>
         </div>
 
@@ -1208,7 +1256,7 @@ export function POAPSlideBuilder() {
       </div>
 
       {/* ═══ RIGHT: Live Preview ═══ */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem', minWidth: 0 }}>
+      <div className="poap-slide-builder-preview-pane">
         {/* Preview header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -1247,7 +1295,7 @@ export function POAPSlideBuilder() {
           display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
         }}>
           <div style={{ width: '100%', maxWidth: 700 }}>
-            <SlidePreview form={form} activeSlide={previewSlide} />
+            <ScaledSlidePreview form={form} activeSlide={previewSlide} />
           </div>
         </div>
 

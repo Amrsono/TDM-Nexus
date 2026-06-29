@@ -25,7 +25,7 @@ export function ReleaseGovernance({
             <Scale size={18} className="mono" />
             <h3 className="mono">Release Governance & RAGs</h3>
           </div>
-          <div className="card-body" style={{ display: 'flex', gap: '2rem' }}>
+          <div className="card-body responsive-flex" style={{ alignItems: 'stretch' }}>
             {Object.keys(ragStatus).map((key) => (
               <div key={key} className="input-group" style={{ flex: 1 }}>
                 <label style={{ textTransform: 'capitalize' }}>{key} RAG</label>
@@ -98,7 +98,7 @@ export function ReleaseGovernance({
                       <td>
                         <select 
                           className="cyber-input" 
-                          style={{ padding: '0.25rem' }}
+                          style={{ padding: '0.35rem 0.5rem' }}
                           value={r.status}
                           onChange={(e) => {
                             const newRisks = risks.map(x => x.id === r.id ? { ...x, status: e.target.value as any } : x);

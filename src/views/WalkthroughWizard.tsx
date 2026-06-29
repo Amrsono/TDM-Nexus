@@ -245,6 +245,53 @@ export function WalkthroughWizard({ data, setData }: WalkthroughWizardProps) {
           grid-template-columns: 1fr 1fr;
           gap: 1.25rem;
         }
+
+        @media (max-width: 768px) {
+          .grid-2 {
+            grid-template-columns: 1fr;
+          }
+          
+          .pi-wizard-topbar {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.75rem;
+          }
+          
+          .pi-step-indicators {
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            -webkit-overflow-scrolling: touch;
+          }
+          
+          .pi-step-chip {
+            padding: 0.6rem 0.95rem; /* Touch targets */
+          }
+          
+          .pi-export-actions {
+            justify-content: space-between;
+          }
+          
+          .pi-wizard-nav {
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: stretch;
+          }
+          
+          .pi-nav-buttons {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+          }
+          
+          .pi-nav-buttons button {
+            flex: 1;
+            justify-content: center;
+          }
+          
+          .pi-nav-info {
+            text-align: center;
+          }
+        }
       `}</style>
 
       {/* Top Bar */}
@@ -270,11 +317,11 @@ export function WalkthroughWizard({ data, setData }: WalkthroughWizardProps) {
         <div className="pi-export-actions">
           <button className="cyber-button" onClick={() => exportWalkthroughToExcel(data)} title="Extract Excel Report">
             <FileSpreadsheet size={16} />
-            <span>Excel</span>
+            <span className="cyber-btn-text">Excel</span>
           </button>
           <button className="cyber-button secondary" onClick={() => exportWalkthroughToPPT(data)} title="Extract PPT Report">
             <Presentation size={16} />
-            <span>PPT</span>
+            <span className="cyber-btn-text">PPT</span>
           </button>
         </div>
       </div>

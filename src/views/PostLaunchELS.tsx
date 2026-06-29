@@ -47,7 +47,7 @@ export function PostLaunchELS({ hypercare, setHypercare }: PostLaunchELSProps) {
                       <td>
                         <select 
                           className="cyber-input" 
-                          style={{ padding: '0.25rem' }}
+                          style={{ padding: '0.35rem 0.5rem' }}
                           value={ticket.status}
                           onChange={(e) => {
                             const newHyp = hypercare.map(x => x.id === ticket.id ? { ...x, status: e.target.value as any } : x);

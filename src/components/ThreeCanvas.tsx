@@ -29,9 +29,10 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({ activePhase, onPhaseSe
     camera.position.set(0, 18, 25);
 
     // 2. Renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const isMobile = window.innerWidth <= 768;
+    const renderer = new THREE.WebGLRenderer({ antialias: !isMobile, alpha: true });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2));
     containerRef.current.appendChild(renderer.domElement);
 
     // 3. Lights
@@ -137,7 +138,7 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({ activePhase, onPhaseSe
     scene.add(orbitMesh);
 
     // 7. Particle System (Stars / Data Packets)
-    const particleCount = 250;
+    const particleCount = isMobile ? 80 : 250;
     const particlesGeom = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
@@ -266,8 +267,51 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({ activePhase, onPhaseSe
       }
     };
 
+    const handleTouchStart = (event: TouchEvent) => {
+      if (event.touches.length > 0) {
+        const touch = event.touches[0];
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(nodeMeshes);
+        if (intersects.length > 0) {
+          const mesh = intersects[0].object as THREE.Mesh;
+          if (hoveredNode !== mesh) {
+            if (hoveredNode) {
+              const baseColor = hoveredNode.userData.baseColor;
+              (hoveredNode.material as THREE.MeshPhongMaterial).color.setHex(baseColor);
+              hoveredNode.scale.set(1, 1, 1);
+            }
+            hoveredNode = mesh;
+            (mesh.material as THREE.MeshPhongMaterial).color.setHex(0xffffff);
+            mesh.scale.set(1.3, 1.3, 1.3);
+          }
+        }
+      }
+    };
+
+    const handleTouchEnd = () => {
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(nodeMeshes);
+      if (intersects.length > 0) {
+        const mesh = intersects[0].object as THREE.Mesh;
+        const phaseId = mesh.userData.phaseId;
+        onPhaseSelectRef.current(phaseId);
+      }
+      if (hoveredNode) {
+        const baseColor = hoveredNode.userData.baseColor;
+        (hoveredNode.material as THREE.MeshPhongMaterial).color.setHex(baseColor);
+        hoveredNode.scale.set(1, 1, 1);
+        hoveredNode = null;
+      }
+    };
+
     renderer.domElement.addEventListener('mousemove', handleMouseMove);
     renderer.domElement.addEventListener('click', handleClick);
+    renderer.domElement.addEventListener('touchstart', handleTouchStart, { passive: true });
+    renderer.domElement.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     // Watch for activePhase changes to update target camera position
     const intervalId = setInterval(() => {
@@ -278,6 +322,7 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({ activePhase, onPhaseSe
 
     // 10. Resize handler
     const handleResize = () => {
+      if (window.innerWidth <= 480) return;
       if (!containerRef.current) return;
       const w = containerRef.current.clientWidth;
       const h = containerRef.current.clientHeight;
@@ -294,6 +339,12 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({ activePhase, onPhaseSe
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
+      
+      // Suspend rendering on small mobile screens to save GPU/battery resources
+      if (window.innerWidth <= 480) {
+        return;
+      }
+      
       const elapsedTime = clock.getElapsedTime();
 
       // Rotate core slowly
@@ -345,6 +396,8 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({ activePhase, onPhaseSe
       if (renderer.domElement && containerRef.current) {
         renderer.domElement.removeEventListener('mousemove', handleMouseMove);
         renderer.domElement.removeEventListener('click', handleClick);
+        renderer.domElement.removeEventListener('touchstart', handleTouchStart);
+        renderer.domElement.removeEventListener('touchend', handleTouchEnd);
         containerRef.current.removeChild(renderer.domElement);
       }
       renderer.dispose();

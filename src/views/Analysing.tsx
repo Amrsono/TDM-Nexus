@@ -44,7 +44,7 @@ export function Analysing({ adoWorkItems, setAdoWorkItems, squads, renameSquad }
                       <td>
                         <select 
                           className="cyber-input" 
-                          style={{ padding: '0.25rem' }}
+                          style={{ padding: '0.35rem 0.5rem' }}
                           value={item.status}
                           onChange={(e) => {
                             const newItems = adoWorkItems.map(i => i.id === item.id ? { ...i, status: e.target.value as ADOWorkItem['status'] } : i);

@@ -41,7 +41,7 @@ export function TestingQuality({ qaGates, setQaGates, defects, setDefects, squad
                         <td>
                           <select 
                             className="cyber-input" 
-                            style={{ padding: '0.25rem' }}
+                            style={{ padding: '0.35rem 0.5rem' }}
                             value={gate.status}
                             onChange={(e) => {
                               const newGates = qaGates.map(g => g.name === gate.name ? { ...g, status: e.target.value as any } : g);
@@ -109,7 +109,7 @@ export function TestingQuality({ qaGates, setQaGates, defects, setDefects, squad
                       <td>
                         <select 
                           className="cyber-input" 
-                          style={{ padding: '0.25rem' }}
+                          style={{ padding: '0.35rem 0.5rem' }}
                           value={d.status}
                           onChange={(e) => {
                             const newDef = defects.map(x => x.id === d.id ? { ...x, status: e.target.value as any } : x);

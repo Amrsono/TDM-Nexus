@@ -13,7 +13,9 @@ import {
   Settings as SettingsIcon,
   SlidersHorizontal,
   ClipboardList,
-  BookOpen
+  BookOpen,
+  Menu,
+  X
 } from 'lucide-react';
 import { ThreeCanvas } from './components/ThreeCanvas';
 import { FunnelReviewing } from './views/FunnelReviewing';
@@ -76,6 +78,7 @@ interface PhaseMetadata {
 export default function App() {
   const [activePhase, setActivePhase] = useState<PhaseId>('funnel');
   const [theme, setTheme] = useState<ThemeMode>('dark');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   React.useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -147,6 +150,7 @@ export default function App() {
   const handlePhaseSelect = (phaseId: string) => {
     if (phases.some(p => p.id === phaseId)) {
       setActivePhase(phaseId as PhaseId);
+      setSidebarOpen(false);
     }
   };
 
@@ -303,11 +307,25 @@ export default function App() {
       <div className="grid-bg-overlay"></div>
       <div className="scanlines-overlay"></div>
 
+      {/* Sidebar Backdrop Drawer Overlay */}
+      {sidebarOpen && (
+        <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)}></div>
+      )}
+
       {/* Sidebar Navigation */}
-      <aside className="sidebar">
+      <aside className={`sidebar ${sidebarOpen ? 'sidebar--open' : ''}`}>
         <div>
-          <div className="sidebar-logo">
-            TDM <span>NEXUS</span>
+          <div className="sidebar-logo" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              TDM <span>NEXUS</span>
+            </div>
+            <button 
+              className="hamburger-btn mobile-close-btn"
+              onClick={() => setSidebarOpen(false)}
+              style={{ padding: '0.25rem', border: 'none', background: 'transparent', cursor: 'pointer' }}
+            >
+              <X size={20} style={{ color: 'var(--color-text-secondary)' }} />
+            </button>
           </div>
           <ul className="nav-list">
             {phases.map(p => {
@@ -316,7 +334,7 @@ export default function App() {
                 <li 
                   key={p.id} 
                   className={`nav-item ${activePhase === p.id ? 'active' : ''}`}
-                  onClick={() => setActivePhase(p.id)}
+                  onClick={() => handlePhaseSelect(p.id)}
                 >
                   <Icon size={18} />
                   <span>{p.name}</span>
@@ -351,11 +369,20 @@ export default function App() {
         <div className="ui-overlay-container">
           {/* Top HUD Banner */}
           <header className="hud-banner glass-panel">
-            <div className="hud-stat">
-              <span className="hud-stat-label">Project / Increment</span>
-              <span className="hud-stat-value mono" style={{ color: 'var(--color-cyan)', fontSize: '1.1rem' }}>
-                PRJ-VELOCITY (PI40)
-              </span>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <button 
+                className="hamburger-btn" 
+                onClick={() => setSidebarOpen(true)}
+                title="Toggle Menu"
+              >
+                <Menu size={20} />
+              </button>
+              <div className="hud-stat">
+                <span className="hud-stat-label">Project / Increment</span>
+                <span className="hud-stat-value mono" style={{ color: 'var(--color-cyan)', fontSize: '1.1rem' }}>
+                  PRJ-VELOCITY (PI40)
+                </span>
+              </div>
             </div>
 
             <div className="hud-stat-group">
@@ -401,11 +428,11 @@ export default function App() {
               <div style={{ display: 'flex', gap: '0.75rem', pointerEvents: 'auto' }}>
                 <button className="cyber-button" onClick={handleExcelExport} title="Export project details, finances, NFRs to Excel">
                   <FileSpreadsheet size={16} />
-                  <span>Export Excel</span>
+                  <span className="cyber-btn-text">Export Excel</span>
                 </button>
                 <button className="cyber-button secondary" onClick={handlePPTExport} title="Export SteerCo Steering Committee PPT deck">
                   <Presentation size={16} />
-                  <span>Export PPT</span>
+                  <span className="cyber-btn-text">Export PPT</span>
                 </button>
               </div>
             </div>

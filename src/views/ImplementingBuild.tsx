@@ -87,7 +87,7 @@ export function ImplementingBuild({ squads, setSquads, milestones, setMilestones
                       <td>
                         <select 
                           className="cyber-input" 
-                          style={{ padding: '0.25rem' }}
+                          style={{ padding: '0.35rem 0.5rem' }}
                           value={m.status}
                           onChange={(e) => {
                             const newMs = milestones.map(x => x.id === m.id ? { ...x, status: e.target.value as any } : x);

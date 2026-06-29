@@ -12,7 +12,7 @@ export function POAP({ poapData, setPoapData, ragStatus }: POAPProps) {
   return (
     <div className="poap-container">
       <div className="poap-header">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="poap-header-flex" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <h1 className="poap-title">{poapData.projectName}</h1>
             <p className="poap-subtitle mono">
@@ -40,7 +40,7 @@ export function POAP({ poapData, setPoapData, ragStatus }: POAPProps) {
 
         <div className="poap-panel">
           <div className="poap-panel-title"><LayoutTemplate size={16} /> Scope & Budget</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div className="poap-scope-grid" style={{ gap: '1rem' }}>
             <div>
               <div className="poap-section-title">In Scope</div>
               <ul className="poap-list">
@@ -55,7 +55,7 @@ export function POAP({ poapData, setPoapData, ragStatus }: POAPProps) {
             </div>
           </div>
           <div className="poap-section-title" style={{ marginTop: '1rem' }}>Financial Summary</div>
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
             <div className="hud-stat-value mono">Total: ${(poapData.totalBudget / 1000000).toFixed(2)}M</div>
             <div className="hud-stat-value mono">Spent: ${(poapData.spentToDate / 1000000).toFixed(2)}M</div>
           </div>
@@ -63,7 +63,8 @@ export function POAP({ poapData, setPoapData, ragStatus }: POAPProps) {
 
         <div className="poap-panel">
           <div className="poap-panel-title"><Users size={16} /> Stakeholders & Roles</div>
-          <table className="poap-table">
+          <div className="cyber-table-container" style={{ overflowX: 'auto' }}>
+            <table className="poap-table">
             <thead>
               <tr>
                 <th>Name</th>
@@ -80,7 +81,8 @@ export function POAP({ poapData, setPoapData, ragStatus }: POAPProps) {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
 
         <div className="poap-panel">

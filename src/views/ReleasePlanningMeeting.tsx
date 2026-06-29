@@ -14,6 +14,17 @@ export function ReleasePlanningMeeting({ gates, setGates }: ReleasePlanningMeeti
   const [activeGateId, setActiveGateId] = useState<string>('rpm');
   const [viewMode, setViewMode] = useState<ViewMode>('split');
 
+  React.useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 768 && viewMode === 'split') {
+        setViewMode('edit');
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    handleResize();
+    return () => window.removeEventListener('resize', handleResize);
+  }, [viewMode]);
+
   const activeGate = gates.find(g => g.id === activeGateId) || gates[0];
 
   const updateGateField = (field: keyof GovernanceGateDetail, value: any) => {
@@ -398,6 +409,40 @@ export function ReleasePlanningMeeting({ gates, setGates }: ReleasePlanningMeeti
         .slide-cr-list-title.not-considered {
           color: #E60000;
         }
+
+        @media (max-width: 768px) {
+          .view-controls .view-mode-btn:first-child {
+            display: none !important;
+          }
+          .gate-tabs {
+            overflow-x: auto;
+            padding-bottom: 0.25rem;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+          }
+          .gate-tab-btn {
+            white-space: nowrap;
+            padding: 0.6rem 0.9rem;
+          }
+          .view-controls {
+            width: 100%;
+            justify-content: space-between;
+          }
+          .view-mode-btn {
+            padding: 0.5rem 0.8rem;
+          }
+          .view-action-buttons {
+            width: 100%;
+            justify-content: space-between;
+          }
+          .view-action-buttons button {
+            flex: 1;
+            justify-content: center;
+          }
+          .participant-fields {
+            grid-template-columns: 1fr;
+          }
+        }
       `}</style>
 
       {/* Header and actions bar */}
@@ -441,11 +486,11 @@ export function ReleasePlanningMeeting({ gates, setGates }: ReleasePlanningMeeti
         <div className="view-action-buttons">
           <button className="cyber-button" onClick={handleExportSingle} title="Export current slide as PPTX">
             <Download size={14} />
-            <span>Export Active Slide</span>
+            <span className="cyber-btn-text">Export Active Slide</span>
           </button>
           <button className="cyber-button secondary" onClick={handleExportAll} title="Export all 4 governance slides as a PPTX deck">
             <Presentation size={14} />
-            <span>Export Gate Deck</span>
+            <span className="cyber-btn-text">Export Gate Deck</span>
           </button>
           <button className="cyber-button secondary" style={{ minWidth: '40px', padding: '0.5rem' }} onClick={handleReset} title="Reset slide to template defaults">
             <RefreshCw size={14} />

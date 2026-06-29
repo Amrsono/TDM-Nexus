@@ -27,7 +27,7 @@ export function FinancesApprovals({
             <Wallet size={18} className="mono" />
             <h3 className="mono">ICAR & ITRB Approvals</h3>
           </div>
-          <div className="card-body" style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+          <div className="card-body responsive-flex">
             <label className="checkbox-label" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
               <input 
                 type="checkbox" 
