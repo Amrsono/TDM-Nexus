@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { FileSliders, Plus, Trash2, FileDown, Eye } from 'lucide-react';
 import pptxgen from 'pptxgenjs';
 
@@ -214,6 +214,25 @@ const exampleMilestones: MilestoneRow[] = [
   { id: 26, name: 'Support', status: 'In Progress', startDate: '2027-02-01', targetedDate: '2027-02-28', releaseDate: '', actualDate: '', phase: 'Transition', track: 'Support', type: 'Block' }
 ];
 
+const getMonthLabel = (m: { label: string }, index: number, total: number) => {
+  const parts = m.label.split(' ');
+  const monthShort = parts[0];
+  const year = parts[1];
+  
+  const fullMonths: Record<string, string> = {
+    Jan: 'January', Feb: 'February', Mar: 'March', Apr: 'April', May: 'May',
+    Jun: 'June', Jul: 'July', Aug: 'August', Sep: 'September', Oct: 'October',
+    Nov: 'November', Dec: 'December'
+  };
+  
+  const monthFull = fullMonths[monthShort] || monthShort;
+  
+  if (index === 0 || index === total - 1) {
+    return `${monthShort} ${year}`;
+  }
+  return monthFull;
+};
+
 /* ─── Live Preview Component ──────────────────────────────────────────────── */
 function SlidePreview({ form, activeSlide }: { form: POAPSlideData; activeSlide: 1 | 2 | 3 }) {
   const scopeLines = (form.projectScope || '').split('\n').filter(Boolean);
@@ -230,7 +249,7 @@ function SlidePreview({ form, activeSlide }: { form: POAPSlideData; activeSlide:
       }}>
         {/* Red header bar */}
         <div style={{
-          background: '#C00000', height: '7.3%', display: 'flex', alignItems: 'center',
+          background: '#E60000', height: '7.3%', display: 'flex', alignItems: 'center',
           padding: '0 1.5%', gap: '1%',
         }}>
           <span style={{ color: '#fff', fontWeight: 700, fontSize: '1.2em', flex: '0 0 35%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -295,7 +314,7 @@ function SlidePreview({ form, activeSlide }: { form: POAPSlideData; activeSlide:
           <div style={{ flex: 1, overflow: 'hidden' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.72em' }}>
               <thead>
-                <tr style={{ background: '#C00000', color: '#fff' }}>
+                <tr style={{ background: '#E60000', color: '#fff' }}>
                   <th style={thStyle}>#</th>
                   <th style={thStyle}>Project Milestones</th>
                   <th style={thStyle}>Status</th>
@@ -352,7 +371,7 @@ function SlidePreview({ form, activeSlide }: { form: POAPSlideData; activeSlide:
               {lg.l}
             </span>
           ))}
-          <span style={{ marginLeft: 'auto', fontWeight: 700, fontSize: '2em', color: '#C00000' }}>VOIS</span>
+          <span style={{ marginLeft: 'auto', fontWeight: 700, fontSize: '2em', color: '#E60000' }}>VOIS</span>
         </div>
       </div>
     );
@@ -364,159 +383,279 @@ function SlidePreview({ form, activeSlide }: { form: POAPSlideData; activeSlide:
     const phaseRanges = getPhaseRanges(form.milestones);
     const tracksList = ['Governance', 'Core', 'Sprints', 'Testing', 'Transition', 'Support'] as const;
 
+    const tStart = timelineStart.getTime();
+    const tEnd   = timelineEnd.getTime();
+    const total  = tEnd - tStart;
+
     const getTaskStyle = (ms: MilestoneRow) => {
       const startStr = ms.startDate || ms.targetedDate || timelineStart.toISOString().split('T')[0];
-      const endStr = ms.targetedDate || ms.startDate || timelineEnd.toISOString().split('T')[0];
-      const start = new Date(startStr).getTime();
-      const end = new Date(endStr).getTime();
-      const tStart = timelineStart.getTime();
-      const tEnd = timelineEnd.getTime();
-      const total = tEnd - tStart;
-
-      let left = ((start - tStart) / total) * 100;
-      let width = ((end - start) / total) * 100;
-
-      if (left < 0) left = 0;
-      if (left > 100) left = 100;
+      const endStr   = ms.targetedDate || ms.startDate  || timelineEnd.toISOString().split('T')[0];
+      let left  = ((new Date(startStr).getTime() - tStart) / total) * 100;
+      let width = ((new Date(endStr).getTime()   - new Date(startStr).getTime()) / total) * 100;
+      if (left  < 0)   left  = 0;
+      if (left  > 100) left  = 100;
       if (left + width > 100) width = 100 - left;
-      if (width < 2) width = 2;
-
+      if (width < 1.5) width = 1.5;
       return { left: `${left}%`, width: `${width}%` };
     };
 
-    const getTaskColor = (ms: MilestoneRow) => {
-      if (ms.track === 'Governance') return '#2F5597';
-      if (ms.track === 'Sprints' || ms.track === 'Support' || ms.name.toLowerCase().includes('sprint')) {
-        return '#548235'; // Green
-      }
-      if (ms.phase === 'Inception') return '#C55A11'; // Orange
-      if (ms.phase === 'Elaboration') return '#2F5597'; // Blue
-      return '#2F5597'; // default blue
+    const phaseColorMap: Record<string, { border: string; text: string; bg: string; bgLight: string }> = {
+      Inception:    { border: '#C55A11', text: '#C55A11', bg: '#FBE4D5', bgLight: '#FEF3EC' },
+      Elaboration:  { border: '#2E75B6', text: '#2E75B6', bg: '#DAE9F7', bgLight: '#EBF4FB' },
+      Construction: { border: '#548235', text: '#548235', bg: '#E2EFDA', bgLight: '#EEF7E9' },
+      Transition:   { border: '#70AD47', text: '#70AD47', bg: '#E2EFDA', bgLight: '#F0F8E8' },
+    };
+    const getPhaseColor = (phase: string) =>
+      phaseColorMap[phase] ?? { border: '#7F7F7F', text: '#7F7F7F', bg: '#F2F2F2', bgLight: '#F9F9F9' };
+
+    const getTaskColor = (ms: MilestoneRow): string => {
+      if (ms.track === 'Governance') return '#4472C4';
+      if (ms.track === 'Sprints' || ms.track === 'Support') return '#548235';
+      if (ms.track === 'Testing' || ms.track === 'Transition') return '#2E75B6';
+      if (ms.phase === 'Inception') return '#C55A11';
+      if (ms.phase === 'Elaboration') return '#2E75B6';
+      return '#2E75B6';
     };
 
-    const getPhaseColor = (phase: string) => {
-      if (phase === 'Inception') return { border: '#C55A11', text: '#C55A11', bg: '#FDF2E9' };
-      if (phase === 'Elaboration') return { border: '#2F5597', text: '#2F5597', bg: '#EDF2F8' };
-      if (phase === 'Construction') return { border: '#548235', text: '#548235', bg: '#EBF5EC' };
-      if (phase === 'Transition') return { border: '#70AD47', text: '#70AD47', bg: '#F2F9EE' };
-      return { border: '#7F7F7F', text: '#7F7F7F', bg: '#F2F2F2' };
-    };
+    // Compute phase overlay positions (% of chart width)
+    const phaseOverlays = Object.entries(phaseRanges).map(([phase, range]) => {
+      let left  = ((range.start - tStart) / total) * 100;
+      let width = ((range.end   - range.start) / total) * 100;
+      if (left < 0) { width += left; left = 0; }
+      if (left + width > 100) width = 100 - left;
+      return { phase, left, width };
+    });
 
     return (
       <div style={{
         width: '100%', aspectRatio: '13.33/7.5', background: '#fff',
         fontFamily: 'Arial, sans-serif', position: 'relative', overflow: 'hidden',
-        borderRadius: '4px', fontSize: '0.45em', color: '#000', padding: '1.5% 2% 2% 2%',
+        borderRadius: '4px', fontSize: '0.42em', color: '#000',
+        padding: '1.2% 1.5% 1.5% 1.5%',
         boxSizing: 'border-box', display: 'flex', flexDirection: 'column'
       }}>
-        {/* Title */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1.5px solid #C00000', paddingBottom: '0.3%', marginBottom: '1%' }}>
-          <span style={{ fontSize: '1.4em', fontWeight: 700, color: '#1F4E79' }}>
-            {form.projectName || 'MS Dynamics AX'} – Indicative Plan on a Page
+
+        {/* ── Title Row ──────────────────────────────────────────────────────── */}
+        <div style={{
+          display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: '0.3em',
+          marginBottom: '0.7%', paddingBottom: '0.4%',
+          borderBottom: '2px solid #E60000', flexShrink: 0
+        }}>
+          <span style={{ fontWeight: 700, fontSize: '1.2em', color: '#000' }}>Example :</span>
+          <span style={{ fontWeight: 700, fontSize: '1.2em', color: '#2E75B6' }}>
+            {form.projectName || 'MS Dynamics AX'}
           </span>
-          <span style={{ fontSize: '0.85em', color: '#7F7F7F', fontWeight: 'bold' }}>
-            DRAFT only – {new Date().toLocaleDateString('en-GB')}
+          <span style={{ fontSize: '1.1em', color: '#2E75B6' }}>
+            {'– Indicative Plan on a Page –'}
+          </span>
+          <span style={{ fontSize: '1em', color: '#7F7F7F', fontStyle: 'italic' }}>
+            {'DRAFT only –'} {new Date().toLocaleDateString('en-GB')}
           </span>
         </div>
 
-        {/* Timeline Header (Months) */}
-        <div style={{ display: 'flex', width: '100%', height: '8%', marginBottom: '1%', flexShrink: 0 }}>
-          <div style={{ width: '13%', flexShrink: 0 }} />
-          <div style={{ display: 'flex', flexGrow: 1, width: '87%' }}>
+        {/* ── Month Header Row ───────────────────────────────────────────────── */}
+        <div style={{ display: 'flex', width: '100%', flexShrink: 0 }}>
+          {/* Left track-label column spacer */}
+          <div style={{ width: '13%', flexShrink: 0, background: '#F2F2F2', borderBottom: '1px solid #CCC' }} />
+          {/* Month cells */}
+          <div style={{ display: 'flex', flexGrow: 1 }}>
             {months.map((m, i) => {
-              const phase = getMonthPhase(m.dateStart, phaseRanges);
+              const phase  = getMonthPhase(m.dateStart, phaseRanges);
               const colors = getPhaseColor(phase);
+              const label  = getMonthLabel(m, i, months.length);
               return (
                 <div key={i} style={{
-                  flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  borderLeft: i > 0 ? '1px dashed #BFBFBF' : 'none',
-                  background: colors.bg, borderTop: `3px solid ${colors.border}`,
-                  padding: '2px 0', boxSizing: 'border-box'
+                  flex: 1, display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center',
+                  borderTop: `3px solid ${colors.border}`,
+                  background: colors.bg,
+                  borderLeft: i > 0 ? '1px dashed rgba(150,150,150,0.5)' : 'none',
+                  padding: '2px 0', boxSizing: 'border-box', minWidth: 0,
                 }}>
-                  <span style={{ fontWeight: 'bold', fontSize: '1.05em', color: '#333' }}>{m.label.split(' ')[0]}</span>
-                  <span style={{ fontSize: '0.8em', color: colors.text, fontWeight: 'bold', textTransform: 'uppercase' }}>{phase}</span>
+                  <span style={{
+                    fontWeight: 700, fontSize: '0.95em', color: '#1F1F1F',
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'clip',
+                    maxWidth: '100%', textAlign: 'center', display: 'block',
+                  }}>
+                    {label}
+                  </span>
+                  <span style={{
+                    fontSize: '0.7em', color: colors.text, fontWeight: 700,
+                    textTransform: 'uppercase', whiteSpace: 'nowrap',
+                  }}>
+                    {phase}
+                  </span>
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* Tracks and Gantt Grid */}
-        <div style={{ flexGrow: 1, position: 'relative', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-          {/* Vertical Grid Lines */}
-          <div style={{ position: 'absolute', top: 0, bottom: 0, left: '13%', right: 0, display: 'flex', pointerEvents: 'none', zIndex: 0 }}>
-            {months.map((m, i) => (
-              <div key={i} style={{
-                flex: 1, borderRight: '1px solid rgba(191, 191, 191, 0.2)',
-                borderLeft: i === 0 ? '1px solid rgba(191, 191, 191, 0.2)' : 'none',
-                height: '100%',
-                background: getPhaseColor(getMonthPhase(m.dateStart, phaseRanges)).bg + '0a'
-              }} />
-            ))}
-          </div>
+        {/* ── Main Chart Body ─────────────────────────────────────────────────── */}
+        <div style={{ flexGrow: 1, display: 'flex', minHeight: 0, position: 'relative' }}>
 
-          {/* Render Tracks */}
-          <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          {/* Track label column */}
+          <div style={{
+            width: '13%', flexShrink: 0, display: 'flex', flexDirection: 'column',
+            borderRight: '2px solid #1F4E79', background: '#FAFAFA', zIndex: 4,
+          }}>
             {tracksList.map((trackName) => {
               const trackMs = form.milestones.filter(m => (m.track || 'Core') === trackName);
               if (trackMs.length === 0) return null;
-
-              const rows = layoutTrackTasks(trackMs);
-
+              const rowCount = layoutTrackTasks(trackMs).length;
               return (
-                <div key={trackName} style={{ display: 'flex', width: '100%', alignItems: 'stretch' }}>
-                  {/* Track Label */}
-                  <div style={{
-                    width: '13%', flexShrink: 0, display: 'flex', alignItems: 'center',
-                    justifyContent: 'flex-end', paddingRight: '8px', boxSizing: 'border-box', borderRight: '2px solid #1F4E79'
+                <div key={trackName} style={{
+                  height: `${rowCount * 21}px`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+                  paddingRight: '5px', boxSizing: 'border-box',
+                  borderBottom: '1px solid #E0E0E0',
+                }}>
+                  <span style={{
+                    fontWeight: 700, color: '#1F4E79', fontSize: '0.82em',
+                    textAlign: 'right', wordBreak: 'break-word', lineHeight: 1.15,
+                    whiteSpace: 'pre-wrap',
                   }}>
-                    <span style={{ fontWeight: 'bold', color: '#1F4E79', fontSize: '0.85em', textAlign: 'right', wordBreak: 'break-word' }}>
-                      {trackName === 'Core' ? 'Key Milestones' : trackName}
-                    </span>
-                  </div>
+                    {trackName === 'Core' ? 'Key\nMilestones' : trackName}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
 
-                  {/* Lanes Content */}
-                  <div style={{ flexGrow: 1, width: '87%', display: 'flex', flexDirection: 'column', gap: '2px', padding: '1px 0' }}>
+          {/* Gantt area */}
+          <div style={{ flexGrow: 1, position: 'relative', overflow: 'hidden', minWidth: 0 }}>
+
+            {/* Phase column backgrounds */}
+            <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, display: 'flex', zIndex: 0, pointerEvents: 'none' }}>
+              {months.map((m, i) => {
+                const phase  = getMonthPhase(m.dateStart, phaseRanges);
+                const colors = getPhaseColor(phase);
+                return (
+                  <div key={i} style={{
+                    flex: 1, height: '100%', background: colors.bgLight,
+                    borderLeft: i > 0 ? '1px solid rgba(180,180,180,0.25)' : 'none',
+                  }} />
+                );
+              })}
+            </div>
+
+            {/* Phase banner labels (Elaboration >>, Construction >> etc.) */}
+            {phaseOverlays.map(({ phase, left, width }) => {
+              const colors = getPhaseColor(phase);
+              return (
+                <div key={phase} style={{
+                  position: 'absolute', top: '1px', left: `${left}%`, width: `${width}%`,
+                  zIndex: 1, pointerEvents: 'none', overflow: 'hidden',
+                }}>
+                  <span style={{
+                    display: 'inline-block', paddingLeft: '4px',
+                    fontSize: '1.05em', fontWeight: 700, color: colors.border, whiteSpace: 'nowrap',
+                  }}>
+                    {phase} &gt;&gt;
+                  </span>
+                </div>
+              );
+            })}
+
+            {/* Track rows */}
+            <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column' }}>
+              {tracksList.map((trackName) => {
+                const trackMs = form.milestones.filter(m => (m.track || 'Core') === trackName);
+                if (trackMs.length === 0) return null;
+                const rows = layoutTrackTasks(trackMs);
+
+                return (
+                  <div key={trackName} style={{
+                    display: 'flex', flexDirection: 'column',
+                    borderBottom: '1px solid rgba(191,191,191,0.4)',
+                  }}>
                     {rows.map((rowTasks, rowIdx) => (
-                      <div key={rowIdx} style={{ position: 'relative', height: '20px', width: '100%' }}>
+                      <div key={rowIdx} style={{ position: 'relative', height: '21px', width: '100%' }}>
                         {rowTasks.map((ms) => {
-                          const style = getTaskStyle(ms);
+                          const sty   = getTaskStyle(ms);
                           const color = getTaskColor(ms);
 
+                          /* ── Governance: full-width chevron arrow ── */
+                          if (ms.track === 'Governance') {
+                            return (
+                              <div key={ms.id} style={{
+                                position: 'absolute', left: sty.left, width: sty.width, top: '10%', height: '80%',
+                                background: '#4472C4', color: '#fff',
+                                clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%)',
+                                display: 'flex', alignItems: 'center', paddingLeft: '8px',
+                                fontSize: '0.8em', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden',
+                              }}>
+                                {ms.name}
+                              </div>
+                            );
+                          }
+
+                          /* ── Milestone diamond ── */
                           if (ms.type === 'Milestone') {
                             return (
                               <div key={ms.id} style={{
-                                position: 'absolute', left: style.left, width: style.width, height: '100%',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                position: 'absolute', left: sty.left, height: '100%',
+                                display: 'flex', alignItems: 'center',
                               }}>
-                                <div style={{
-                                  width: '8px', height: '8px', background: '#0070C0', transform: 'rotate(45deg)',
-                                  flexShrink: 0, boxShadow: '0 1px 2px rgba(0,0,0,0.2)'
-                                }} />
-                                <span style={{ marginLeft: '4px', fontSize: '0.7em', fontWeight: 'bold', color: '#333', whiteSpace: 'nowrap' }}>
+                                <div style={{ width: '7px', height: '7px', background: '#0070C0', transform: 'rotate(45deg)', flexShrink: 0 }} />
+                                <span style={{ marginLeft: '4px', fontSize: '0.72em', fontWeight: 700, color: '#222', whiteSpace: 'nowrap' }}>
                                   {ms.name}
                                 </span>
                               </div>
                             );
                           }
 
+                          /* ── Sprint: "SPRINTS >>" prefix + striped green bar ── */
+                          if (ms.type === 'Sprint') {
+                            return (
+                              <div key={ms.id} style={{
+                                position: 'absolute', left: sty.left, width: sty.width,
+                                top: '10%', height: '80%', display: 'flex', alignItems: 'stretch',
+                              }}>
+                                <div style={{
+                                  background: '#548235', color: '#fff', padding: '0 4px',
+                                  fontSize: '0.68em', fontWeight: 700, whiteSpace: 'nowrap',
+                                  display: 'flex', alignItems: 'center', flexShrink: 0,
+                                  borderRadius: '2px 0 0 2px',
+                                }}>
+                                  SPRINTS &gt;&gt;
+                                </div>
+                                <div style={{
+                                  flexGrow: 1,
+                                  background: 'repeating-linear-gradient(90deg,#548235,#548235 13px,#3d6023 13px,#3d6023 14px)',
+                                  border: '1px solid #2d4a1a', borderLeft: 'none',
+                                  display: 'flex', alignItems: 'center', paddingLeft: '5px',
+                                  borderRadius: '0 2px 2px 0', overflow: 'hidden',
+                                }}>
+                                  <span style={{ fontSize: '0.68em', fontWeight: 700, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {ms.name}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          /* ── SignOff: chevron + diamond ── */
                           if (ms.type === 'SignOff') {
                             return (
                               <div key={ms.id} style={{
-                                position: 'absolute', ...style, height: '100%',
-                                display: 'flex', alignItems: 'center'
+                                position: 'absolute', left: sty.left, width: sty.width, height: '100%',
+                                display: 'flex', alignItems: 'center',
                               }}>
                                 <div style={{
-                                  flexGrow: 1, height: '80%', background: color, color: '#fff',
-                                  clipPath: 'polygon(0% 0%, calc(100% - 6px) 0%, 100% 50%, calc(100% - 6px) 100%, 0% 100%)',
-                                  display: 'flex', alignItems: 'center', padding: '0 8px 0 4px',
-                                  fontSize: '0.7em', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+                                  flexGrow: 1, height: '78%',
+                                  background: color, color: '#fff',
+                                  clipPath: 'polygon(0 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 0 100%)',
+                                  display: 'flex', alignItems: 'center',
+                                  paddingLeft: '6px', paddingRight: '12px',
+                                  fontSize: '0.68em', fontWeight: 700,
+                                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                                 }}>
                                   {ms.name}
                                 </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginLeft: '1px', position: 'relative', width: '10px' }}>
-                                  <div style={{ width: '5px', height: '5px', background: '#0070C0', transform: 'rotate(45deg)' }} />
-                                  <span style={{ fontSize: '0.5em', color: '#666', fontStyle: 'italic', position: 'absolute', top: '6px', whiteSpace: 'nowrap' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginLeft: '2px', position: 'relative', flexShrink: 0 }}>
+                                  <div style={{ width: '6px', height: '6px', background: '#0070C0', transform: 'rotate(45deg)' }} />
+                                  <span style={{ position: 'absolute', top: '8px', fontSize: '0.45em', color: '#555', fontStyle: 'italic', whiteSpace: 'nowrap' }}>
                                     sign off
                                   </span>
                                 </div>
@@ -524,32 +663,22 @@ function SlidePreview({ form, activeSlide }: { form: POAPSlideData; activeSlide:
                             );
                           }
 
-                          if (ms.type === 'Sprint') {
-                            return (
-                              <div key={ms.id} style={{
-                                position: 'absolute', ...style, height: '80%',
-                                background: `repeating-linear-gradient(90deg, ${color}, ${color} 15px, #4a6d36 15px, #4a6d36 16px)`,
-                                border: '1px solid #2e471d', borderRadius: '2px', color: '#fff',
-                                display: 'flex', alignItems: 'center', padding: '0 8px',
-                                fontSize: '0.7em', fontWeight: 'bold', justifyContent: 'center',
-                                textShadow: '1px 1px 1px rgba(0,0,0,0.4)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
-                              }}>
-                                {ms.name}
-                              </div>
-                            );
-                          }
-
+                          /* ── Default block or chevron ── */
                           const isChevron = ms.type === 'Chevron';
                           return (
                             <div key={ms.id} style={{
-                              position: 'absolute', ...style, height: '80%',
+                              position: 'absolute', left: sty.left, width: sty.width,
+                              top: '10%', height: '80%',
                               background: color, color: '#fff',
-                              borderRadius: isChevron ? '0' : '3px',
-                              clipPath: isChevron ? 'polygon(0% 0%, calc(100% - 6px) 0%, 100% 50%, calc(100% - 6px) 100%, 0% 100%)' : 'none',
+                              clipPath: isChevron
+                                ? 'polygon(0 0, calc(100% - 7px) 0, 100% 50%, calc(100% - 7px) 100%, 0 100%)'
+                                : 'none',
+                              borderRadius: isChevron ? '0' : '2px',
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              fontSize: '0.7em', fontWeight: 'bold', padding: isChevron ? '0 10px' : '0 8px',
+                              padding: isChevron ? '0 12px 0 6px' : '0 4px',
+                              fontSize: '0.68em', fontWeight: 700,
+                              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                               boxShadow: isChevron ? 'none' : '0 1px 2px rgba(0,0,0,0.12)',
-                              textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
                             }}>
                               {ms.name}
                             </div>
@@ -558,37 +687,44 @@ function SlidePreview({ form, activeSlide }: { form: POAPSlideData; activeSlide:
                       </div>
                     ))}
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        {/* Footer Notes and Legend */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'auto', paddingTop: '0.5%', borderTop: '1px solid #BFBFBF', flexShrink: 0 }}>
-          <div style={{ fontSize: '0.7em', color: '#555', lineHeight: 1.25 }}>
+        {/* ── Footer ──────────────────────────────────────────────────────────── */}
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end',
+          marginTop: '0.5%', borderTop: '1px solid #BFBFBF',
+          paddingTop: '0.3%', flexShrink: 0,
+        }}>
+          <div style={{ fontSize: '0.72em', color: '#444', lineHeight: 1.3 }}>
             <b>NOTES:</b><br />
             • Agile SCRUM delivery approach<br />
             • Key gates align with SteerCo review dates
           </div>
-          <div style={{ display: 'flex', gap: '8px', fontSize: '0.65em' }}>
+          <div style={{ display: 'flex', gap: '5px', fontSize: '0.65em', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
             {[
               { l: 'Inception (Orange)', c: '#C55A11' },
-              { l: 'Elaboration/Gov (Blue)', c: '#2F5597' },
+              { l: 'Elaboration/Gov (Blue)', c: '#2E75B6' },
               { l: 'Construction/Sprints (Green)', c: '#548235' },
-              { l: 'Sign-Off Diamond', c: '#0070C0', icon: '♦' }
+              { l: 'Sign-Off', c: '#0070C0', icon: '♦' },
             ].map((lg, i) => (
-              <span key={i} style={{ display: 'flex', alignItems: 'center', gap: '2px', background: '#F2F2F2', padding: '1px 5px', borderRadius: '3px' }}>
-                {lg.icon ? <span style={{ color: lg.c, fontWeight: 'bold' }}>{lg.icon}</span> : <span style={{ display: 'inline-block', width: '6px', height: '6px', background: lg.c }} />}
+              <span key={i} style={{ display: 'flex', alignItems: 'center', gap: '3px', background: '#F2F2F2', padding: '1px 5px', borderRadius: '3px' }}>
+                {lg.icon
+                  ? <span style={{ color: lg.c, fontWeight: 'bold', fontSize: '1.2em' }}>{lg.icon}</span>
+                  : <span style={{ display: 'inline-block', width: '7px', height: '7px', background: lg.c }} />}
                 {lg.l}
               </span>
             ))}
           </div>
-          <span style={{ fontSize: '1.3em', fontWeight: 'bold', color: '#C00000', letterSpacing: '1px' }}>VOIS</span>
+          <span style={{ fontSize: '1.6em', fontWeight: 900, color: '#E60000', letterSpacing: '1px' }}>VOIS</span>
         </div>
       </div>
     );
   }
+
 
   // Slide 2: Milestones Plan
   return (
@@ -625,7 +761,7 @@ function SlidePreview({ form, activeSlide }: { form: POAPSlideData; activeSlide:
           <div key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: '2.5%', gap: '2%' }}>
             {/* Red milestone label */}
             <div style={{
-              background: '#C00000', color: '#fff', borderRadius: 4, padding: '1% 2%',
+              background: '#E60000', color: '#fff', borderRadius: 4, padding: '1% 2%',
               fontWeight: 700, fontSize: '0.8em', textAlign: 'center', flex: '0 0 16%',
               lineHeight: 1.3,
             }}>
@@ -773,7 +909,7 @@ export function POAPSlideBuilder() {
 
     const WHITE = 'FFFFFF';
     const BLACK = '000000';
-    const DARK_RED = 'C00000';
+    const DARK_RED = 'E60000';
     const RED = 'FF0000';
     const LIGHT_GRAY = 'F2F2F2';
     const BORDER_GRAY = 'BFBFBF';
@@ -937,7 +1073,7 @@ export function POAPSlideBuilder() {
         line: { color: 'E6E6E6', width: 0.5 }
       });
 
-      s3.addText(m.label.split(' ')[0], {
+      s3.addText(getMonthLabel(m, i, months.length), {
         x: xPos, y: 0.8, w: colW, h: 0.2,
         fontSize: 8, bold: true, align: 'center', color: '333333', fontFace: 'Arial'
       });
