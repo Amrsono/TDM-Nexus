@@ -327,7 +327,8 @@ export default function App() {
   };
 
   return (
-    <div className="dashboard-container">
+    <>
+      <div className="dashboard-container">
       <div className="grid-bg-overlay"></div>
       <div className="scanlines-overlay"></div>
 
@@ -467,7 +468,8 @@ export default function App() {
           </div>
         </div>
       </main>
-      <AIAssistantApplet activePhase={activePhase} onNavigateToSettings={() => handlePhaseSelect('settings')} />
     </div>
+    <AIAssistantApplet activePhase={activePhase} onNavigateToSettings={() => handlePhaseSelect('settings')} />
+    </>
   );
 }
