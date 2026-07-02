@@ -32,6 +32,9 @@ import { ReleasePlanningMeeting } from './views/ReleasePlanningMeeting';
 import { WalkthroughWizard } from './views/WalkthroughWizard';
 import { exportToExcel } from './utils/excelExporter';
 import { exportToPPT } from './utils/pptxExporter';
+import { useAIAssistant } from './context/AIAssistantContext';
+import { AIAssistantApplet } from './components/AIAssistantApplet';
+import { generateReportAnalytics } from './utils/aiService';
 import {
   initialFinancials,
   initialADOWorkItems,
@@ -66,7 +69,7 @@ import {
   initialWalkthroughData
 } from './utils/mockData';
 
-type PhaseId = 'funnel' | 'analysing' | 'build' | 'finances' | 'testing' | 'releaseplanning' | 'walkthrough' | 'governance' | 'postlaunch' | 'poap' | 'slidebuilder' | 'settings';
+export type PhaseId = 'funnel' | 'analysing' | 'build' | 'finances' | 'testing' | 'releaseplanning' | 'walkthrough' | 'governance' | 'postlaunch' | 'poap' | 'slidebuilder' | 'settings';
 
 interface PhaseMetadata {
   id: PhaseId;
@@ -76,6 +79,7 @@ interface PhaseMetadata {
 }
 
 export default function App() {
+  const { setProjectState, settings, projectState } = useAIAssistant();
   const [activePhase, setActivePhase] = useState<PhaseId>('funnel');
   const [theme, setTheme] = useState<ThemeMode>('dark');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -146,6 +150,14 @@ export default function App() {
     const completed = checklist.filter(c => c.checked).length;
     return Math.round((completed / checklist.length) * 100);
   }, [checklist]);
+
+  React.useEffect(() => {
+    setProjectState({
+      financials, adoWorkItems, squads, milestones, allocations, transfers, forecastMonths,
+      qaGates, defects, risks, checklist, hypercare, poapData, governanceGates, 
+      piWizardData, walkthroughData, ragStatus, budgetProgressPercent, sitProgressPercent, checklistPercent
+    });
+  }, [financials, adoWorkItems, squads, milestones, allocations, transfers, forecastMonths, qaGates, defects, risks, checklist, hypercare, poapData, governanceGates, piWizardData, walkthroughData, ragStatus, budgetProgressPercent, sitProgressPercent, checklistPercent, setProjectState]);
 
   const handlePhaseSelect = (phaseId: string) => {
     if (phases.some(p => p.id === phaseId)) {
@@ -276,7 +288,12 @@ export default function App() {
     }
   };
 
-  const handleExcelExport = () => {
+  const handleExcelExport = async () => {
+    let aiAnalysis = 'Offline Analysis: No AI configured.';
+    if (projectState && settings.enabled) {
+      aiAnalysis = await generateReportAnalytics(projectState, 'excel', settings);
+    }
+    
     exportToExcel(
       financials,
       adoWorkItems,
@@ -285,11 +302,17 @@ export default function App() {
       transfers,
       qaGates,
       defects,
-      risks
+      risks,
+      aiAnalysis
     );
   };
 
-  const handlePPTExport = () => {
+  const handlePPTExport = async () => {
+    let aiAnalysis = 'Offline Analysis: No AI configured.';
+    if (projectState && settings.enabled) {
+      aiAnalysis = await generateReportAnalytics(projectState, 'ppt', settings);
+    }
+
     exportToPPT(
       financials,
       adoWorkItems,
@@ -298,7 +321,8 @@ export default function App() {
       qaGates,
       defects,
       risks,
-      ragStatus
+      ragStatus,
+      aiAnalysis
     );
   };
 
@@ -443,6 +467,7 @@ export default function App() {
           </div>
         </div>
       </main>
+      <AIAssistantApplet activePhase={activePhase} onNavigateToSettings={() => handlePhaseSelect('settings')} />
     </div>
   );
 }

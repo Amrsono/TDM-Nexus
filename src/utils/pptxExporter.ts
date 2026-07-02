@@ -19,7 +19,8 @@ export const exportToPPT = (
   qaGates: QAGate[],
   defects: Defect[],
   risks: RiskIssue[],
-  ragStatus: { schedule: string; budget: string; scope: string; quality: string; overall: string }
+  ragStatus: { schedule: string; budget: string; scope: string; quality: string; overall: string },
+  aiAnalysis: string
 ) => {
   const pptx = new pptxgen();
   pptx.layout = 'LAYOUT_WIDE';
@@ -154,9 +155,17 @@ export const exportToPPT = (
       { text: r.status.toUpperCase(), options: { color: r.status === 'Open' ? COLOR_RED : COLOR_GREEN, bold: true, fill: { color: CARD_BG } } }
     ]);
   });
-  slide6.addTable(riskTableRows, { x: 0.5, y: 1.5, w: 12.3, h: 5.0, border: { type: 'solid', color: '1e293b', pt: 1 }, fontSize: 10, fontFace: 'Outfit', align: 'left', valign: 'middle' });
+  slide6.addTable(riskTableRows, { x: 0.5, y: 1.5, w: 12.3, h: 5.0, border: { type: 'solid', color: '1e293b', pt: 1 }, fontSize: 10, fontFace: 'Outfit', align: 'left', valign: 'middle'  });
 
-  pptx.writeFile({ fileName: 'TDM_SteerCo_Report.pptx' });
+  // SLIDE 7: AI Executive Summary
+  const slide7 = pptx.addSlide();
+  addSlideHeader(slide7, 'AI Executive Summary');
+  slide7.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.5, w: 12.3, h: 5.5, fill: { color: CARD_BG }, line: { color: CYAN, width: 1 } });
+  slide7.addText('Nexus AI Analytics', { x: 0.8, y: 1.8, w: 11.0, h: 0.4, fontSize: 18, bold: true, color: PURPLE, fontFace: 'Outfit' });
+  slide7.addText(aiAnalysis, { x: 0.8, y: 2.5, w: 11.7, h: 4.0, fontSize: 14, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top' });
+
+  // Save
+  pptx.writeFile({ fileName: `TDM_SteerCo_Report_${new Date().toISOString().split('T')[0]}.pptx` });
 };
 
 export const exportPOAPToPPT = (

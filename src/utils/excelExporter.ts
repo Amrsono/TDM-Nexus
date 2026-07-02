@@ -18,7 +18,8 @@ export const exportToExcel = (
   transfers: FundTransfer[],
   qaGates: QAGate[],
   defects: Defect[],
-  risks: RiskIssue[]
+  risks: RiskIssue[],
+  aiAnalysis: string
 ) => {
   const wb = XLSX.utils.book_new();
 
@@ -134,6 +135,13 @@ export const exportToExcel = (
   }));
   const wsRaid = XLSX.utils.json_to_sheet(raidData);
   XLSX.utils.book_append_sheet(wb, wsRaid, 'RAID Log');
+
+  // Sheet 8: AI Analysis
+  const aiData = [
+    { 'AI Analysis & Recommendations': aiAnalysis }
+  ];
+  const wsAI = XLSX.utils.json_to_sheet(aiData);
+  XLSX.utils.book_append_sheet(wb, wsAI, 'AI Analysis');
 
   // Write workbook to file
   XLSX.writeFile(wb, 'TDM_Nexus_Project_Report.xlsx');
