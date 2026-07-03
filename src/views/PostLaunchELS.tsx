@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { HypercareTicket } from '../utils/mockData';
-import { Activity, Ticket, CheckCircle2 } from 'lucide-react';
+import { Activity, Ticket, CheckCircle2, Plus } from 'lucide-react';
 
 interface PostLaunchELSProps {
   hypercare: HypercareTicket[];
@@ -8,6 +8,22 @@ interface PostLaunchELSProps {
 }
 
 export function PostLaunchELS({ hypercare, setHypercare }: PostLaunchELSProps) {
+  const [newTicketTitle, setNewTicketTitle] = useState('');
+  const [newTicketSeverity, setNewTicketSeverity] = useState<'P1' | 'P2' | 'P3' | 'P4'>('P3');
+
+  const handleAddTicket = () => {
+    if (!newTicketTitle.trim()) return;
+    setHypercare([...hypercare, {
+      id: `INC-${Math.floor(Math.random() * 10000)}`,
+      title: newTicketTitle,
+      severity: newTicketSeverity,
+      status: 'Open',
+      reportedAt: new Date().toISOString().slice(0, 16),
+      slaMinutes: newTicketSeverity === 'P1' || newTicketSeverity === 'P2' ? 60 : 240
+    }]);
+    setNewTicketTitle('');
+  };
+
   return (
     <div className="view-grid">
       <div className="grid-col span-12">
@@ -63,6 +79,29 @@ export function PostLaunchELS({ hypercare, setHypercare }: PostLaunchELSProps) {
                   ))}
                 </tbody>
               </table>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
+              <select 
+                className="cyber-input" 
+                value={newTicketSeverity} 
+                onChange={(e) => setNewTicketSeverity(e.target.value as any)}
+              >
+                <option value="P1">P1</option>
+                <option value="P2">P2</option>
+                <option value="P3">P3</option>
+                <option value="P4">P4</option>
+              </select>
+              <input 
+                className="cyber-input" 
+                style={{ flex: 1 }} 
+                placeholder="New hypercare ticket title..." 
+                value={newTicketTitle}
+                onChange={(e) => setNewTicketTitle(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddTicket()}
+              />
+              <button className="cyber-button" onClick={handleAddTicket} style={{ padding: '0 1rem' }}>
+                <Plus size={16} /> Add
+              </button>
             </div>
           </div>
         </div>
