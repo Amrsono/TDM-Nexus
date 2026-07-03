@@ -150,7 +150,15 @@ export const AIAssistantApplet: React.FC<AIAssistantAppletProps> = ({ activePhas
                 <div style={{ marginTop: '20px', padding: '12px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
                   <strong>Status:</strong> {settings.apiKey ? 'Connected to AI Provider' : 'Offline Mode (Rule-based)'}
                   <br/><br/>
-                  Navigate to Settings to configure your AI provider for deep analytics.
+                  {settings.apiKey ? (
+                    <span>
+                      ✨ AI-generated executive summaries will be automatically generated and embedded when you click the <strong>Export Excel</strong> or <strong>Export PPT</strong> buttons in the top right of the dashboard header.
+                    </span>
+                  ) : (
+                    <span>
+                      Navigate to Settings and configure an API key to enable AI-powered deep analytics in your exported reports.
+                    </span>
+                  )}
                 </div>
               </div>
             )}
