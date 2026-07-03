@@ -48,9 +48,9 @@
   --color-purple: #4a4a4a;
   --color-text-primary: #0f172a;
   --color-text-secondary: #475569;
-  --color-border: rgba(230, 0, 0, 0.2);
-  --color-border-hover: rgba(230, 0, 0, 0.5);
-  --color-border-purple: rgba(74, 74, 74, 0.2);
+  --color-border: rgba(0, 0, 0, 0.8);
+  --color-border-hover: rgba(0, 0, 0, 1);
+  --color-border-purple: rgba(0, 0, 0, 0.5);
   
   --shadow-glow-cyan: 0 4px 15px rgba(230, 0, 0, 0.15);
   --shadow-glow-purple: 0 4px 15px rgba(0, 0, 0, 0.05);
