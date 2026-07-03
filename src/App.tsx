@@ -190,6 +190,29 @@ export default function App() {
 
     // 4. Update defects squad name
     setDefects(prev => prev.map(d => d.squad === oldName ? { ...d, squad: newName } : d));
+
+    // 5. Update adoWorkItems portfolio
+    setAdoWorkItems(prev => prev.map(a => a.portfolio === oldName ? { ...a, portfolio: newName } : a));
+  };
+
+  const deleteSquad = (id: string) => {
+    const squadToDelete = squads.find(s => s.id === id);
+    if (!squadToDelete) return;
+    const oldName = squadToDelete.name;
+
+    setSquads(prev => prev.filter(s => s.id !== id));
+    setAllocations(prev => prev.filter(a => a.squadId !== id));
+    setTransfers(prev => prev.filter(t => t.fromSquad !== oldName && t.toSquad !== oldName));
+    setDefects(prev => prev.map(d => d.squad === oldName ? { ...d, squad: 'Unassigned' } : d));
+    setAdoWorkItems(prev => prev.map(a => a.portfolio === oldName ? { ...a, portfolio: 'Unassigned' } : a));
+  };
+
+  const clearAllSquads = () => {
+    setSquads([]);
+    setAllocations([]);
+    setTransfers([]);
+    setDefects(prev => prev.map(d => ({ ...d, squad: 'Unassigned' })));
+    setAdoWorkItems(prev => prev.map(a => ({ ...a, portfolio: 'Unassigned' })));
   };
 
   const renderActiveView = () => {
@@ -202,7 +225,10 @@ export default function App() {
             adoWorkItems={adoWorkItems} 
             setAdoWorkItems={setAdoWorkItems} 
             squads={squads} 
+            setSquads={setSquads}
             renameSquad={renameSquad} 
+            deleteSquad={deleteSquad}
+            clearAllSquads={clearAllSquads}
           />
         );
       case 'finances':
