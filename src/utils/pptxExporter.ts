@@ -158,12 +158,22 @@ export const exportToPPT = (
   slide6.addTable(riskTableRows, { x: 0.5, y: 1.5, w: 12.3, h: 5.0, border: { type: 'solid', color: '1e293b', pt: 1 }, fontSize: 10, fontFace: 'Outfit', align: 'left', valign: 'middle'  });
 
   // SLIDE 7: AI Executive Summary & Financials (Part 1)
-  const splitIndex = aiAnalysis.search(/(?:\r?\n)(?:3\.|3\s+QUALITY|QUALITY\s*&\s*TESTING)/i);
+  const splitIndex1 = aiAnalysis.search(/(?:\r?\n)(?:3\.|3\s+QUALITY|QUALITY\s*&\s*TESTING)/i);
   let part1 = aiAnalysis;
   let part2 = '';
-  if (splitIndex !== -1) {
-    part1 = aiAnalysis.substring(0, splitIndex).trim();
-    part2 = aiAnalysis.substring(splitIndex).trim();
+  let part3 = '';
+
+  if (splitIndex1 !== -1) {
+    part1 = aiAnalysis.substring(0, splitIndex1).trim();
+    const remaining = aiAnalysis.substring(splitIndex1).trim();
+    const splitIndex2 = remaining.search(/(?:\r?\n)(?:4\.|4\s+KEY|KEY\s+RECOMMENDATIONS)/i);
+    
+    if (splitIndex2 !== -1) {
+      part2 = remaining.substring(0, splitIndex2).trim();
+      part3 = remaining.substring(splitIndex2).trim();
+    } else {
+      part2 = remaining;
+    }
   }
 
   const slide7 = pptx.addSlide();
@@ -173,12 +183,21 @@ export const exportToPPT = (
   slide7.addText(part1, { x: 0.8, y: 2.1, w: 11.7, h: 4.5, fontSize: 11, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top', lineSpacing: 16 });
 
   if (part2) {
-    // SLIDE 8: AI Quality & Recommendations (Part 2)
+    // SLIDE 8: AI Quality & Testing (Part 2)
     const slide8 = pptx.addSlide();
-    addSlideHeader(slide8, 'AI Quality & Recommendations');
+    addSlideHeader(slide8, 'AI Quality & Testing');
     slide8.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.5, w: 12.3, h: 5.4, fill: { color: CARD_BG }, line: { color: CYAN, width: 1 } });
     slide8.addText('Nexus AI Analytics - Part 2', { x: 0.8, y: 1.7, w: 11.0, h: 0.3, fontSize: 16, bold: true, color: PURPLE, fontFace: 'Outfit' });
     slide8.addText(part2, { x: 0.8, y: 2.1, w: 11.7, h: 4.5, fontSize: 11, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top', lineSpacing: 16 });
+  }
+
+  if (part3) {
+    // SLIDE 9: AI Recommendations (Part 3)
+    const slide9 = pptx.addSlide();
+    addSlideHeader(slide9, 'AI Recommendations');
+    slide9.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.5, w: 12.3, h: 5.4, fill: { color: CARD_BG }, line: { color: CYAN, width: 1 } });
+    slide9.addText('Nexus AI Analytics - Part 3', { x: 0.8, y: 1.7, w: 11.0, h: 0.3, fontSize: 16, bold: true, color: PURPLE, fontFace: 'Outfit' });
+    slide9.addText(part3, { x: 0.8, y: 2.1, w: 11.7, h: 4.5, fontSize: 11, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top', lineSpacing: 16 });
   }
 
   // Save
