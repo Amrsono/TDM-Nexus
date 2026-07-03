@@ -94,6 +94,37 @@ const defaultSettings: AISettings = {
   enabled: true,
 };
 
+/** Default model per provider — used to auto-correct stale localStorage values */
+const defaultModelForProvider: Record<AISettings['provider'], string> = {
+  openai: 'gpt-4o',
+  gemini: 'gemini-2.0-flash',
+  anthropic: 'claude-3-5-sonnet-20240620',
+  custom: '',
+};
+
+/** Provider prefixes that indicate a model belongs to a specific provider */
+const modelPrefixMap: Array<{ prefix: string; provider: AISettings['provider'] }> = [
+  { prefix: 'gpt-', provider: 'openai' },
+  { prefix: 'o1', provider: 'openai' },
+  { prefix: 'gemini-', provider: 'gemini' },
+  { prefix: 'claude-', provider: 'anthropic' },
+];
+
+/**
+ * Ensures the saved model is compatible with the saved provider.
+ * If the model clearly belongs to a different provider, it is replaced
+ * with the sensible default for the active provider.
+ */
+const sanitizeSettings = (s: AISettings): AISettings => {
+  const mismatch = modelPrefixMap.find(
+    ({ prefix, provider }) => s.model.startsWith(prefix) && provider !== s.provider
+  );
+  if (mismatch) {
+    return { ...s, model: defaultModelForProvider[s.provider] || s.model };
+  }
+  return s;
+};
+
 const AIAssistantContext = createContext<AIAssistantContextType | undefined>(undefined);
 
 export const useAIAssistant = () => {
@@ -107,7 +138,8 @@ export const useAIAssistant = () => {
 export const AIAssistantProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [settings, setSettingsState] = useState<AISettings>(() => {
     const saved = localStorage.getItem('tdm-ai-settings');
-    return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
+    const loaded = saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
+    return sanitizeSettings(loaded);
   });
 
   const [messages, setMessages] = useState<AIMessage[]>([{
@@ -123,7 +155,7 @@ export const AIAssistantProvider: React.FC<{ children: ReactNode }> = ({ childre
 
   const updateSettings = (newSettings: Partial<AISettings>) => {
     setSettingsState(prev => {
-      const updated = { ...prev, ...newSettings };
+      const updated = sanitizeSettings({ ...prev, ...newSettings });
       localStorage.setItem('tdm-ai-settings', JSON.stringify(updated));
       return updated;
     });
