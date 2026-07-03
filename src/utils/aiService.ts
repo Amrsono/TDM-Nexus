@@ -312,9 +312,36 @@ export const getProjectHealthSummary = async (projectState: ProjectState, settin
     return `Project Health is ${projectState.ragStatus.overall}. Schedule is ${projectState.ragStatus.schedule} and Budget is ${projectState.ragStatus.budget}. You have used ${projectState.budgetProgressPercent}% of your budget and SIT pass rate is ${projectState.sitProgressPercent}%.`;
   }
   
-  // Implementation for calling LLM to summarize health could go here.
-  // For now, returning a basic offline-like summary as a placeholder to save calls.
-  return `Project Health is ${projectState.ragStatus.overall}. Schedule is ${projectState.ragStatus.schedule} and Budget is ${projectState.ragStatus.budget}. You have used ${projectState.budgetProgressPercent}% of your budget and SIT pass rate is ${projectState.sitProgressPercent}%.`;
+  try {
+    const url = getEndpointUrl(settings);
+    if (!url) throw new Error('Missing API URL');
+
+    const prompt = `Provide a concise 2-sentence executive summary of the project health based on the following:
+Overall RAG: ${projectState.ragStatus.overall} (Schedule: ${projectState.ragStatus.schedule}, Budget: ${projectState.ragStatus.budget})
+Budget Used: ${projectState.budgetProgressPercent}%
+SIT Pass Rate: ${projectState.sitProgressPercent}%
+Open High Defects: ${projectState.defects.filter(d => (d.severity === 'P1' || d.severity === 'P2') && d.status !== 'Closed').length}`;
+
+    const apiMessages: OpenAIMessage[] = [
+      { role: 'system', content: 'You are a project manager. Summarize health concisely.' },
+      { role: 'user', content: prompt }
+    ];
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: getRequestHeaders(settings),
+      body: JSON.stringify(buildRequestBody(settings, apiMessages))
+    });
+
+    if (!response.ok) {
+      return `Overall Health is ${projectState.ragStatus.overall}. Schedule: ${projectState.ragStatus.schedule}, Budget: ${projectState.ragStatus.budget}. (${projectState.budgetProgressPercent}% budget used, ${projectState.sitProgressPercent}% SIT pass rate)`;
+    }
+
+    const data = await response.json();
+    return extractTextFromResponse(settings, data);
+  } catch (error) {
+    return `Overall Health is ${projectState.ragStatus.overall}. Schedule: ${projectState.ragStatus.schedule}, Budget: ${projectState.ragStatus.budget}. (${projectState.budgetProgressPercent}% budget used, ${projectState.sitProgressPercent}% SIT pass rate)`;
+  }
 };
 
 export const generateReportAnalytics = async (projectState: ProjectState, reportType: 'ppt' | 'excel', settings?: AISettings): Promise<string> => {
@@ -322,5 +349,50 @@ export const generateReportAnalytics = async (projectState: ProjectState, report
     return "Offline Analysis: Project is tracking to overall RAG status. Please configure an AI provider for deep analytics.";
   }
   
-  return "AI-generated executive summary for the report. (Configure actual LLM call here).";
+  try {
+    const url = getEndpointUrl(settings);
+    if (!url) throw new Error('Missing API URL');
+
+    const openDefects = projectState.defects.filter(d => d.status !== 'Closed');
+    const openRisks = projectState.risks.filter(r => r.status === 'Open');
+    
+    const projectSummaryPrompt = `You are a project management executive at Vodafone. Provide a detailed, professional AI analysis and executive recommendation summary for the project based on the following metrics:
+- Overall Health RAG: ${projectState.ragStatus.overall} (Schedule: ${projectState.ragStatus.schedule}, Budget: ${projectState.ragStatus.budget}, Scope: ${projectState.ragStatus.scope}, Quality: ${projectState.ragStatus.quality})
+- Budget Progress: ${projectState.budgetProgressPercent}% consumed of CAPEX: $${projectState.financials.capexLimit} / OPEX: $${projectState.financials.opexLimit} (Total Spent: $${projectState.financials.totalSpent})
+- QA SIT Pass Rate: ${projectState.sitProgressPercent}%
+- Open Defects count: ${openDefects.length} (P1/P2 high severity count: ${openDefects.filter(d => d.severity === 'P1' || d.severity === 'P2').length})
+- Open Risks: ${openRisks.length}
+- Governance Gate Completion: ${projectState.checklistPercent}%
+
+Write a structured analysis for a ${reportType === 'excel' ? 'spreadsheet report tab' : 'SteerCo deck slide'}, including:
+1. Executive Summary: High-level overview of health, delivery risks, and progress.
+2. Financial Health: Budget consumption analysis and outlook.
+3. Quality & Testing: SIT pass rate assessment and defect remediation.
+4. Key Recommendations: 3 concrete next best actions to mitigate risks and ensure gate approvals.
+
+Keep the tone professional, objective, and action-oriented. Format the response as clean plain text with structured sections (do not wrap in markdown block code formatting).`;
+
+    const apiMessages: OpenAIMessage[] = [
+      { role: 'system', content: 'You are an executive project management assistant. Generate clear, structured reports.' },
+      { role: 'user', content: projectSummaryPrompt }
+    ];
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: getRequestHeaders(settings),
+      body: JSON.stringify(buildRequestBody(settings, apiMessages))
+    });
+
+    if (!response.ok) {
+      const friendlyError = await parseFriendlyError(response, settings.provider);
+      return `Failed to generate AI Analysis: ${friendlyError}`;
+    }
+
+    const data = await response.json();
+    return extractTextFromResponse(settings, data);
+  } catch (error) {
+    console.error('Error generating report analytics:', error);
+    return `Failed to generate AI Analysis: ${error instanceof Error ? error.message : String(error)}`;
+  }
 };
+
