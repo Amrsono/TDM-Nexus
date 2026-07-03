@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { QAGate, Defect, PortfolioSquad } from '../utils/mockData';
-import { Bug, ShieldCheck, Activity } from 'lucide-react';
+import { Bug, ShieldCheck, Activity, Plus } from 'lucide-react';
 
 interface TestingQualityProps {
   qaGates: QAGate[];
@@ -11,7 +11,24 @@ interface TestingQualityProps {
 }
 
 export function TestingQuality({ qaGates, setQaGates, defects, setDefects, squads }: TestingQualityProps) {
-  return (
+  const [newDefectTitle, setNewDefectTitle] = useState('');
+  const [newDefectSeverity, setNewDefectSeverity] = useState<'P1' | 'P2' | 'P3' | 'P4'>('P3');
+  const [newDefectPhase, setNewDefectPhase] = useState<'SIT' | 'UAT' | 'PAT' | 'OAT' | 'PEN' | 'CJT' | 'DVT' | 'Hypercare'>('SIT');
+  const [newDefectSquad, setNewDefectSquad] = useState(squads.length > 0 ? squads[0].name : 'Unassigned');
+
+  const handleAddDefect = () => {
+    if (!newDefectTitle.trim()) return;
+    setDefects([...defects, {
+      id: `DEF-${Math.floor(Math.random() * 10000)}`,
+      title: newDefectTitle,
+      severity: newDefectSeverity,
+      status: 'New',
+      squad: newDefectSquad,
+      phase: newDefectPhase,
+      description: ''
+    }]);
+    setNewDefectTitle('');
+  };
     <div className="view-grid">
       <div className="grid-col span-12">
         <div className="cyber-card">
@@ -54,9 +71,42 @@ export function TestingQuality({ qaGates, setQaGates, defects, setDefects, squad
                             <option value="Failed">Failed</option>
                           </select>
                         </td>
-                        <td className="text-right mono">{gate.totalTests}</td>
-                        <td className="text-right mono" style={{ color: 'var(--color-green)' }}>{gate.passed}</td>
-                        <td className="text-right mono" style={{ color: gate.failed > 0 ? 'var(--color-red)' : 'inherit' }}>{gate.failed}</td>
+                        <td className="text-right mono">
+                          <input 
+                            type="number"
+                            className="cyber-input"
+                            style={{ width: '70px', padding: '0.2rem', textAlign: 'right' }}
+                            value={gate.totalTests}
+                            onChange={(e) => {
+                              const newGates = qaGates.map(g => g.name === gate.name ? { ...g, totalTests: parseInt(e.target.value) || 0 } : g);
+                              setQaGates(newGates);
+                            }}
+                          />
+                        </td>
+                        <td className="text-right mono">
+                          <input 
+                            type="number"
+                            className="cyber-input"
+                            style={{ width: '70px', padding: '0.2rem', textAlign: 'right', color: 'var(--color-green)' }}
+                            value={gate.passed}
+                            onChange={(e) => {
+                              const newGates = qaGates.map(g => g.name === gate.name ? { ...g, passed: parseInt(e.target.value) || 0 } : g);
+                              setQaGates(newGates);
+                            }}
+                          />
+                        </td>
+                        <td className="text-right mono">
+                          <input 
+                            type="number"
+                            className="cyber-input"
+                            style={{ width: '70px', padding: '0.2rem', textAlign: 'right', color: gate.failed > 0 ? 'var(--color-red)' : 'inherit' }}
+                            value={gate.failed}
+                            onChange={(e) => {
+                              const newGates = qaGates.map(g => g.name === gate.name ? { ...g, failed: parseInt(e.target.value) || 0 } : g);
+                              setQaGates(newGates);
+                            }}
+                          />
+                        </td>
                         <td className="text-right mono">
                           <span style={{ color: passRate > 80 ? 'var(--color-green)' : passRate > 50 ? 'var(--color-amber)' : 'var(--color-red)' }}>
                             {passRate}%
@@ -126,6 +176,50 @@ export function TestingQuality({ qaGates, setQaGates, defects, setDefects, squad
                   ))}
                 </tbody>
               </table>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
+              <select 
+                className="cyber-input" 
+                value={newDefectPhase} 
+                onChange={(e) => setNewDefectPhase(e.target.value as any)}
+              >
+                <option value="SIT">SIT</option>
+                <option value="UAT">UAT</option>
+                <option value="PAT">PAT</option>
+                <option value="OAT">OAT</option>
+                <option value="PEN">PEN</option>
+                <option value="CJT">CJT</option>
+                <option value="DVT">DVT</option>
+              </select>
+              <select 
+                className="cyber-input" 
+                value={newDefectSquad} 
+                onChange={(e) => setNewDefectSquad(e.target.value)}
+              >
+                {squads.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                {squads.length === 0 && <option value="Unassigned">Unassigned</option>}
+              </select>
+              <select 
+                className="cyber-input" 
+                value={newDefectSeverity} 
+                onChange={(e) => setNewDefectSeverity(e.target.value as any)}
+              >
+                <option value="P1">P1</option>
+                <option value="P2">P2</option>
+                <option value="P3">P3</option>
+                <option value="P4">P4</option>
+              </select>
+              <input 
+                className="cyber-input" 
+                style={{ flex: 1 }} 
+                placeholder="New defect title..." 
+                value={newDefectTitle}
+                onChange={(e) => setNewDefectTitle(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddDefect()}
+              />
+              <button className="cyber-button" onClick={handleAddDefect} style={{ padding: '0 1rem' }}>
+                <Plus size={16} /> Add
+              </button>
             </div>
           </div>
         </div>
