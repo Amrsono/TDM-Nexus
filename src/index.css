@@ -62,26 +62,26 @@
 }
 
 [data-theme="medium"] {
-  --bg-primary: #1e3a8a;
-  --bg-secondary: #1e40af;
-  --bg-bottom: #172554;
-  --bg-card: rgba(30, 58, 138, 0.85);
-  --bg-card-hover: rgba(30, 64, 175, 0.95);
+  --bg-primary: #334155;
+  --bg-secondary: #475569;
+  --bg-bottom: #1e293b;
+  --bg-card: rgba(51, 65, 85, 0.85);
+  --bg-card-hover: rgba(71, 85, 105, 0.95);
   
-  --color-cyan: #60a5fa;
-  --color-purple: #93c5fd;
+  --color-cyan: #94a3b8;
+  --color-purple: #cbd5e1;
   --color-text-primary: #f8fafc;
-  --color-text-secondary: #bfdbfe;
-  --color-border: rgba(96, 165, 250, 0.3);
-  --color-border-hover: rgba(96, 165, 250, 0.6);
-  --color-border-purple: rgba(147, 197, 253, 0.3);
+  --color-text-secondary: #cbd5e1;
+  --color-border: rgba(148, 163, 184, 0.3);
+  --color-border-hover: rgba(148, 163, 184, 0.6);
+  --color-border-purple: rgba(203, 213, 225, 0.3);
 
-  --shadow-glow-cyan: 0 0 15px rgba(96, 165, 250, 0.3);
-  --shadow-glow-purple: 0 0 15px rgba(147, 197, 253, 0.3);
+  --shadow-glow-cyan: 0 0 15px rgba(148, 163, 184, 0.3);
+  --shadow-glow-purple: 0 0 15px rgba(203, 213, 225, 0.3);
 
   --body-bg-image: 
-    radial-gradient(at 10% 20%, rgba(147, 197, 253, 0.1) 0px, transparent 50%),
-    radial-gradient(at 90% 80%, rgba(96, 165, 250, 0.1) 0px, transparent 50%),
+    radial-gradient(at 10% 20%, rgba(203, 213, 225, 0.05) 0px, transparent 50%),
+    radial-gradient(at 90% 80%, rgba(148, 163, 184, 0.05) 0px, transparent 50%),
     linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-bottom) 100%);
 }
 
