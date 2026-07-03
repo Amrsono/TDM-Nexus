@@ -67,6 +67,105 @@ const getOfflineSuggestions = (projectState: ProjectState, activePhase: PhaseId)
   return suggestions;
 };
 
+// ─── Provider-specific helpers ───────────────────────────────────────────────
+
+function getEndpointUrl(settings: AISettings): string {
+  switch (settings.provider) {
+    case 'gemini':
+      return `https://generativelanguage.googleapis.com/v1beta/models/${settings.model}:generateContent?key=${settings.apiKey}`;
+    case 'anthropic':
+      return 'https://api.anthropic.com/v1/messages';
+    case 'custom':
+      return settings.baseUrl || '';
+    case 'openai':
+    default:
+      return 'https://api.openai.com/v1/chat/completions';
+  }
+}
+
+function getRequestHeaders(settings: AISettings): Record<string, string> {
+  const base: Record<string, string> = { 'Content-Type': 'application/json' };
+  switch (settings.provider) {
+    case 'gemini':
+      return base; // key is in the URL
+    case 'anthropic':
+      return { ...base, 'x-api-key': settings.apiKey, 'anthropic-version': '2023-06-01' };
+    case 'openai':
+    case 'custom':
+    default:
+      return { ...base, 'Authorization': `Bearer ${settings.apiKey}` };
+  }
+}
+
+interface OpenAIMessage { role: string; content: string; }
+
+function buildRequestBody(
+  settings: AISettings,
+  messages: OpenAIMessage[],
+  opts: { jsonMode?: boolean } = {}
+): object {
+  switch (settings.provider) {
+    case 'gemini': {
+      // Gemini uses a different schema
+      const systemMsg = messages.find(m => m.role === 'system');
+      const userMessages = messages.filter(m => m.role !== 'system');
+      return {
+        system_instruction: systemMsg ? { parts: [{ text: systemMsg.content }] } : undefined,
+        contents: userMessages.map(m => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }]
+        })),
+        generationConfig: {
+          temperature: settings.temperature,
+          maxOutputTokens: settings.maxTokens,
+          ...(opts.jsonMode ? { responseMimeType: 'application/json' } : {})
+        }
+      };
+    }
+    case 'anthropic': {
+      const systemMsg = messages.find(m => m.role === 'system');
+      const userMessages = messages.filter(m => m.role !== 'system');
+      return {
+        model: settings.model,
+        max_tokens: settings.maxTokens,
+        ...(systemMsg ? { system: systemMsg.content } : {}),
+        messages: userMessages.map(m => ({ role: m.role, content: m.content }))
+      };
+    }
+    case 'openai':
+    case 'custom':
+    default:
+      return {
+        model: settings.model,
+        messages,
+        temperature: settings.temperature,
+        max_tokens: settings.maxTokens,
+        ...(opts.jsonMode ? { response_format: { type: 'json_object' } } : {})
+      };
+  }
+}
+
+function extractTextFromResponse(settings: AISettings, data: Record<string, unknown>): string {
+  switch (settings.provider) {
+    case 'gemini': {
+      const candidates = data.candidates as Array<{ content: { parts: Array<{ text: string }> } }>;
+      return candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    }
+    case 'anthropic': {
+      const content = data.content as Array<{ text: string }>;
+      return content?.[0]?.text ?? '';
+    }
+    case 'openai':
+    case 'custom':
+    default: {
+      const choices = data.choices as Array<{ message: { content: string } }>;
+      return choices?.[0]?.message?.content ?? '';
+    }
+  }
+}
+
+// ─── Public API ───────────────────────────────────────────────────────────────
+
 export const getNextBestActions = async (
   projectState: ProjectState, 
   activePhase: PhaseId,
@@ -78,35 +177,27 @@ export const getNextBestActions = async (
 
   try {
     const systemPrompt = buildSystemPrompt(projectState, activePhase);
-    const url = settings.provider === 'custom' ? (settings.baseUrl || '') : 'https://api.openai.com/v1/chat/completions';
-    
-    // Fallback if URL is missing
+    const url = getEndpointUrl(settings);
     if (!url) return getOfflineSuggestions(projectState, activePhase);
+
+    const messages: OpenAIMessage[] = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: 'Generate 3 next best actions based on the current project state. Return ONLY a JSON array of objects with keys: id, type (action/warning/insight/optimization), title, description, priority (high/medium/low), relatedTab.' }
+    ];
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${settings.apiKey}`
-      },
-      body: JSON.stringify({
-        model: settings.model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: 'Generate 3 next best actions based on the current project state. Return ONLY a JSON array of objects with keys: id, type (action/warning/insight/optimization), title, description, priority (high/medium/low), relatedTab.' }
-        ],
-        temperature: settings.temperature,
-        response_format: { type: 'json_object' }
-      })
+      headers: getRequestHeaders(settings),
+      body: JSON.stringify(buildRequestBody(settings, messages, { jsonMode: true }))
     });
 
     if (!response.ok) {
-      console.warn('API error, falling back to offline suggestions');
+      console.warn('API error, falling back to offline suggestions', await response.text());
       return getOfflineSuggestions(projectState, activePhase);
     }
 
     const data = await response.json();
-    const resultContent = data.choices[0].message.content;
+    const resultContent = extractTextFromResponse(settings, data);
     const parsed = JSON.parse(resultContent);
     return Array.isArray(parsed) ? parsed : (parsed.suggestions || getOfflineSuggestions(projectState, activePhase));
   } catch (error) {
@@ -132,38 +223,30 @@ export const chat = async (
 
   try {
     const systemPrompt = buildSystemPrompt(projectState, activePhase);
-    const url = settings.provider === 'custom' ? (settings.baseUrl || '') : 'https://api.openai.com/v1/chat/completions';
-    
+    const url = getEndpointUrl(settings);
     if (!url) throw new Error('Missing API URL');
 
-    const apiMessages = [
+    const apiMessages: OpenAIMessage[] = [
       { role: 'system', content: systemPrompt },
       ...messages.filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.content }))
     ];
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${settings.apiKey}`
-      },
-      body: JSON.stringify({
-        model: settings.model,
-        messages: apiMessages,
-        temperature: settings.temperature,
-        max_tokens: settings.maxTokens
-      })
+      headers: getRequestHeaders(settings),
+      body: JSON.stringify(buildRequestBody(settings, apiMessages))
     });
 
     if (!response.ok) {
-      throw new Error(`API Error: ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`API Error ${response.status}: ${errorText}`);
     }
 
     const data = await response.json();
     return {
       id: Math.random().toString(36).substring(2, 9),
       role: 'assistant',
-      content: data.choices[0].message.content,
+      content: extractTextFromResponse(settings, data),
       timestamp: new Date()
     };
   } catch (error) {

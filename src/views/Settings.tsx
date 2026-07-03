@@ -11,21 +11,45 @@ interface SettingsProps {
 
 export function Settings({ theme, setTheme }: SettingsProps) {
   const { settings, updateSettings } = useAIAssistant();
+  const [localSettings, setLocalSettings] = useState(settings);
   const [showApiKey, setShowApiKey] = useState(false);
   const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saved'>('idle');
+
+  React.useEffect(() => {
+    setLocalSettings(settings);
+  }, [settings]);
+
+  const handleSave = () => {
+    updateSettings(localSettings);
+    setSaveStatus('saved');
+    setTimeout(() => setSaveStatus('idle'), 2000);
+  };
 
   const handleTestConnection = async () => {
     setTestStatus('testing');
     try {
-      const url = settings.provider === 'custom' ? (settings.baseUrl || '') : 'https://api.openai.com/v1/models';
+      let url: string;
+      let headers: Record<string, string> = {};
+
+      if (localSettings.provider === 'gemini') {
+        // List models endpoint — lightweight ping to verify key validity
+        url = `https://generativelanguage.googleapis.com/v1beta/models?key=${localSettings.apiKey}`;
+      } else if (localSettings.provider === 'anthropic') {
+        url = 'https://api.anthropic.com/v1/models';
+        headers = { 'x-api-key': localSettings.apiKey, 'anthropic-version': '2023-06-01' };
+      } else if (localSettings.provider === 'custom') {
+        url = localSettings.baseUrl || '';
+        headers = { 'Authorization': `Bearer ${localSettings.apiKey}` };
+      } else {
+        // openai
+        url = 'https://api.openai.com/v1/models';
+        headers = { 'Authorization': `Bearer ${localSettings.apiKey}` };
+      }
+
       if (!url) throw new Error('No URL configured');
 
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${settings.apiKey}`
-        }
-      });
+      const response = await fetch(url, { method: 'GET', headers });
       if (response.ok) {
         setTestStatus('success');
       } else {
@@ -89,21 +113,28 @@ export function Settings({ theme, setTheme }: SettingsProps) {
                 <label style={{ color: 'var(--color-text-primary)' }}>Enable AI Assistant:</label>
                 <input 
                   type="checkbox" 
-                  checked={settings.enabled} 
-                  onChange={(e) => updateSettings({ enabled: e.target.checked })} 
+                  checked={localSettings.enabled} 
+                  onChange={(e) => setLocalSettings({ ...localSettings, enabled: e.target.checked })} 
                   style={{ width: '20px', height: '20px', accentColor: 'var(--color-cyan)' }}
                 />
               </div>
 
-              {settings.enabled && (
+              {localSettings.enabled && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'rgba(0,0,0,0.15)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
                   
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
                     {(['openai', 'gemini', 'anthropic', 'custom'] as const).map(provider => (
                       <div 
                         key={provider}
-                        className={`map-node ${settings.provider === provider ? 'active' : ''}`}
-                        onClick={() => updateSettings({ provider })}
+                        className={`map-node ${localSettings.provider === provider ? 'active' : ''}`}
+                        onClick={() => {
+                          let newModel = localSettings.model;
+                          if (provider === 'gemini') newModel = 'gemini-2.0-flash';
+                          else if (provider === 'openai') newModel = 'gpt-4o';
+                          else if (provider === 'anthropic') newModel = 'claude-3-5-sonnet-20240620';
+                          setLocalSettings({ ...localSettings, provider, model: newModel });
+                          setTestStatus('idle');
+                        }}
                         style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem' }}
                       >
                         <div className="map-node-title" style={{ textTransform: 'capitalize' }}>{provider}</div>
@@ -120,8 +151,8 @@ export function Settings({ theme, setTheme }: SettingsProps) {
                         <input 
                           type={showApiKey ? "text" : "password"} 
                           className="cyber-input" 
-                          value={settings.apiKey} 
-                          onChange={(e) => updateSettings({ apiKey: e.target.value })}
+                          value={localSettings.apiKey} 
+                          onChange={(e) => setLocalSettings({ ...localSettings, apiKey: e.target.value })}
                           placeholder="sk-..."
                           style={{ flex: 1 }}
                         />
@@ -135,18 +166,34 @@ export function Settings({ theme, setTheme }: SettingsProps) {
                       <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-text-secondary)', marginBottom: '6px', fontSize: '0.85rem' }}>
                         <Cpu size={14} /> Model
                       </label>
-                      <input 
-                        type="text" 
-                        className="cyber-input" 
-                        value={settings.model} 
-                        onChange={(e) => updateSettings({ model: e.target.value })}
-                        placeholder="e.g., gpt-4o, gemini-2.5-pro"
-                        style={{ width: '100%' }}
-                      />
+                      {localSettings.provider === 'gemini' ? (
+                        <select
+                          className="cyber-input"
+                          value={localSettings.model}
+                          onChange={(e) => setLocalSettings({ ...localSettings, model: e.target.value })}
+                          style={{ width: '100%', appearance: 'auto', backgroundColor: 'var(--bg-input)' }}
+                        >
+                          <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                          <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                          <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                          <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                          <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                          <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash-8B</option>
+                        </select>
+                      ) : (
+                        <input 
+                          type="text" 
+                          className="cyber-input" 
+                          value={localSettings.model} 
+                          onChange={(e) => setLocalSettings({ ...localSettings, model: e.target.value })}
+                          placeholder="e.g., gpt-4o, claude-3"
+                          style={{ width: '100%' }}
+                        />
+                      )}
                     </div>
                   </div>
 
-                  {settings.provider === 'custom' && (
+                  {localSettings.provider === 'custom' && (
                     <div>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-text-secondary)', marginBottom: '6px', fontSize: '0.85rem' }}>
                         <Globe size={14} /> Custom Base URL
@@ -154,8 +201,8 @@ export function Settings({ theme, setTheme }: SettingsProps) {
                       <input 
                         type="text" 
                         className="cyber-input" 
-                        value={settings.baseUrl || ''} 
-                        onChange={(e) => updateSettings({ baseUrl: e.target.value })}
+                        value={localSettings.baseUrl || ''} 
+                        onChange={(e) => setLocalSettings({ ...localSettings, baseUrl: e.target.value })}
                         placeholder="https://api.your-provider.com/v1/chat/completions"
                         style={{ width: '100%' }}
                       />
@@ -165,13 +212,13 @@ export function Settings({ theme, setTheme }: SettingsProps) {
                   <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
                     <div style={{ flex: '1 1 200px' }}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-text-secondary)', marginBottom: '6px', fontSize: '0.85rem' }}>
-                        Temperature: {settings.temperature}
+                        Temperature: {localSettings.temperature}
                       </label>
                       <input 
                         type="range" 
                         min="0" max="1" step="0.1"
-                        value={settings.temperature} 
-                        onChange={(e) => updateSettings({ temperature: parseFloat(e.target.value) })}
+                        value={localSettings.temperature} 
+                        onChange={(e) => setLocalSettings({ ...localSettings, temperature: parseFloat(e.target.value) })}
                         style={{ width: '100%', accentColor: 'var(--color-cyan)' }}
                       />
                     </div>
@@ -182,15 +229,25 @@ export function Settings({ theme, setTheme }: SettingsProps) {
                       <input 
                         type="number" 
                         className="cyber-input" 
-                        value={settings.maxTokens} 
-                        onChange={(e) => updateSettings({ maxTokens: parseInt(e.target.value) || 2048 })}
+                        value={localSettings.maxTokens} 
+                        onChange={(e) => setLocalSettings({ ...localSettings, maxTokens: parseInt(e.target.value) || 2048 })}
                         style={{ width: '100%' }}
                       />
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1rem' }}>
-                    <button className="cyber-button" onClick={handleTestConnection} disabled={testStatus === 'testing' || !settings.apiKey}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                    <button className="cyber-button" onClick={handleSave} style={{ background: 'var(--color-purple)' }}>
+                      Save Configuration
+                    </button>
+                    {saveStatus === 'saved' && <span style={{ color: 'var(--color-cyan)' }}>Saved!</span>}
+
+                    <button
+                      className="cyber-button secondary"
+                      onClick={handleTestConnection}
+                      disabled={testStatus === 'testing' || !localSettings.apiKey}
+                      title="Save your configuration first, then test"
+                    >
                       {testStatus === 'testing' ? 'Testing...' : 'Test Connection'}
                     </button>
                     {testStatus === 'success' && <span style={{ color: 'var(--color-green)' }}>Connection Successful!</span>}
