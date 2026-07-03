@@ -17,7 +17,7 @@ export function Analysing({ adoWorkItems, setAdoWorkItems, squads, setSquads, re
   const [editingAdo, setEditingAdo] = useState<string | null>(null);
   const [adoForm, setAdoForm] = useState<Partial<ADOWorkItem>>({});
   
-  const [newAdoType, setNewAdoType] = useState<'Epic' | 'Feature' | 'User Story'>('Feature');
+  const [newAdoType, setNewAdoType] = useState<'Epic' | 'Feature' | 'Delivery' | 'Function'>('Feature');
   const [newAdoTitle, setNewAdoTitle] = useState('');
   const [newAdoPortfolio, setNewAdoPortfolio] = useState(squads.length > 0 ? squads[0].name : 'Unassigned');
 
@@ -96,6 +96,8 @@ export function Analysing({ adoWorkItems, setAdoWorkItems, squads, setSquads, re
       id: `sq-${Math.floor(Math.random() * 10000)}`,
       name: newSquadName,
       lead: newSquadLead,
+      progress: 0,
+      status: 'Not Started',
       targetRelease: newSquadRelease,
       description: newSquadDesc
     }]);
@@ -147,7 +149,8 @@ export function Analysing({ adoWorkItems, setAdoWorkItems, squads, setSquads, re
                             <select className="cyber-input" value={adoForm.type} onChange={(e) => setAdoForm({...adoForm, type: e.target.value as any})}>
                               <option value="Epic">Epic</option>
                               <option value="Feature">Feature</option>
-                              <option value="User Story">User Story</option>
+                              <option value="Delivery">Delivery</option>
+                              <option value="Function">Function</option>
                             </select>
                           </td>
                           <td><input className="cyber-input" value={adoForm.title || ''} onChange={(e) => setAdoForm({...adoForm, title: e.target.value})} /></td>
@@ -208,7 +211,8 @@ export function Analysing({ adoWorkItems, setAdoWorkItems, squads, setSquads, re
               <select className="cyber-input" value={newAdoType} onChange={(e) => setNewAdoType(e.target.value as any)}>
                 <option value="Epic">Epic</option>
                 <option value="Feature">Feature</option>
-                <option value="User Story">User Story</option>
+                <option value="Delivery">Delivery</option>
+                <option value="Function">Function</option>
               </select>
               <select className="cyber-input" value={newAdoPortfolio} onChange={(e) => setNewAdoPortfolio(e.target.value)}>
                 {squads.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
