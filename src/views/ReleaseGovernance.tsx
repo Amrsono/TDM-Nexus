@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { RiskIssue, ProjectFinancials, PortfolioSquad, Defect, ChecklistItem } from '../utils/mockData';
-import { Scale, AlertTriangle, CheckSquare } from 'lucide-react';
+import { Scale, AlertTriangle, CheckSquare, Plus } from 'lucide-react';
 
 interface ReleaseGovernanceProps {
   risks: RiskIssue[];
@@ -17,6 +17,35 @@ interface ReleaseGovernanceProps {
 export function ReleaseGovernance({ 
   risks, setRisks, ragStatus, setRagStatus, checklist, setChecklist 
 }: ReleaseGovernanceProps) {
+  const [newChecklistItem, setNewChecklistItem] = useState('');
+  const [newRiskTitle, setNewRiskTitle] = useState('');
+  const [newRiskType, setNewRiskType] = useState<'Risk' | 'Issue' | 'Dependency'>('Risk');
+
+  const handleAddChecklist = () => {
+    if (!newChecklistItem.trim()) return;
+    setChecklist([...checklist, {
+      id: `chk-${Date.now()}`,
+      category: 'CP0',
+      item: newChecklistItem,
+      checked: false,
+      owner: 'Unassigned'
+    }]);
+    setNewChecklistItem('');
+  };
+
+  const handleAddRisk = () => {
+    if (!newRiskTitle.trim()) return;
+    setRisks([...risks, {
+      id: `RSK-${Math.floor(Math.random() * 10000)}`,
+      type: newRiskType,
+      title: newRiskTitle,
+      impact: 'Medium',
+      mitigation: '',
+      status: 'Open'
+    }]);
+    setNewRiskTitle('');
+  };
+
   return (
     <div className="view-grid">
       <div className="grid-col span-12">
@@ -68,6 +97,19 @@ export function ReleaseGovernance({
                 </div>
               </label>
             ))}
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
+              <input 
+                className="cyber-input" 
+                style={{ flex: 1 }} 
+                placeholder="New checkpoint description..." 
+                value={newChecklistItem}
+                onChange={(e) => setNewChecklistItem(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddChecklist()}
+              />
+              <button className="cyber-button" onClick={handleAddChecklist} style={{ padding: '0 1rem' }}>
+                <Plus size={16} /> Add
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -114,6 +156,28 @@ export function ReleaseGovernance({
                   ))}
                 </tbody>
               </table>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
+              <select 
+                className="cyber-input" 
+                value={newRiskType} 
+                onChange={(e) => setNewRiskType(e.target.value as any)}
+              >
+                <option value="Risk">Risk</option>
+                <option value="Issue">Issue</option>
+                <option value="Dependency">Dependency</option>
+              </select>
+              <input 
+                className="cyber-input" 
+                style={{ flex: 1 }} 
+                placeholder="New risk or issue..." 
+                value={newRiskTitle}
+                onChange={(e) => setNewRiskTitle(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddRisk()}
+              />
+              <button className="cyber-button" onClick={handleAddRisk} style={{ padding: '0 1rem' }}>
+                <Plus size={16} /> Add
+              </button>
             </div>
           </div>
         </div>
