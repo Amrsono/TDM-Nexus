@@ -260,6 +260,16 @@ export function Settings({ theme, setTheme }: SettingsProps) {
 
 interface GeminiModel { id: string; displayName: string; }
 
+const DEFAULT_GEMINI_MODELS: GeminiModel[] = [
+  { id: 'gemini-2.0-flash', displayName: 'Gemini 2.0 Flash' },
+  { id: 'gemini-2.0-flash-lite', displayName: 'Gemini 2.0 Flash-Lite' },
+  { id: 'gemini-1.5-flash-latest', displayName: 'Gemini 1.5 Flash (Latest)' },
+  { id: 'gemini-1.5-pro-latest', displayName: 'Gemini 1.5 Pro (Latest)' },
+  { id: 'gemini-1.5-flash-8b-latest', displayName: 'Gemini 1.5 Flash-8B (Latest)' },
+  { id: 'gemini-2.5-flash-preview-05-20', displayName: 'Gemini 2.5 Flash (Preview)' },
+  { id: 'gemini-2.5-pro-preview-06-05', displayName: 'Gemini 2.5 Pro (Preview)' },
+];
+
 function GeminiModelPicker({
   apiKey,
   value,
@@ -269,13 +279,13 @@ function GeminiModelPicker({
   value: string;
   onChange: (model: string) => void;
 }) {
-  const [models, setModels] = useState<GeminiModel[]>([]);
+  const [models, setModels] = useState<GeminiModel[]>(DEFAULT_GEMINI_MODELS);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [loaded, setLoaded] = useState(false);
+  const [usingCustomList, setUsingCustomList] = useState(false);
 
-  const fetchModels = async () => {
-    if (!apiKey) { setError('Enter your API key first.'); return; }
+  const fetchModels = React.useCallback(async () => {
+    if (!apiKey) return;
     setLoading(true);
     setError('');
     try {
@@ -288,7 +298,6 @@ function GeminiModelPicker({
         throw new Error(msg);
       }
       const data = await res.json();
-      // Only show models that support generateContent
       const list: GeminiModel[] = (data.models || [])
         .filter((m: { supportedGenerationMethods?: string[] }) =>
           m.supportedGenerationMethods?.includes('generateContent')
@@ -297,53 +306,31 @@ function GeminiModelPicker({
           id: m.name.replace('models/', ''),
           displayName: m.displayName || m.name.replace('models/', ''),
         }));
-      if (list.length === 0) throw new Error('No generateContent models found for this key.');
-      setModels(list);
-      setLoaded(true);
-      // Auto-select first model if current value is not in the list
-      if (!list.find(m => m.id === value)) {
-        onChange(list[0].id);
+      if (list.length > 0) {
+        setModels(list);
+        setUsingCustomList(true);
+        // Auto-select first model if current value is not in the list
+        if (!list.find(m => m.id === value)) {
+          onChange(list[0].id);
+        }
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      console.warn('Failed to fetch Gemini models, using fallbacks:', e);
+      setError('Could not fetch custom list (using default models).');
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiKey, value, onChange]);
 
-  if (!loaded) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <input
-            type="text"
-            className="cyber-input"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder="gemini-2.0-flash"
-            style={{ flex: 1 }}
-          />
-          <button
-            className="cyber-button secondary"
-            onClick={fetchModels}
-            disabled={loading || !apiKey}
-            title="Fetch available models from your API key"
-            style={{ whiteSpace: 'nowrap' }}
-          >
-            {loading ? '...' : '⟳ Load'}
-          </button>
-        </div>
-        {error && (
-          <span style={{ color: 'var(--color-red)', fontSize: '0.78rem' }}>
-            {error.length > 120 ? error.slice(0, 120) + '…' : error}
-          </span>
-        )}
-        <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.75rem' }}>
-          Click ⟳ Load to fetch models available to your API key.
-        </span>
-      </div>
-    );
-  }
+  // Auto-fetch on mount/apiKey change
+  React.useEffect(() => {
+    if (apiKey) {
+      fetchModels();
+    } else {
+      setModels(DEFAULT_GEMINI_MODELS);
+      setUsingCustomList(false);
+    }
+  }, [apiKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -360,15 +347,24 @@ function GeminiModelPicker({
         </select>
         <button
           className="cyber-button secondary"
-          onClick={() => { setLoaded(false); setModels([]); }}
-          title="Reload model list"
+          onClick={fetchModels}
+          disabled={loading || !apiKey}
+          title="Reload models list"
+          style={{ padding: '0 0.8rem' }}
         >
-          ⟳
+          {loading ? '...' : '⟳'}
         </button>
       </div>
-      <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.75rem' }}>
-        {models.length} models available for your key.
-      </span>
+      {error ? (
+        <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.75rem' }}>
+          {error}
+        </span>
+      ) : (
+        <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.75rem' }}>
+          {usingCustomList ? `${models.length} models loaded from API key.` : 'Showing default Gemini models.'}
+        </span>
+      )}
     </div>
   );
 }
+

@@ -189,7 +189,7 @@ async function parseFriendlyError(response: Response, provider: AISettings['prov
     const retryHint = retryMatch ? ` Retry in ~${Math.ceil(Number(retryMatch[1]))} seconds.` : '';
 
     if (rawMessage.includes('free_tier') || rawMessage.includes('FreeTier') || rawMessage.includes('limit: 0')) {
-      return `⚠️ Gemini free-tier quota exhausted.${retryHint} To fix this: enable billing at https://ai.dev/rate-limit, or switch to a different model (e.g. Gemini 1.5 Flash) in Settings.`;
+      return `⚠️ Gemini free-tier quota exhausted.${retryHint} To fix this: enable billing at https://aistudio.google.com/ or switch to a different model (e.g. Gemini 1.5 Flash (Latest)) in Settings.`;
     }
     return `⚠️ Rate limit reached.${retryHint} Please wait before sending another message.`;
   }
