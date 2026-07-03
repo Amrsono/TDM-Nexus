@@ -352,7 +352,7 @@ function GeminiModelPicker({
           className="cyber-input"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          style={{ flex: 1, appearance: 'auto', backgroundColor: 'var(--bg-input)' }}
+          style={{ flex: 1 }}
         >
           {models.map(m => (
             <option key={m.id} value={m.id}>{m.displayName}</option>

@@ -233,6 +233,52 @@ h1, h2, h3, h4 {
   background: var(--bg-card);
 }
 
+/* Dark dropdown popup — forces the browser to render the option list dark */
+.cyber-input select,
+select.cyber-input {
+  color-scheme: dark;
+  background-color: var(--bg-secondary);
+  color: var(--color-text-primary);
+}
+
+select.cyber-input option,
+.cyber-input select option {
+  background-color: #0c1328;
+  color: #f8fafc;
+}
+
+select.cyber-input option:hover,
+select.cyber-input option:checked {
+  background-color: #00f2fe22;
+  color: #00f2fe;
+}
+
+/* Light-theme override — keep readable in light mode */
+[data-theme="light"] select.cyber-input,
+[data-theme="light"] .cyber-input select {
+  color-scheme: light;
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+[data-theme="light"] select.cyber-input option {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+/* Medium-theme override */
+[data-theme="medium"] select.cyber-input,
+[data-theme="medium"] .cyber-input select {
+  color-scheme: dark;
+  background-color: #1e3a8a;
+  color: #f8fafc;
+}
+
+[data-theme="medium"] select.cyber-input option {
+  background-color: #1e3a8a;
+  color: #f8fafc;
+}
+
 /* Glowing RAG badges */
 .rag-badge {
   display: inline-flex;
