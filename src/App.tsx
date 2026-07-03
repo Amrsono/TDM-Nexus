@@ -442,7 +442,10 @@ export default function App() {
           </header>
 
           {/* Active View Module */}
-          <div className="active-view-overlay glass-panel">
+          <div 
+            className="active-view-overlay glass-panel"
+            style={activePhase === 'slidebuilder' ? { maxWidth: 'none' } : undefined}
+          >
             <div className="view-header">
               <div className="view-title">
                 {React.createElement(activeMetadata.icon, { size: 22, className: 'mono', style: { color: activeMetadata.color } })}
