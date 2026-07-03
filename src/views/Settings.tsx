@@ -173,12 +173,13 @@ export function Settings({ theme, setTheme }: SettingsProps) {
                           onChange={(e) => setLocalSettings({ ...localSettings, model: e.target.value })}
                           style={{ width: '100%', appearance: 'auto', backgroundColor: 'var(--bg-input)' }}
                         >
-                          <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-                          <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                          <option value="gemini-2.5-pro-preview-06-05">Gemini 2.5 Pro (Preview)</option>
+                          <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash (Preview)</option>
                           <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                          <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                          <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                          <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash-8B</option>
+                          <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash-Lite</option>
+                          <option value="gemini-1.5-pro-latest">Gemini 1.5 Pro (Latest)</option>
+                          <option value="gemini-1.5-flash-latest">Gemini 1.5 Flash (Latest)</option>
+                          <option value="gemini-1.5-flash-8b-latest">Gemini 1.5 Flash-8B (Latest)</option>
                         </select>
                       ) : (
                         <input 

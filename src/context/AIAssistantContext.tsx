@@ -110,17 +110,31 @@ const modelPrefixMap: Array<{ prefix: string; provider: AISettings['provider'] }
   { prefix: 'claude-', provider: 'anthropic' },
 ];
 
+/** Bare Gemini IDs that are deprecated on v1beta — map them to their -latest alias */
+const deprecatedGeminiModels: Record<string, string> = {
+  'gemini-1.5-flash': 'gemini-1.5-flash-latest',
+  'gemini-1.5-pro': 'gemini-1.5-pro-latest',
+  'gemini-1.5-flash-8b': 'gemini-1.5-flash-8b-latest',
+  'gemini-2.5-pro': 'gemini-2.5-pro-preview-06-05',
+  'gemini-2.5-flash': 'gemini-2.5-flash-preview-05-20',
+};
+
 /**
  * Ensures the saved model is compatible with the saved provider.
- * If the model clearly belongs to a different provider, it is replaced
- * with the sensible default for the active provider.
+ * - Replaces cross-provider model names with the provider's default.
+ * - Upgrades bare deprecated Gemini model IDs to their versioned aliases.
  */
 const sanitizeSettings = (s: AISettings): AISettings => {
+  // Fix cross-provider model mismatch (e.g. gpt-4o saved while provider is gemini)
   const mismatch = modelPrefixMap.find(
     ({ prefix, provider }) => s.model.startsWith(prefix) && provider !== s.provider
   );
   if (mismatch) {
     return { ...s, model: defaultModelForProvider[s.provider] || s.model };
+  }
+  // Upgrade stale/deprecated Gemini model IDs
+  if (s.provider === 'gemini' && deprecatedGeminiModels[s.model]) {
+    return { ...s, model: deprecatedGeminiModels[s.model] };
   }
   return s;
 };
