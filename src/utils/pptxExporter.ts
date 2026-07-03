@@ -157,12 +157,29 @@ export const exportToPPT = (
   });
   slide6.addTable(riskTableRows, { x: 0.5, y: 1.5, w: 12.3, h: 5.0, border: { type: 'solid', color: '1e293b', pt: 1 }, fontSize: 10, fontFace: 'Outfit', align: 'left', valign: 'middle'  });
 
-  // SLIDE 7: AI Executive Summary
+  // SLIDE 7: AI Executive Summary & Financials (Part 1)
+  const splitIndex = aiAnalysis.search(/(?:\r?\n)(?:3\.|3\s+QUALITY|QUALITY\s*&\s*TESTING)/i);
+  let part1 = aiAnalysis;
+  let part2 = '';
+  if (splitIndex !== -1) {
+    part1 = aiAnalysis.substring(0, splitIndex).trim();
+    part2 = aiAnalysis.substring(splitIndex).trim();
+  }
+
   const slide7 = pptx.addSlide();
-  addSlideHeader(slide7, 'AI Executive Summary');
-  slide7.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.5, w: 12.3, h: 5.5, fill: { color: CARD_BG }, line: { color: CYAN, width: 1 } });
-  slide7.addText('Nexus AI Analytics', { x: 0.8, y: 1.8, w: 11.0, h: 0.4, fontSize: 18, bold: true, color: PURPLE, fontFace: 'Outfit' });
-  slide7.addText(aiAnalysis, { x: 0.8, y: 2.5, w: 11.7, h: 4.0, fontSize: 14, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top' });
+  addSlideHeader(slide7, 'AI Executive Summary & Financials');
+  slide7.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.5, w: 12.3, h: 5.4, fill: { color: CARD_BG }, line: { color: CYAN, width: 1 } });
+  slide7.addText('Nexus AI Analytics - Part 1', { x: 0.8, y: 1.7, w: 11.0, h: 0.3, fontSize: 16, bold: true, color: PURPLE, fontFace: 'Outfit' });
+  slide7.addText(part1, { x: 0.8, y: 2.1, w: 11.7, h: 4.5, fontSize: 11, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top', lineSpacing: 16 });
+
+  if (part2) {
+    // SLIDE 8: AI Quality & Recommendations (Part 2)
+    const slide8 = pptx.addSlide();
+    addSlideHeader(slide8, 'AI Quality & Recommendations');
+    slide8.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.5, w: 12.3, h: 5.4, fill: { color: CARD_BG }, line: { color: CYAN, width: 1 } });
+    slide8.addText('Nexus AI Analytics - Part 2', { x: 0.8, y: 1.7, w: 11.0, h: 0.3, fontSize: 16, bold: true, color: PURPLE, fontFace: 'Outfit' });
+    slide8.addText(part2, { x: 0.8, y: 2.1, w: 11.7, h: 4.5, fontSize: 11, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top', lineSpacing: 16 });
+  }
 
   // Save
   pptx.writeFile({ fileName: `TDM_SteerCo_Report_${new Date().toISOString().split('T')[0]}.pptx` });
