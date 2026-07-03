@@ -164,6 +164,54 @@ function extractTextFromResponse(settings: AISettings, data: Record<string, unkn
   }
 }
 
+// ─── Error helpers ────────────────────────────────────────────────────────────
+
+/**
+ * Converts raw API error responses into concise, human-readable messages.
+ * Handles quota exhaustion, auth errors, model-not-found, and generic failures.
+ */
+async function parseFriendlyError(response: Response, provider: AISettings['provider']): Promise<string> {
+  let body: Record<string, unknown> = {};
+  try { body = await response.json(); } catch { /* ignore parse errors */ }
+
+  const status = response.status;
+
+  // Extract the core message from the provider's error schema
+  const rawMessage: string =
+    (body?.error as Record<string, unknown>)?.message as string ||
+    (body?.message as string) ||
+    response.statusText ||
+    'Unknown error';
+
+  if (status === 429) {
+    // Extract retry delay if present
+    const retryMatch = rawMessage.match(/(\d+(\.\d+)?)s/);
+    const retryHint = retryMatch ? ` Retry in ~${Math.ceil(Number(retryMatch[1]))} seconds.` : '';
+
+    if (rawMessage.includes('free_tier') || rawMessage.includes('FreeTier') || rawMessage.includes('limit: 0')) {
+      return `⚠️ Gemini free-tier quota exhausted.${retryHint} To fix this: enable billing at https://ai.dev/rate-limit, or switch to a different model (e.g. Gemini 1.5 Flash) in Settings.`;
+    }
+    return `⚠️ Rate limit reached.${retryHint} Please wait before sending another message.`;
+  }
+
+  if (status === 401 || status === 403) {
+    return `🔑 Authentication failed (${status}). Please check your API key in Settings — it may be invalid or expired.`;
+  }
+
+  if (status === 404) {
+    const modelHint = provider === 'gemini' ? ' Try selecting a different Gemini model in Settings.' : '';
+    return `❌ Model or endpoint not found (404).${modelHint}`;
+  }
+
+  if (status >= 500) {
+    return `🔥 The ${provider} API returned a server error (${status}). This is likely temporary — please try again shortly.`;
+  }
+
+  // Trim the raw message to avoid giant JSON dumps in the chat
+  const trimmed = rawMessage.length > 200 ? rawMessage.slice(0, 200) + '…' : rawMessage;
+  return `API Error ${status}: ${trimmed}`;
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 export const getNextBestActions = async (
@@ -238,8 +286,8 @@ export const chat = async (
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`API Error ${response.status}: ${errorText}`);
+      const friendlyError = await parseFriendlyError(response, settings.provider);
+      throw new Error(friendlyError);
     }
 
     const data = await response.json();
