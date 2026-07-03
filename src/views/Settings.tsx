@@ -302,10 +302,21 @@ function GeminiModelPicker({
         .filter((m: { supportedGenerationMethods?: string[] }) =>
           m.supportedGenerationMethods?.includes('generateContent')
         )
-        .map((m: { name: string; displayName?: string }) => ({
-          id: m.name.replace('models/', ''),
-          displayName: m.displayName || m.name.replace('models/', ''),
-        }));
+        .map((m: { name: string; displayName?: string }) => {
+          const id = m.name.replace('models/', '');
+          let displayName = m.displayName || id;
+
+          // Make confusing Google names (like "Gemini Flash Latest") explicitly say 1.5
+          if (id.includes('1.5-flash-8b') || displayName === 'Gemini Flash-Lite Latest') {
+            displayName = `Gemini 1.5 Flash-8B (${displayName})`;
+          } else if (id.includes('1.5-flash') || displayName === 'Gemini Flash Latest') {
+            displayName = `Gemini 1.5 Flash (${displayName})`;
+          } else if (id.includes('1.5-pro') || displayName === 'Gemini Pro Latest') {
+            displayName = `Gemini 1.5 Pro (${displayName})`;
+          }
+
+          return { id, displayName };
+        });
       if (list.length > 0) {
         setModels(list);
         setUsingCustomList(true);
