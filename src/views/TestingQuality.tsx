@@ -29,6 +29,8 @@ export function TestingQuality({ qaGates, setQaGates, defects, setDefects, squad
     }]);
     setNewDefectTitle('');
   };
+
+  return (
     <div className="view-grid">
       <div className="grid-col span-12">
         <div className="cyber-card">
