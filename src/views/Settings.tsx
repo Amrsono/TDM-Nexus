@@ -167,20 +167,11 @@ export function Settings({ theme, setTheme }: SettingsProps) {
                         <Cpu size={14} /> Model
                       </label>
                       {localSettings.provider === 'gemini' ? (
-                        <select
-                          className="cyber-input"
+                        <GeminiModelPicker
+                          apiKey={localSettings.apiKey}
                           value={localSettings.model}
-                          onChange={(e) => setLocalSettings({ ...localSettings, model: e.target.value })}
-                          style={{ width: '100%', appearance: 'auto', backgroundColor: 'var(--bg-input)' }}
-                        >
-                          <option value="gemini-2.5-pro-preview-06-05">Gemini 2.5 Pro (Preview)</option>
-                          <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash (Preview)</option>
-                          <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                          <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash-Lite</option>
-                          <option value="gemini-1.5-pro-latest">Gemini 1.5 Pro (Latest)</option>
-                          <option value="gemini-1.5-flash-latest">Gemini 1.5 Flash (Latest)</option>
-                          <option value="gemini-1.5-flash-8b-latest">Gemini 1.5 Flash-8B (Latest)</option>
-                        </select>
+                          onChange={(model) => setLocalSettings({ ...localSettings, model })}
+                        />
                       ) : (
                         <input 
                           type="text" 
@@ -261,6 +252,123 @@ export function Settings({ theme, setTheme }: SettingsProps) {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─── Gemini Model Picker ──────────────────────────────────────────────────────
+
+interface GeminiModel { id: string; displayName: string; }
+
+function GeminiModelPicker({
+  apiKey,
+  value,
+  onChange,
+}: {
+  apiKey: string;
+  value: string;
+  onChange: (model: string) => void;
+}) {
+  const [models, setModels] = useState<GeminiModel[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [loaded, setLoaded] = useState(false);
+
+  const fetchModels = async () => {
+    if (!apiKey) { setError('Enter your API key first.'); return; }
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
+      );
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        const msg = (body?.error?.message as string) || res.statusText;
+        throw new Error(msg);
+      }
+      const data = await res.json();
+      // Only show models that support generateContent
+      const list: GeminiModel[] = (data.models || [])
+        .filter((m: { supportedGenerationMethods?: string[] }) =>
+          m.supportedGenerationMethods?.includes('generateContent')
+        )
+        .map((m: { name: string; displayName?: string }) => ({
+          id: m.name.replace('models/', ''),
+          displayName: m.displayName || m.name.replace('models/', ''),
+        }));
+      if (list.length === 0) throw new Error('No generateContent models found for this key.');
+      setModels(list);
+      setLoaded(true);
+      // Auto-select first model if current value is not in the list
+      if (!list.find(m => m.id === value)) {
+        onChange(list[0].id);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!loaded) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <input
+            type="text"
+            className="cyber-input"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="gemini-2.0-flash"
+            style={{ flex: 1 }}
+          />
+          <button
+            className="cyber-button secondary"
+            onClick={fetchModels}
+            disabled={loading || !apiKey}
+            title="Fetch available models from your API key"
+            style={{ whiteSpace: 'nowrap' }}
+          >
+            {loading ? '...' : '⟳ Load'}
+          </button>
+        </div>
+        {error && (
+          <span style={{ color: 'var(--color-red)', fontSize: '0.78rem' }}>
+            {error.length > 120 ? error.slice(0, 120) + '…' : error}
+          </span>
+        )}
+        <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.75rem' }}>
+          Click ⟳ Load to fetch models available to your API key.
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <select
+          className="cyber-input"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          style={{ flex: 1, appearance: 'auto', backgroundColor: 'var(--bg-input)' }}
+        >
+          {models.map(m => (
+            <option key={m.id} value={m.id}>{m.displayName}</option>
+          ))}
+        </select>
+        <button
+          className="cyber-button secondary"
+          onClick={() => { setLoaded(false); setModels([]); }}
+          title="Reload model list"
+        >
+          ⟳
+        </button>
+      </div>
+      <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.75rem' }}>
+        {models.length} models available for your key.
+      </span>
     </div>
   );
 }
