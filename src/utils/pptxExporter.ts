@@ -69,16 +69,17 @@ export const exportToPPT = (
     slide.addText('TDM NEXUS  •  Steering Committee Report', {
       x: 0.3, y: 7.32, w: 8.0, h: 0.15, fontSize: 7, color: VF_GRAY_MID, fontFace: VF_FONT
     });
-    // VOIS branding badge bottom-right
-    slide.addShape(pptx.ShapeType.rect, { x: 12.0, y: 7.05, w: 1.3, h: 0.4, fill: { color: VF_RED } });
+    // VOIS branding badge bottom-right (shifted left if page number is present to prevent overlap)
+    const badgeX = slideNum !== undefined ? 11.3 : 12.0;
+    slide.addShape(pptx.ShapeType.rect, { x: badgeX, y: 7.05, w: 1.3, h: 0.4, fill: { color: VF_RED } });
     slide.addText('VOIS', {
-      x: 12.0, y: 7.05, w: 1.3, h: 0.4, fontSize: 9, bold: true,
+      x: badgeX, y: 7.05, w: 1.3, h: 0.4, fontSize: 9, bold: true,
       color: VF_WHITE, fontFace: VF_FONT, align: 'center', valign: 'middle'
     });
     if (slideNum !== undefined) {
-      slide.addShape(pptx.ShapeType.rect, { x: 12.7, y: 7.1, w: 0.6, h: 0.4, fill: { color: VF_AUBERGINE } });
+      slide.addShape(pptx.ShapeType.rect, { x: 12.7, y: 7.05, w: 0.6, h: 0.4, fill: { color: VF_AUBERGINE } });
       slide.addText(slideNum.toString(), {
-        x: 12.7, y: 7.1, w: 0.6, h: 0.4, fontSize: 14, bold: true,
+        x: 12.7, y: 7.05, w: 0.6, h: 0.4, fontSize: 14, bold: true,
         color: VF_WHITE, fontFace: VF_FONT, align: 'center', valign: 'middle'
       });
     }
