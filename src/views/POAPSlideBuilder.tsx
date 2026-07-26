@@ -1040,8 +1040,13 @@ export function POAPSlideBuilder() {
     s2.addText('RAG Legend:', { x: 10.0, y: 0.2, w: 1.0, h: 0.2, fontSize: 7, bold: true, color: BLACK, fontFace: 'Arial' });
     [{ label: 'Critical Risk', color: RED }, { label: 'On Track', color: '00B050' }, { label: 'Behind/Risk', color: 'FFC000' }, { label: 'Off Track', color: 'A6A6A6' }]
       .forEach((item, i) => {
-        s2.addShape(pptx.ShapeType.rect, { x: 11.0 + (i > 1 ? -1.0 : 0), y: 0.45 + (i > 1 ? 0.2 : 0) + (i % 2 === 1 ? 0.2 : 0), w: 0.15, h: 0.15, fill: { color: item.color } });
-        s2.addText(item.label, { x: 11.2 + (i > 1 ? -1.0 : 0), y: 0.42 + (i > 1 ? 0.2 : 0) + (i % 2 === 1 ? 0.2 : 0), w: 1.5, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
+        const col = i % 2;
+        const row = Math.floor(i / 2);
+        const startX = 10.0 + col * 1.5;
+        const startY = 0.45 + row * 0.2;
+        
+        s2.addShape(pptx.ShapeType.rect, { x: startX, y: startY + 0.03, w: 0.15, h: 0.15, fill: { color: item.color } });
+        s2.addText(item.label, { x: startX + 0.2, y: startY, w: 1.2, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
       });
 
     form.milestones.forEach((ms, idx) => {
