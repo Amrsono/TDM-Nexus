@@ -26,19 +26,25 @@ export const exportToPPT = (
   pptx.layout = 'LAYOUT_WIDE';
 
   // ── Vodafone Official Brand Colours ──────────────────────────────────────
-  const VF_RED       = 'E60000';   // Vodafone primary red
-  const VF_WHITE     = 'FFFFFF';   // Slide background
-  const VF_BLACK     = '1A1A1A';   // Primary body text
-  const VF_GRAY_DARK = '666666';   // Secondary text / meta
-  const VF_GRAY_MID  = 'CCCCCC';   // Borders / dividers
-  const VF_GRAY_LITE = 'F5F5F5';   // Card / row fill
-  const VF_RED_LITE  = 'FEE2E2';   // Soft red card background
-  const VF_FOOTER_BG = '0D0D0D';   // Footer bar
+  const VF_RED        = 'E60000';   // Vodafone Primary Red
+  const VF_WHITE      = 'FFFFFF';   // White
+  const VF_BLACK      = '333333';   // Vodafone Black
+  const VF_AUBERGINE  = '5E2750';   // Vodafone Finn / Aubergine
+  const VF_ABBEY      = '4A4D4E';   // Vodafone Abbey – secondary text
+  const VF_CERULEAN   = '00B0CA';   // Vodafone Cerulean – info accents
+  const VF_LAGOON     = '007C92';   // Vodafone Blue Lagoon – deep info
+  const VF_SEANCE     = '9C2AA0';   // Vodafone Seance – purple accent
+  const VF_GRAY_MID   = 'D6D6D6';   // Neutral mid-grey borders
+  const VF_GRAY_LITE  = 'F4F4F4';   // Neutral light-grey card fill
+  const VF_RED_LITE   = 'FCEAEA';   // Soft Vodafone red tint
 
-  // RAG status colours (kept clear and accessible)
-  const COLOR_GREEN = '007A33';   // Vodafone Green
-  const COLOR_AMBER = 'FF9900';   // Vodafone Amber
-  const COLOR_RED   = 'E60000';   // Vodafone Red
+  // RAG status colours – Vodafone brand-aligned
+  const COLOR_GREEN = '428600';   // Vodafone status green
+  const COLOR_AMBER = 'EB9700';   // Vodafone status amber
+  const COLOR_RED   = 'E60000';   // Vodafone status red
+
+  // Font – matches the web app
+  const VF_FONT = 'Outfit';
 
   const getRagHex = (val: string) => {
     if (val.toLowerCase() === 'green') return COLOR_GREEN;
@@ -49,25 +55,31 @@ export const exportToPPT = (
   // ── Shared helpers ────────────────────────────────────────────────────────
   const addSlideHeader = (slide: any, title: string, slideNum?: number) => {
     slide.background = { color: VF_WHITE };
-    // Top red accent line
+    // Top red accent bar
     slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 0.08, fill: { color: VF_RED } });
     // Title
     slide.addText(title, {
       x: 0.5, y: 0.2, w: 10.0, h: 0.6,
-      fontSize: 24, bold: true, color: VF_BLACK, fontFace: 'Calibri'
+      fontSize: 24, bold: true, color: VF_AUBERGINE, fontFace: VF_FONT
     });
     // Thin red underline beneath title
     slide.addShape(pptx.ShapeType.rect, { x: 0.5, y: 0.85, w: 1.5, h: 0.04, fill: { color: VF_RED } });
-    // Footer bar
-    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 7.3, w: '100%', h: 0.2, fill: { color: VF_FOOTER_BG } });
-    slide.addText('TDM NEXUS – Steering Committee Report', {
-      x: 0.3, y: 7.32, w: 8.0, h: 0.15, fontSize: 7, color: VF_GRAY_MID, fontFace: 'Calibri'
+    // Aubergine footer bar
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 7.3, w: '100%', h: 0.2, fill: { color: VF_AUBERGINE } });
+    slide.addText('TDM NEXUS  •  Steering Committee Report', {
+      x: 0.3, y: 7.32, w: 8.0, h: 0.15, fontSize: 7, color: VF_GRAY_MID, fontFace: VF_FONT
+    });
+    // Vodafone branding badge bottom-right
+    slide.addShape(pptx.ShapeType.rect, { x: 12.0, y: 7.05, w: 1.3, h: 0.4, fill: { color: VF_RED } });
+    slide.addText('vodafone', {
+      x: 12.0, y: 7.05, w: 1.3, h: 0.4, fontSize: 9, bold: true,
+      color: VF_WHITE, fontFace: VF_FONT, align: 'center', valign: 'middle'
     });
     if (slideNum !== undefined) {
-      slide.addShape(pptx.ShapeType.rect, { x: 12.7, y: 7.1, w: 0.6, h: 0.4, fill: { color: VF_RED } });
+      slide.addShape(pptx.ShapeType.rect, { x: 12.7, y: 7.1, w: 0.6, h: 0.4, fill: { color: VF_AUBERGINE } });
       slide.addText(slideNum.toString(), {
         x: 12.7, y: 7.1, w: 0.6, h: 0.4, fontSize: 14, bold: true,
-        color: VF_WHITE, fontFace: 'Calibri', align: 'center', valign: 'middle'
+        color: VF_WHITE, fontFace: VF_FONT, align: 'center', valign: 'middle'
       });
     }
   };
@@ -75,22 +87,24 @@ export const exportToPPT = (
   // ── SLIDE 1: Title ────────────────────────────────────────────────────────
   const slide1 = pptx.addSlide();
   slide1.background = { color: VF_WHITE };
+  // Top red accent bar
   slide1.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 0.08, fill: { color: VF_RED } });
-  slide1.addShape(pptx.ShapeType.rect, { x: 0, y: 7.3, w: '100%', h: 0.2, fill: { color: VF_FOOTER_BG } });
-  // Large red left accent bar
-  slide1.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.4, w: 0.12, h: 3.8, fill: { color: VF_RED } });
-  slide1.addText('TDM NEXUS', { x: 0.8, y: 1.5, w: 11.0, h: 1.0, fontSize: 52, bold: true, color: VF_BLACK, fontFace: 'Calibri' });
-  slide1.addText('STEERING COMMITTEE REPORT', { x: 0.8, y: 2.7, w: 10.0, h: 0.5, fontSize: 16, bold: true, color: VF_RED, fontFace: 'Calibri' });
+  // Aubergine footer bar
+  slide1.addShape(pptx.ShapeType.rect, { x: 0, y: 7.3, w: '100%', h: 0.2, fill: { color: VF_AUBERGINE } });
+  // Large aubergine left accent bar
+  slide1.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.4, w: 0.12, h: 3.8, fill: { color: VF_AUBERGINE } });
+  slide1.addText('TDM NEXUS', { x: 0.8, y: 1.5, w: 11.0, h: 1.0, fontSize: 52, bold: true, color: VF_AUBERGINE, fontFace: VF_FONT });
+  slide1.addText('STEERING COMMITTEE REPORT', { x: 0.8, y: 2.7, w: 10.0, h: 0.5, fontSize: 16, bold: true, color: VF_RED, fontFace: VF_FONT });
   slide1.addShape(pptx.ShapeType.rect, { x: 0.8, y: 3.4, w: 6.0, h: 1.6, fill: { color: VF_GRAY_LITE }, line: { color: VF_GRAY_MID, width: 1 } });
   slide1.addText([
     { text: 'Reporting Date: ', options: { bold: true, color: VF_BLACK } },
-    { text: new Date().toLocaleDateString('en-GB') + '\n', options: { color: VF_GRAY_DARK } },
+    { text: new Date().toLocaleDateString('en-GB') + '\n', options: { color: VF_ABBEY } },
     { text: 'Overall Status: ', options: { bold: true, color: VF_BLACK } },
     { text: ragStatus.overall.toUpperCase(), options: { color: getRagHex(ragStatus.overall), bold: true } }
-  ], { x: 1.0, y: 3.55, w: 5.5, h: 1.3, fontSize: 13, fontFace: 'Calibri', lineSpacing: 24 });
-  // Vodafone logo text bottom right
+  ], { x: 1.0, y: 3.55, w: 5.5, h: 1.3, fontSize: 13, fontFace: VF_FONT, lineSpacing: 24 });
+  // Vodafone branding badge bottom-right
   slide1.addShape(pptx.ShapeType.rect, { x: 11.8, y: 6.8, w: 1.5, h: 0.6, fill: { color: VF_RED } });
-  slide1.addText('vodafone', { x: 11.8, y: 6.8, w: 1.5, h: 0.6, fontSize: 11, bold: true, color: VF_WHITE, fontFace: 'Calibri', align: 'center', valign: 'middle' });
+  slide1.addText('vodafone', { x: 11.8, y: 6.8, w: 1.5, h: 0.6, fontSize: 11, bold: true, color: VF_WHITE, fontFace: VF_FONT, align: 'center', valign: 'middle' });
 
   // ── SLIDE 2: RAG Status ───────────────────────────────────────────────────
   const slide2 = pptx.addSlide();
@@ -106,10 +120,10 @@ export const exportToPPT = (
     const ragHex = getRagHex(r.val);
     slide2.addShape(pptx.ShapeType.rect, { x: xOff, y: 1.3, w: 3.0, h: 4.5, fill: { color: VF_GRAY_LITE }, line: { color: VF_GRAY_MID, width: 0.75 } });
     slide2.addShape(pptx.ShapeType.rect, { x: xOff, y: 1.3, w: 3.0, h: 0.08, fill: { color: ragHex } });
-    slide2.addText(r.label.toUpperCase(), { x: xOff + 0.15, y: 1.45, w: 2.7, h: 0.4, fontSize: 15, bold: true, color: VF_BLACK, fontFace: 'Calibri' });
+    slide2.addText(r.label.toUpperCase(), { x: xOff + 0.15, y: 1.45, w: 2.7, h: 0.4, fontSize: 15, bold: true, color: VF_AUBERGINE, fontFace: VF_FONT });
     slide2.addShape(pptx.ShapeType.rect, { x: xOff + 0.15, y: 2.0, w: 1.4, h: 0.45, fill: { color: ragHex }, line: { color: ragHex, width: 1 } });
-    slide2.addText(r.val.toUpperCase(), { x: xOff + 0.15, y: 2.0, w: 1.4, h: 0.45, fontSize: 13, bold: true, color: VF_WHITE, fontFace: 'Calibri', align: 'center', valign: 'middle' });
-    slide2.addText(r.desc, { x: xOff + 0.15, y: 2.65, w: 2.7, h: 2.8, fontSize: 12, color: VF_GRAY_DARK, fontFace: 'Calibri', lineSpacing: 18 });
+    slide2.addText(r.val.toUpperCase(), { x: xOff + 0.15, y: 2.0, w: 1.4, h: 0.45, fontSize: 13, bold: true, color: VF_WHITE, fontFace: VF_FONT, align: 'center', valign: 'middle' });
+    slide2.addText(r.desc, { x: xOff + 0.15, y: 2.65, w: 2.7, h: 2.8, fontSize: 12, color: VF_ABBEY, fontFace: VF_FONT, lineSpacing: 18 });
   });
 
   // ── SLIDE 3: Financial Health ─────────────────────────────────────────────
@@ -126,13 +140,13 @@ export const exportToPPT = (
     const rowFill = i % 2 === 0 ? VF_WHITE : VF_GRAY_LITE;
     finTableRows.push([
       { text: a.squadName, options: { color: VF_BLACK, fill: { color: rowFill }, align: 'left', bold: true } },
-      { text: `$${(a.capexAllocated / 1000).toFixed(0)}k`, options: { color: VF_GRAY_DARK, fill: { color: rowFill }, align: 'right' } },
-      { text: `$${(a.capexSpent / 1000).toFixed(0)}k`,     options: { color: VF_GRAY_DARK, fill: { color: rowFill }, align: 'right' } },
-      { text: `$${(a.opexAllocated / 1000).toFixed(0)}k`,  options: { color: VF_GRAY_DARK, fill: { color: rowFill }, align: 'right' } },
-      { text: `$${(a.opexSpent / 1000).toFixed(0)}k`,      options: { color: VF_GRAY_DARK, fill: { color: rowFill }, align: 'right' } }
+      { text: `$${(a.capexAllocated / 1000).toFixed(0)}k`, options: { color: VF_ABBEY, fill: { color: rowFill }, align: 'right' } },
+      { text: `$${(a.capexSpent / 1000).toFixed(0)}k`,     options: { color: VF_ABBEY, fill: { color: rowFill }, align: 'right' } },
+      { text: `$${(a.opexAllocated / 1000).toFixed(0)}k`,  options: { color: VF_ABBEY, fill: { color: rowFill }, align: 'right' } },
+      { text: `$${(a.opexSpent / 1000).toFixed(0)}k`,      options: { color: VF_ABBEY, fill: { color: rowFill }, align: 'right' } }
     ]);
   });
-  slide3.addTable(finTableRows, { x: 0.5, y: 1.3, w: 12.3, h: 5.5, border: { type: 'solid', color: VF_GRAY_MID, pt: 1 }, fontSize: 11, fontFace: 'Calibri', valign: 'middle' });
+  slide3.addTable(finTableRows, { x: 0.5, y: 1.3, w: 12.3, h: 5.5, border: { type: 'solid', color: VF_GRAY_MID, pt: 1 }, fontSize: 11, fontFace: VF_FONT, valign: 'middle' });
 
   // ── SLIDE 4: Squad Delivery ───────────────────────────────────────────────
   const slide4 = pptx.addSlide();
@@ -142,16 +156,16 @@ export const exportToPPT = (
     const isBlocked = s.status === 'Blocked';
     slide4.addShape(pptx.ShapeType.rect, { x: 0.5, y: yOff, w: 12.3, h: 0.82, fill: { color: VF_GRAY_LITE }, line: { color: isBlocked ? VF_RED : VF_GRAY_MID, width: isBlocked ? 1.5 : 0.75 } });
     slide4.addShape(pptx.ShapeType.rect, { x: 0.5, y: yOff, w: 0.08, h: 0.82, fill: { color: isBlocked ? VF_RED : COLOR_GREEN } });
-    slide4.addText(s.name, { x: 0.75, y: yOff + 0.1, w: 3.5, h: 0.3, fontSize: 13, bold: true, color: VF_BLACK, fontFace: 'Calibri' });
-    slide4.addText(`Lead: ${s.lead} | Target: ${s.targetRelease}`, { x: 0.75, y: yOff + 0.44, w: 3.5, h: 0.28, fontSize: 9, color: VF_GRAY_DARK, fontFace: 'Calibri' });
+    slide4.addText(s.name, { x: 0.75, y: yOff + 0.1, w: 3.5, h: 0.3, fontSize: 13, bold: true, color: VF_BLACK, fontFace: VF_FONT });
+    slide4.addText(`Lead: ${s.lead} | Target: ${s.targetRelease}`, { x: 0.75, y: yOff + 0.44, w: 3.5, h: 0.28, fontSize: 9, color: VF_ABBEY, fontFace: VF_FONT });
     // Progress bar track
     slide4.addShape(pptx.ShapeType.rect, { x: 4.5, y: yOff + 0.3, w: 5.5, h: 0.22, fill: { color: VF_GRAY_MID } });
     if (s.progress > 0) {
       slide4.addShape(pptx.ShapeType.rect, { x: 4.5, y: yOff + 0.3, w: (s.progress / 100) * 5.5, h: 0.22, fill: { color: isBlocked ? COLOR_AMBER : VF_RED } });
     }
-    slide4.addText(`${s.progress}%`, { x: 10.1, y: yOff + 0.22, w: 0.8, h: 0.3, fontSize: 12, bold: true, color: VF_RED, fontFace: 'Calibri' });
-    const stCol = s.status === 'Blocked' ? COLOR_RED : s.status === 'Completed' ? COLOR_GREEN : VF_GRAY_DARK;
-    slide4.addText(s.status, { x: 11.0, y: yOff + 0.24, w: 1.7, h: 0.28, fontSize: 11, bold: true, color: stCol, fontFace: 'Calibri', align: 'right' });
+    slide4.addText(`${s.progress}%`, { x: 10.1, y: yOff + 0.22, w: 0.8, h: 0.3, fontSize: 12, bold: true, color: VF_RED, fontFace: VF_FONT });
+    const stCol = s.status === 'Blocked' ? COLOR_RED : s.status === 'Completed' ? COLOR_GREEN : VF_ABBEY;
+    slide4.addText(s.status, { x: 11.0, y: yOff + 0.24, w: 1.7, h: 0.28, fontSize: 11, bold: true, color: stCol, fontFace: VF_FONT, align: 'right' });
   });
 
   // ── SLIDE 5: QA Gates ─────────────────────────────────────────────────────
@@ -173,8 +187,8 @@ export const exportToPPT = (
     const kx = 0.4 + i * 3.2;
     slide5.addShape(pptx.ShapeType.rect, { x: kx, y: 1.2, w: 3.0, h: 1.0, fill: { color: VF_GRAY_LITE }, line: { color: VF_GRAY_MID, width: 0.75 } });
     slide5.addShape(pptx.ShapeType.rect, { x: kx, y: 1.2, w: 3.0, h: 0.07, fill: { color: kpi.color } });
-    slide5.addText(kpi.label, { x: kx + 0.15, y: 1.3, w: 2.7, h: 0.3, fontSize: 10, color: VF_GRAY_DARK, fontFace: 'Calibri' });
-    slide5.addText(kpi.val,   { x: kx + 0.15, y: 1.6, w: 2.7, h: 0.45, fontSize: 22, bold: true, color: kpi.color, fontFace: 'Calibri' });
+    slide5.addText(kpi.label, { x: kx + 0.15, y: 1.3, w: 2.7, h: 0.3, fontSize: 10, color: VF_ABBEY, fontFace: VF_FONT });
+    slide5.addText(kpi.val,   { x: kx + 0.15, y: 1.6, w: 2.7, h: 0.45, fontSize: 22, bold: true, color: kpi.color, fontFace: VF_FONT });
   });
 
   const qaTableHeader: any[] = [
@@ -190,22 +204,22 @@ export const exportToPPT = (
   qaGates.forEach((g, i) => {
     const pr = g.totalTests > 0 ? Math.round((g.passed / g.totalTests) * 100) : 0;
     const prColor = pr >= 80 ? COLOR_GREEN : pr >= 50 ? COLOR_AMBER : COLOR_RED;
-    const stColor = g.status === 'Passed' ? COLOR_GREEN : g.status === 'Failed' ? COLOR_RED : g.status === 'In Progress' ? COLOR_AMBER : VF_GRAY_DARK;
+    const stColor = g.status === 'Passed' ? COLOR_GREEN : g.status === 'Failed' ? COLOR_RED : g.status === 'In Progress' ? COLOR_AMBER : VF_ABBEY;
     const rowFill = i % 2 === 0 ? VF_WHITE : VF_GRAY_LITE;
     qaTableRows.push([
       { text: g.name,                       options: { color: VF_BLACK,    fill: { color: rowFill }, bold: true, align: 'left'   } },
       { text: g.status,                     options: { color: stColor,     fill: { color: rowFill }, bold: true, align: 'center' } },
       { text: g.totalTests.toString(),      options: { color: VF_BLACK,    fill: { color: rowFill }, align: 'center' } },
       { text: g.passed.toString(),          options: { color: COLOR_GREEN, fill: { color: rowFill }, bold: true, align: 'center' } },
-      { text: g.failed.toString(),          options: { color: g.failed > 0 ? COLOR_RED : VF_GRAY_DARK, fill: { color: rowFill }, bold: g.failed > 0, align: 'center' } },
-      { text: (g.blocked || 0).toString(), options: { color: g.blocked ? COLOR_AMBER : VF_GRAY_DARK, fill: { color: rowFill }, align: 'center' } },
+      { text: g.failed.toString(),          options: { color: g.failed > 0 ? COLOR_RED : VF_ABBEY, fill: { color: rowFill }, bold: g.failed > 0, align: 'center' } },
+      { text: (g.blocked || 0).toString(), options: { color: g.blocked ? COLOR_AMBER : VF_ABBEY, fill: { color: rowFill }, align: 'center' } },
       { text: `${pr}%`,                     options: { color: prColor, fill: { color: rowFill }, bold: true, align: 'center' } },
     ]);
   });
   slide5.addTable(qaTableRows, {
     x: 0.5, y: 2.4, w: 12.3, h: Math.min(4.5, 0.45 + qaGates.length * 0.45),
     border: { type: 'solid', color: VF_GRAY_MID, pt: 1 },
-    fontSize: 11, fontFace: 'Calibri', valign: 'middle',
+    fontSize: 11, fontFace: VF_FONT, valign: 'middle',
     colW: [1.6, 1.6, 1.2, 1.2, 1.2, 1.2, 1.3]
   });
 
@@ -227,8 +241,8 @@ export const exportToPPT = (
     const kx = 0.4 + i * 3.2;
     slide5b.addShape(pptx.ShapeType.rect, { x: kx, y: 1.2, w: 3.0, h: 1.0, fill: { color: VF_GRAY_LITE }, line: { color: VF_GRAY_MID, width: 0.75 } });
     slide5b.addShape(pptx.ShapeType.rect, { x: kx, y: 1.2, w: 3.0, h: 0.07, fill: { color: kpi.color } });
-    slide5b.addText(kpi.label, { x: kx + 0.15, y: 1.3, w: 2.7, h: 0.3, fontSize: 10, color: VF_GRAY_DARK, fontFace: 'Calibri' });
-    slide5b.addText(kpi.val,   { x: kx + 0.15, y: 1.6, w: 2.7, h: 0.45, fontSize: 22, bold: true, color: kpi.color, fontFace: 'Calibri' });
+    slide5b.addText(kpi.label, { x: kx + 0.15, y: 1.3, w: 2.7, h: 0.3, fontSize: 10, color: VF_ABBEY, fontFace: VF_FONT });
+    slide5b.addText(kpi.val,   { x: kx + 0.15, y: 1.6, w: 2.7, h: 0.45, fontSize: 22, bold: true, color: kpi.color, fontFace: VF_FONT });
   });
 
   const defTableHeader: any[] = [
@@ -241,14 +255,14 @@ export const exportToPPT = (
   ];
   const defTableRows: any[][] = [defTableHeader];
   defects.slice(0, 18).forEach((d, i) => {
-    const sevColor = d.severity === 'P1' ? COLOR_RED : d.severity === 'P2' ? COLOR_AMBER : VF_GRAY_DARK;
+    const sevColor = d.severity === 'P1' ? COLOR_RED : d.severity === 'P2' ? COLOR_AMBER : VF_ABBEY;
     const stColor  = d.status === 'Closed' ? COLOR_GREEN : d.status === 'In Progress' || d.status === 'Retesting' ? COLOR_AMBER : COLOR_RED;
     const rowFill = i % 2 === 0 ? VF_WHITE : VF_GRAY_LITE;
     defTableRows.push([
       { text: d.id,           options: { color: VF_RED,      fill: { color: rowFill }, bold: true, align: 'center' } },
       { text: d.title,        options: { color: VF_BLACK,    fill: { color: rowFill }, align: 'left'   } },
-      { text: d.phase || '-', options: { color: VF_GRAY_DARK,fill: { color: rowFill }, align: 'center' } },
-      { text: d.squad,        options: { color: VF_GRAY_DARK,fill: { color: rowFill }, align: 'left'   } },
+      { text: d.phase || '-', options: { color: VF_ABBEY,    fill: { color: rowFill }, align: 'center' } },
+      { text: d.squad,        options: { color: VF_ABBEY,    fill: { color: rowFill }, align: 'left'   } },
       { text: d.severity,     options: { color: sevColor,    fill: { color: rowFill }, bold: true, align: 'center' } },
       { text: d.status,       options: { color: stColor,     fill: { color: rowFill }, bold: true, align: 'center' } },
     ]);
@@ -257,11 +271,11 @@ export const exportToPPT = (
     slide5b.addTable(defTableRows, {
       x: 0.5, y: 2.4, w: 12.3, h: Math.min(4.5, 0.45 + (defTableRows.length - 1) * 0.35),
       border: { type: 'solid', color: VF_GRAY_MID, pt: 1 },
-      fontSize: 10, fontFace: 'Calibri', valign: 'middle',
+      fontSize: 10, fontFace: VF_FONT, valign: 'middle',
       colW: [1.2, 3.8, 1.0, 2.3, 1.2, 1.5]
     });
   } else {
-    slide5b.addText('No defects logged yet.', { x: 0.5, y: 3.5, w: 12.3, h: 0.5, fontSize: 14, color: VF_GRAY_DARK, fontFace: 'Calibri', align: 'center' });
+    slide5b.addText('No defects logged yet.', { x: 0.5, y: 3.5, w: 12.3, h: 0.5, fontSize: 14, color: VF_ABBEY, fontFace: VF_FONT, align: 'center' });
   }
 
   // ── SLIDE 6: RAID Log ─────────────────────────────────────────────────────
@@ -282,14 +296,14 @@ export const exportToPPT = (
       { text: r.type,   options: { color: VF_BLACK,    fill: { color: rowFill }, bold: true, align: 'left'   } },
       { text: r.title,  options: { color: VF_BLACK,    fill: { color: rowFill }, align: 'left'   } },
       { text: r.impact, options: { color: r.impact === 'Critical' || r.impact === 'High' ? COLOR_RED : COLOR_AMBER, fill: { color: rowFill }, bold: true, align: 'center' } },
-      { text: r.mitigation, options: { color: VF_GRAY_DARK, fill: { color: rowFill }, align: 'left' } },
+      { text: r.mitigation, options: { color: VF_ABBEY, fill: { color: rowFill }, align: 'left' } },
       { text: r.status.toUpperCase(), options: { color: r.status === 'Open' ? COLOR_RED : COLOR_GREEN, fill: { color: rowFill }, bold: true, align: 'center' } }
     ]);
   });
   slide6.addTable(riskTableRows, {
     x: 0.5, y: 1.3, w: 12.3, h: 5.8,
     border: { type: 'solid', color: VF_GRAY_MID, pt: 1 },
-    fontSize: 10, fontFace: 'Calibri', align: 'left', valign: 'middle'
+    fontSize: 10, fontFace: VF_FONT, align: 'left', valign: 'middle'
   });
 
   // ── SLIDES 7–10: AI Analytics ─────────────────────────────────────────────
@@ -331,10 +345,10 @@ export const exportToPPT = (
     // Light red content card
     aiSlide.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.2, w: 12.3, h: 5.8, fill: { color: VF_RED_LITE }, line: { color: VF_GRAY_MID, width: 0.75 } });
     aiSlide.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.2, w: 0.08, h: 5.8, fill: { color: VF_RED } });
-    aiSlide.addText(s.label, { x: 0.75, y: 1.25, w: 11.0, h: 0.35, fontSize: 13, bold: true, color: VF_RED, fontFace: 'Calibri' });
+    aiSlide.addText(s.label, { x: 0.75, y: 1.25, w: 11.0, h: 0.35, fontSize: 13, bold: true, color: VF_RED, fontFace: VF_FONT });
     aiSlide.addText(s.content, {
       x: 0.75, y: 1.7, w: 11.8, h: 5.2,
-      fontSize: 10, color: VF_BLACK, fontFace: 'Calibri',
+      fontSize: 10, color: VF_BLACK, fontFace: VF_FONT,
       align: 'left', valign: 'top', lineSpacing: 14
     });
   });
