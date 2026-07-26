@@ -355,8 +355,7 @@ export const exportToPPT = (
 
   // Save
   pptx.writeFile({ fileName: `TDM_SteerCo_Report_${new Date().toISOString().split('T')[0]}.pptx` });
-
-
+};
 
 export const exportPOAPToPPT = (
   poapData: POAPData,
