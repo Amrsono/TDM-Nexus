@@ -158,46 +158,64 @@ export const exportToPPT = (
   slide6.addTable(riskTableRows, { x: 0.5, y: 1.5, w: 12.3, h: 5.0, border: { type: 'solid', color: '1e293b', pt: 1 }, fontSize: 10, fontFace: 'Outfit', align: 'left', valign: 'middle'  });
 
   // SLIDE 7: AI Executive Summary & Financials (Part 1)
-  const splitIndex1 = aiAnalysis.search(/(?:\r?\n)(?:3\.|3\s+QUALITY|QUALITY\s*&\s*TESTING)/i);
+  const splitIndex1 = aiAnalysis.search(/(?:\r?\n)(?:2\.|2\s+FINANCIAL|FINANCIAL\s+HEALTH)/i);
   let part1 = aiAnalysis;
   let part2 = '';
   let part3 = '';
+  let part4 = '';
 
   if (splitIndex1 !== -1) {
     part1 = aiAnalysis.substring(0, splitIndex1).trim();
-    const remaining = aiAnalysis.substring(splitIndex1).trim();
-    const splitIndex2 = remaining.search(/(?:\r?\n)(?:4\.|4\s+KEY|KEY\s+RECOMMENDATIONS)/i);
+    const remainingAfter1 = aiAnalysis.substring(splitIndex1).trim();
+    const splitIndex2 = remainingAfter1.search(/(?:\r?\n)(?:3\.|3\s+QUALITY|QUALITY\s*&\s*TESTING)/i);
     
     if (splitIndex2 !== -1) {
-      part2 = remaining.substring(0, splitIndex2).trim();
-      part3 = remaining.substring(splitIndex2).trim();
+      part2 = remainingAfter1.substring(0, splitIndex2).trim();
+      const remainingAfter2 = remainingAfter1.substring(splitIndex2).trim();
+      const splitIndex3 = remainingAfter2.search(/(?:\r?\n)(?:4\.|4\s+KEY|KEY\s+RECOMMENDATIONS)/i);
+      
+      if (splitIndex3 !== -1) {
+        part3 = remainingAfter2.substring(0, splitIndex3).trim();
+        part4 = remainingAfter2.substring(splitIndex3).trim();
+      } else {
+        part3 = remainingAfter2;
+      }
     } else {
-      part2 = remaining;
+      part2 = remainingAfter1;
     }
   }
 
   const slide7 = pptx.addSlide();
-  addSlideHeader(slide7, 'AI Executive Summary & Financials');
+  addSlideHeader(slide7, 'AI Executive Summary');
   slide7.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.5, w: 12.3, h: 5.4, fill: { color: CARD_BG }, line: { color: CYAN, width: 1 } });
   slide7.addText('Nexus AI Analytics - Part 1', { x: 0.8, y: 1.7, w: 11.0, h: 0.3, fontSize: 16, bold: true, color: PURPLE, fontFace: 'Outfit' });
   slide7.addText(part1, { x: 0.8, y: 2.1, w: 11.7, h: 4.7, fontSize: 10, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top', lineSpacing: 14 });
 
   if (part2) {
-    // SLIDE 8: AI Quality & Testing (Part 2)
+    // SLIDE 8: AI Financial Health (Part 2)
     const slide8 = pptx.addSlide();
-    addSlideHeader(slide8, 'AI Quality & Testing');
+    addSlideHeader(slide8, 'AI Financial Health');
     slide8.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.5, w: 12.3, h: 5.4, fill: { color: CARD_BG }, line: { color: CYAN, width: 1 } });
     slide8.addText('Nexus AI Analytics - Part 2', { x: 0.8, y: 1.7, w: 11.0, h: 0.3, fontSize: 16, bold: true, color: PURPLE, fontFace: 'Outfit' });
     slide8.addText(part2, { x: 0.8, y: 2.1, w: 11.7, h: 4.7, fontSize: 10, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top', lineSpacing: 14 });
   }
 
   if (part3) {
-    // SLIDE 9: AI Recommendations (Part 3)
+    // SLIDE 9: AI Quality & Testing (Part 3)
     const slide9 = pptx.addSlide();
-    addSlideHeader(slide9, 'AI Recommendations');
+    addSlideHeader(slide9, 'AI Quality & Testing');
     slide9.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.5, w: 12.3, h: 5.4, fill: { color: CARD_BG }, line: { color: CYAN, width: 1 } });
     slide9.addText('Nexus AI Analytics - Part 3', { x: 0.8, y: 1.7, w: 11.0, h: 0.3, fontSize: 16, bold: true, color: PURPLE, fontFace: 'Outfit' });
     slide9.addText(part3, { x: 0.8, y: 2.1, w: 11.7, h: 4.7, fontSize: 10, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top', lineSpacing: 14 });
+  }
+
+  if (part4) {
+    // SLIDE 10: AI Recommendations (Part 4)
+    const slide10 = pptx.addSlide();
+    addSlideHeader(slide10, 'AI Recommendations');
+    slide10.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.5, w: 12.3, h: 5.4, fill: { color: CARD_BG }, line: { color: CYAN, width: 1 } });
+    slide10.addText('Nexus AI Analytics - Part 4', { x: 0.8, y: 1.7, w: 11.0, h: 0.3, fontSize: 16, bold: true, color: PURPLE, fontFace: 'Outfit' });
+    slide10.addText(part4, { x: 0.8, y: 2.1, w: 11.7, h: 4.7, fontSize: 10, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top', lineSpacing: 14 });
   }
 
   // Save
