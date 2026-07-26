@@ -180,7 +180,7 @@ export const exportToPPT = (
   addSlideHeader(slide7, 'AI Executive Summary & Financials');
   slide7.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.5, w: 12.3, h: 5.4, fill: { color: CARD_BG }, line: { color: CYAN, width: 1 } });
   slide7.addText('Nexus AI Analytics - Part 1', { x: 0.8, y: 1.7, w: 11.0, h: 0.3, fontSize: 16, bold: true, color: PURPLE, fontFace: 'Outfit' });
-  slide7.addText(part1, { x: 0.8, y: 2.1, w: 11.7, h: 4.5, fontSize: 11, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top', lineSpacing: 16 });
+  slide7.addText(part1, { x: 0.8, y: 2.1, w: 11.7, h: 4.7, fontSize: 10, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top', lineSpacing: 14 });
 
   if (part2) {
     // SLIDE 8: AI Quality & Testing (Part 2)
@@ -188,7 +188,7 @@ export const exportToPPT = (
     addSlideHeader(slide8, 'AI Quality & Testing');
     slide8.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.5, w: 12.3, h: 5.4, fill: { color: CARD_BG }, line: { color: CYAN, width: 1 } });
     slide8.addText('Nexus AI Analytics - Part 2', { x: 0.8, y: 1.7, w: 11.0, h: 0.3, fontSize: 16, bold: true, color: PURPLE, fontFace: 'Outfit' });
-    slide8.addText(part2, { x: 0.8, y: 2.1, w: 11.7, h: 4.5, fontSize: 11, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top', lineSpacing: 16 });
+    slide8.addText(part2, { x: 0.8, y: 2.1, w: 11.7, h: 4.7, fontSize: 10, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top', lineSpacing: 14 });
   }
 
   if (part3) {
@@ -197,7 +197,7 @@ export const exportToPPT = (
     addSlideHeader(slide9, 'AI Recommendations');
     slide9.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.5, w: 12.3, h: 5.4, fill: { color: CARD_BG }, line: { color: CYAN, width: 1 } });
     slide9.addText('Nexus AI Analytics - Part 3', { x: 0.8, y: 1.7, w: 11.0, h: 0.3, fontSize: 16, bold: true, color: PURPLE, fontFace: 'Outfit' });
-    slide9.addText(part3, { x: 0.8, y: 2.1, w: 11.7, h: 4.5, fontSize: 11, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top', lineSpacing: 16 });
+    slide9.addText(part3, { x: 0.8, y: 2.1, w: 11.7, h: 4.7, fontSize: 10, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top', lineSpacing: 14 });
   }
 
   // Save
