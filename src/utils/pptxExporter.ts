@@ -25,18 +25,20 @@ export const exportToPPT = (
   const pptx = new pptxgen();
   pptx.layout = 'LAYOUT_WIDE';
 
-  // Theme colors
-  const BG_COLOR = '070B19';
-  const CARD_BG = '0D162F';
-  const CYAN = '00F2FE';
-  const PURPLE = 'BD00FF';
-  const TEXT_WHITE = 'F8FAFC';
-  const TEXT_GRAY = '94A3B8';
-  
-  // Status Colors
-  const COLOR_GREEN = '00F5A0';
-  const COLOR_AMBER = 'F59E0B';
-  const COLOR_RED = 'EF4444';
+  // ── Vodafone Official Brand Colours ──────────────────────────────────────
+  const VF_RED       = 'E60000';   // Vodafone primary red
+  const VF_WHITE     = 'FFFFFF';   // Slide background
+  const VF_BLACK     = '1A1A1A';   // Primary body text
+  const VF_GRAY_DARK = '666666';   // Secondary text / meta
+  const VF_GRAY_MID  = 'CCCCCC';   // Borders / dividers
+  const VF_GRAY_LITE = 'F5F5F5';   // Card / row fill
+  const VF_RED_LITE  = 'FEE2E2';   // Soft red card background
+  const VF_FOOTER_BG = '0D0D0D';   // Footer bar
+
+  // RAG status colours (kept clear and accessible)
+  const COLOR_GREEN = '007A33';   // Vodafone Green
+  const COLOR_AMBER = 'FF9900';   // Vodafone Amber
+  const COLOR_RED   = 'E60000';   // Vodafone Red
 
   const getRagHex = (val: string) => {
     if (val.toLowerCase() === 'green') return COLOR_GREEN;
@@ -44,223 +46,253 @@ export const exportToPPT = (
     return COLOR_RED;
   };
 
-  // Helper to add standard slide header
-  const addSlideHeader = (slide: any, title: string) => {
-    slide.background = { color: BG_COLOR };
-    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 0.9, fill: { color: '050812' } });
-    slide.addText(title.toUpperCase(), { x: 0.5, y: 0.2, w: 8.0, h: 0.5, fontSize: 22, bold: true, color: CYAN, fontFace: 'Outfit' });
-    slide.addText('TDM NEXUS - STEERING COMMITTEE REPORT', { x: 0.5, y: 7.1, w: 5.0, h: 0.3, fontSize: 10, color: TEXT_GRAY, fontFace: 'Outfit' });
+  // ── Shared helpers ────────────────────────────────────────────────────────
+  const addSlideHeader = (slide: any, title: string, slideNum?: number) => {
+    slide.background = { color: VF_WHITE };
+    // Top red accent line
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 0.08, fill: { color: VF_RED } });
+    // Title
+    slide.addText(title, {
+      x: 0.5, y: 0.2, w: 10.0, h: 0.6,
+      fontSize: 24, bold: true, color: VF_BLACK, fontFace: 'Calibri'
+    });
+    // Thin red underline beneath title
+    slide.addShape(pptx.ShapeType.rect, { x: 0.5, y: 0.85, w: 1.5, h: 0.04, fill: { color: VF_RED } });
+    // Footer bar
+    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 7.3, w: '100%', h: 0.2, fill: { color: VF_FOOTER_BG } });
+    slide.addText('TDM NEXUS – Steering Committee Report', {
+      x: 0.3, y: 7.32, w: 8.0, h: 0.15, fontSize: 7, color: VF_GRAY_MID, fontFace: 'Calibri'
+    });
+    if (slideNum !== undefined) {
+      slide.addShape(pptx.ShapeType.rect, { x: 12.7, y: 7.1, w: 0.6, h: 0.4, fill: { color: VF_RED } });
+      slide.addText(slideNum.toString(), {
+        x: 12.7, y: 7.1, w: 0.6, h: 0.4, fontSize: 14, bold: true,
+        color: VF_WHITE, fontFace: 'Calibri', align: 'center', valign: 'middle'
+      });
+    }
   };
 
-  // SLIDE 1
+  // ── SLIDE 1: Title ────────────────────────────────────────────────────────
   const slide1 = pptx.addSlide();
-  slide1.background = { color: BG_COLOR };
-  slide1.addShape(pptx.ShapeType.rect, { x: 1.0, y: 1.5, w: 0.15, h: 3.5, fill: { color: CYAN } });
-  slide1.addText('PROJECT VELOCITY', { x: 1.4, y: 1.6, w: 10.0, h: 1.0, fontSize: 44, bold: true, color: TEXT_WHITE, fontFace: 'Outfit' });
-  slide1.addText('STEERING COMMITTEE REPORT', { x: 1.4, y: 3.5, w: 10.0, h: 0.4, fontSize: 14, bold: true, color: PURPLE, fontFace: 'Outfit' });
-  slide1.addShape(pptx.ShapeType.rect, { x: 1.4, y: 4.4, w: 5.5, h: 1.5, fill: { color: CARD_BG }, line: { color: '00F2FE', width: 1 } });
+  slide1.background = { color: VF_WHITE };
+  slide1.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 0.08, fill: { color: VF_RED } });
+  slide1.addShape(pptx.ShapeType.rect, { x: 0, y: 7.3, w: '100%', h: 0.2, fill: { color: VF_FOOTER_BG } });
+  // Large red left accent bar
+  slide1.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.4, w: 0.12, h: 3.8, fill: { color: VF_RED } });
+  slide1.addText('TDM NEXUS', { x: 0.8, y: 1.5, w: 11.0, h: 1.0, fontSize: 52, bold: true, color: VF_BLACK, fontFace: 'Calibri' });
+  slide1.addText('STEERING COMMITTEE REPORT', { x: 0.8, y: 2.7, w: 10.0, h: 0.5, fontSize: 16, bold: true, color: VF_RED, fontFace: 'Calibri' });
+  slide1.addShape(pptx.ShapeType.rect, { x: 0.8, y: 3.4, w: 6.0, h: 1.6, fill: { color: VF_GRAY_LITE }, line: { color: VF_GRAY_MID, width: 1 } });
   slide1.addText([
-    { text: 'Reporting Date: ', options: { bold: true, color: TEXT_WHITE } },
-    { text: new Date().toLocaleDateString() + '\n', options: { color: TEXT_GRAY } },
-    { text: 'Overall Project status: ', options: { bold: true, color: TEXT_WHITE } },
-    { text: ragStatus.overall.toUpperCase() + '\n', options: { color: getRagHex(ragStatus.overall), bold: true } }
-  ], { x: 1.6, y: 4.5, w: 5.1, h: 1.3, fontSize: 12, fontFace: 'Outfit', lineSpacing: 22 });
+    { text: 'Reporting Date: ', options: { bold: true, color: VF_BLACK } },
+    { text: new Date().toLocaleDateString('en-GB') + '\n', options: { color: VF_GRAY_DARK } },
+    { text: 'Overall Status: ', options: { bold: true, color: VF_BLACK } },
+    { text: ragStatus.overall.toUpperCase(), options: { color: getRagHex(ragStatus.overall), bold: true } }
+  ], { x: 1.0, y: 3.55, w: 5.5, h: 1.3, fontSize: 13, fontFace: 'Calibri', lineSpacing: 24 });
+  // Vodafone logo text bottom right
+  slide1.addShape(pptx.ShapeType.rect, { x: 11.8, y: 6.8, w: 1.5, h: 0.6, fill: { color: VF_RED } });
+  slide1.addText('vodafone', { x: 11.8, y: 6.8, w: 1.5, h: 0.6, fontSize: 11, bold: true, color: VF_WHITE, fontFace: 'Calibri', align: 'center', valign: 'middle' });
 
-  // SLIDE 2: Executive Summary
+  // ── SLIDE 2: RAG Status ───────────────────────────────────────────────────
   const slide2 = pptx.addSlide();
-  addSlideHeader(slide2, 'Executive Summary & RAG Status');
+  addSlideHeader(slide2, 'Executive Summary & RAG Status', 2);
   const rags = [
     { label: 'Schedule', val: ragStatus.schedule, desc: 'Progress on track for next PI.' },
-    { label: 'Budget', val: ragStatus.budget, desc: 'Spending aligned with VROM bounds.' },
-    { label: 'Scope', val: ragStatus.scope, desc: 'HLD locked.' },
-    { label: 'Quality', val: ragStatus.quality, desc: 'Tracking defects across SIT/UAT.' }
+    { label: 'Budget',   val: ragStatus.budget,   desc: 'Spending aligned with VROM bounds.' },
+    { label: 'Scope',    val: ragStatus.scope,     desc: 'HLD locked.' },
+    { label: 'Quality',  val: ragStatus.quality,   desc: 'Tracking defects across SIT/UAT.' }
   ];
   rags.forEach((r, idx) => {
-    const xOffset = 0.5 + idx * 3.1;
-    slide2.addShape(pptx.ShapeType.rect, { x: xOffset, y: 2.8, w: 2.9, h: 3.8, fill: { color: CARD_BG }, line: { color: getRagHex(r.val), width: 1.5 } });
-    slide2.addText(r.label.toUpperCase(), { x: xOffset + 0.2, y: 3.0, w: 2.5, h: 0.3, fontSize: 16, bold: true, color: TEXT_WHITE, fontFace: 'Outfit' });
-    slide2.addShape(pptx.ShapeType.rect, { x: xOffset + 0.2, y: 3.4, w: 1.2, h: 0.4, fill: { color: getRagHex(r.val) + '22' }, line: { color: getRagHex(r.val), width: 1 } });
-    slide2.addText(r.val.toUpperCase(), { x: xOffset + 0.2, y: 3.4, w: 1.2, h: 0.4, fontSize: 12, bold: true, color: getRagHex(r.val), fontFace: 'Outfit', align: 'center', valign: 'middle' });
-    slide2.addText(r.desc, { x: xOffset + 0.2, y: 4.1, w: 2.5, h: 2.0, fontSize: 12, color: TEXT_GRAY, fontFace: 'Outfit', lineSpacing: 18 });
+    const xOff = 0.4 + idx * 3.2;
+    const ragHex = getRagHex(r.val);
+    slide2.addShape(pptx.ShapeType.rect, { x: xOff, y: 1.3, w: 3.0, h: 4.5, fill: { color: VF_GRAY_LITE }, line: { color: VF_GRAY_MID, width: 0.75 } });
+    slide2.addShape(pptx.ShapeType.rect, { x: xOff, y: 1.3, w: 3.0, h: 0.08, fill: { color: ragHex } });
+    slide2.addText(r.label.toUpperCase(), { x: xOff + 0.15, y: 1.45, w: 2.7, h: 0.4, fontSize: 15, bold: true, color: VF_BLACK, fontFace: 'Calibri' });
+    slide2.addShape(pptx.ShapeType.rect, { x: xOff + 0.15, y: 2.0, w: 1.4, h: 0.45, fill: { color: ragHex }, line: { color: ragHex, width: 1 } });
+    slide2.addText(r.val.toUpperCase(), { x: xOff + 0.15, y: 2.0, w: 1.4, h: 0.45, fontSize: 13, bold: true, color: VF_WHITE, fontFace: 'Calibri', align: 'center', valign: 'middle' });
+    slide2.addText(r.desc, { x: xOff + 0.15, y: 2.65, w: 2.7, h: 2.8, fontSize: 12, color: VF_GRAY_DARK, fontFace: 'Calibri', lineSpacing: 18 });
   });
 
-  // SLIDE 3: Finances
+  // ── SLIDE 3: Financial Health ─────────────────────────────────────────────
   const slide3 = pptx.addSlide();
-  addSlideHeader(slide3, 'Financial Health & Forecast Allocations');
-  const finTableRows: any[][] = [
-    [
-      { text: 'Squad / Portfolio', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
-      { text: 'CAPEX Alloc', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
-      { text: 'CAPEX Spent', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
-      { text: 'OPEX Alloc', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
-      { text: 'OPEX Spent', options: { bold: true, color: CYAN, fill: { color: '050812' } } }
-    ]
-  ];
-  allocations.forEach(a => {
+  addSlideHeader(slide3, 'Financial Health & Forecast Allocations', 3);
+  const finTableRows: any[][] = [[
+    { text: 'Squad / Portfolio', options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'left' } },
+    { text: 'CAPEX Alloc',       options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'right' } },
+    { text: 'CAPEX Spent',       options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'right' } },
+    { text: 'OPEX Alloc',        options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'right' } },
+    { text: 'OPEX Spent',        options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'right' } }
+  ]];
+  allocations.forEach((a, i) => {
+    const rowFill = i % 2 === 0 ? VF_WHITE : VF_GRAY_LITE;
     finTableRows.push([
-      { text: a.squadName, options: { color: TEXT_WHITE, fill: { color: CARD_BG } } },
-      { text: `$${(a.capexAllocated / 1000).toFixed(0)}k`, options: { color: TEXT_GRAY, fill: { color: CARD_BG } } },
-      { text: `$${(a.capexSpent / 1000).toFixed(0)}k`, options: { color: TEXT_GRAY, fill: { color: CARD_BG } } },
-      { text: `$${(a.opexAllocated / 1000).toFixed(0)}k`, options: { color: TEXT_GRAY, fill: { color: CARD_BG } } },
-      { text: `$${(a.opexSpent / 1000).toFixed(0)}k`, options: { color: TEXT_GRAY, fill: { color: CARD_BG } } }
+      { text: a.squadName, options: { color: VF_BLACK, fill: { color: rowFill }, align: 'left', bold: true } },
+      { text: `$${(a.capexAllocated / 1000).toFixed(0)}k`, options: { color: VF_GRAY_DARK, fill: { color: rowFill }, align: 'right' } },
+      { text: `$${(a.capexSpent / 1000).toFixed(0)}k`,     options: { color: VF_GRAY_DARK, fill: { color: rowFill }, align: 'right' } },
+      { text: `$${(a.opexAllocated / 1000).toFixed(0)}k`,  options: { color: VF_GRAY_DARK, fill: { color: rowFill }, align: 'right' } },
+      { text: `$${(a.opexSpent / 1000).toFixed(0)}k`,      options: { color: VF_GRAY_DARK, fill: { color: rowFill }, align: 'right' } }
     ]);
   });
-  slide3.addTable(finTableRows, { x: 0.5, y: 2.8, w: 12.3, h: 3.8, border: { type: 'solid', color: '1e293b', pt: 1 }, fontSize: 11, fontFace: 'Outfit', align: 'left', valign: 'middle' });
+  slide3.addTable(finTableRows, { x: 0.5, y: 1.3, w: 12.3, h: 5.5, border: { type: 'solid', color: VF_GRAY_MID, pt: 1 }, fontSize: 11, fontFace: 'Calibri', valign: 'middle' });
 
-  // SLIDE 4: Squad Progress
+  // ── SLIDE 4: Squad Delivery ───────────────────────────────────────────────
   const slide4 = pptx.addSlide();
-  addSlideHeader(slide4, 'Squad Delivery Pipeline');
+  addSlideHeader(slide4, 'Squad Delivery Pipeline', 4);
   squads.forEach((s, idx) => {
-    const yOffset = 1.3 + idx * 1.1;
-    slide4.addShape(pptx.ShapeType.rect, { x: 0.5, y: yOffset, w: 12.3, h: 0.9, fill: { color: CARD_BG }, line: { color: s.status === 'Blocked' ? COLOR_RED : '1e293b', width: 1 } });
-    slide4.addText(s.name, { x: 0.7, y: yOffset + 0.15, w: 3.5, h: 0.3, fontSize: 14, bold: true, color: TEXT_WHITE, fontFace: 'Outfit' });
-    slide4.addText(`Lead: ${s.lead} | Target: ${s.targetRelease}`, { x: 0.7, y: yOffset + 0.45, w: 3.5, h: 0.3, fontSize: 10, color: TEXT_GRAY, fontFace: 'Outfit' });
-    slide4.addShape(pptx.ShapeType.rect, { x: 4.5, y: yOffset + 0.3, w: 5.0, h: 0.25, fill: { color: '161e38' } });
+    const yOff = 1.3 + idx * 0.95;
+    const isBlocked = s.status === 'Blocked';
+    slide4.addShape(pptx.ShapeType.rect, { x: 0.5, y: yOff, w: 12.3, h: 0.82, fill: { color: VF_GRAY_LITE }, line: { color: isBlocked ? VF_RED : VF_GRAY_MID, width: isBlocked ? 1.5 : 0.75 } });
+    slide4.addShape(pptx.ShapeType.rect, { x: 0.5, y: yOff, w: 0.08, h: 0.82, fill: { color: isBlocked ? VF_RED : COLOR_GREEN } });
+    slide4.addText(s.name, { x: 0.75, y: yOff + 0.1, w: 3.5, h: 0.3, fontSize: 13, bold: true, color: VF_BLACK, fontFace: 'Calibri' });
+    slide4.addText(`Lead: ${s.lead} | Target: ${s.targetRelease}`, { x: 0.75, y: yOff + 0.44, w: 3.5, h: 0.28, fontSize: 9, color: VF_GRAY_DARK, fontFace: 'Calibri' });
+    // Progress bar track
+    slide4.addShape(pptx.ShapeType.rect, { x: 4.5, y: yOff + 0.3, w: 5.5, h: 0.22, fill: { color: VF_GRAY_MID } });
     if (s.progress > 0) {
-      slide4.addShape(pptx.ShapeType.rect, { x: 4.5, y: yOffset + 0.3, w: (s.progress / 100) * 5.0, h: 0.25, fill: { color: s.status === 'Blocked' ? COLOR_AMBER : CYAN } });
+      slide4.addShape(pptx.ShapeType.rect, { x: 4.5, y: yOff + 0.3, w: (s.progress / 100) * 5.5, h: 0.22, fill: { color: isBlocked ? COLOR_AMBER : VF_RED } });
     }
-    slide4.addText(`${s.progress}%`, { x: 9.6, y: yOffset + 0.25, w: 0.8, h: 0.3, fontSize: 12, bold: true, color: CYAN, fontFace: 'Outfit' });
+    slide4.addText(`${s.progress}%`, { x: 10.1, y: yOff + 0.22, w: 0.8, h: 0.3, fontSize: 12, bold: true, color: VF_RED, fontFace: 'Calibri' });
+    const stCol = s.status === 'Blocked' ? COLOR_RED : s.status === 'Completed' ? COLOR_GREEN : VF_GRAY_DARK;
+    slide4.addText(s.status, { x: 11.0, y: yOff + 0.24, w: 1.7, h: 0.28, fontSize: 11, bold: true, color: stCol, fontFace: 'Calibri', align: 'right' });
   });
 
-  // SLIDE 5: QA Gates Overview
+  // ── SLIDE 5: QA Gates ─────────────────────────────────────────────────────
   const slide5 = pptx.addSlide();
-  addSlideHeader(slide5, 'Testing & Quality Gates');
+  addSlideHeader(slide5, 'Testing & Quality Gates', 5);
 
-  // Summary KPI row at top
-  const totalTests = qaGates.reduce((s, g) => s + g.totalTests, 0);
-  const totalPassed = qaGates.reduce((s, g) => s + g.passed, 0);
-  const totalFailed = qaGates.reduce((s, g) => s + g.failed, 0);
+  const totalTests    = qaGates.reduce((s, g) => s + g.totalTests, 0);
+  const totalPassed   = qaGates.reduce((s, g) => s + g.passed, 0);
+  const totalFailed   = qaGates.reduce((s, g) => s + g.failed, 0);
   const overallPassRate = totalTests > 0 ? Math.round((totalPassed / totalTests) * 100) : 0;
 
   const kpis = [
-    { label: 'Total Tests', val: totalTests.toString(), color: CYAN },
-    { label: 'Passed', val: totalPassed.toString(), color: COLOR_GREEN },
-    { label: 'Failed', val: totalFailed.toString(), color: COLOR_RED },
-    { label: 'Pass Rate', val: `${overallPassRate}%`, color: overallPassRate >= 80 ? COLOR_GREEN : overallPassRate >= 50 ? COLOR_AMBER : COLOR_RED },
+    { label: 'Total Tests', val: totalTests.toString(),       color: VF_RED     },
+    { label: 'Passed',      val: totalPassed.toString(),      color: COLOR_GREEN },
+    { label: 'Failed',      val: totalFailed.toString(),      color: COLOR_RED   },
+    { label: 'Pass Rate',   val: `${overallPassRate}%`,       color: overallPassRate >= 80 ? COLOR_GREEN : overallPassRate >= 50 ? COLOR_AMBER : COLOR_RED },
   ];
   kpis.forEach((kpi, i) => {
-    const kx = 0.5 + i * 3.1;
-    slide5.addShape(pptx.ShapeType.rect, { x: kx, y: 1.4, w: 2.8, h: 1.0, fill: { color: CARD_BG }, line: { color: kpi.color, width: 1.5 } });
-    slide5.addText(kpi.label, { x: kx + 0.1, y: 1.5, w: 2.6, h: 0.3, fontSize: 10, color: TEXT_GRAY, fontFace: 'Outfit', bold: false });
-    slide5.addText(kpi.val, { x: kx + 0.1, y: 1.8, w: 2.6, h: 0.4, fontSize: 22, bold: true, color: kpi.color, fontFace: 'Outfit' });
+    const kx = 0.4 + i * 3.2;
+    slide5.addShape(pptx.ShapeType.rect, { x: kx, y: 1.2, w: 3.0, h: 1.0, fill: { color: VF_GRAY_LITE }, line: { color: VF_GRAY_MID, width: 0.75 } });
+    slide5.addShape(pptx.ShapeType.rect, { x: kx, y: 1.2, w: 3.0, h: 0.07, fill: { color: kpi.color } });
+    slide5.addText(kpi.label, { x: kx + 0.15, y: 1.3, w: 2.7, h: 0.3, fontSize: 10, color: VF_GRAY_DARK, fontFace: 'Calibri' });
+    slide5.addText(kpi.val,   { x: kx + 0.15, y: 1.6, w: 2.7, h: 0.45, fontSize: 22, bold: true, color: kpi.color, fontFace: 'Calibri' });
   });
 
-  // QA Gates table
   const qaTableHeader: any[] = [
-    { text: 'Gate', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'left' } },
-    { text: 'Status', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'center' } },
-    { text: 'Total Tests', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'center' } },
-    { text: 'Passed', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'center' } },
-    { text: 'Failed', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'center' } },
-    { text: 'Blocked', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'center' } },
-    { text: 'Pass Rate', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'center' } },
+    { text: 'Gate',       options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'left'   } },
+    { text: 'Status',     options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'center' } },
+    { text: 'Total',      options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'center' } },
+    { text: 'Passed',     options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'center' } },
+    { text: 'Failed',     options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'center' } },
+    { text: 'Blocked',    options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'center' } },
+    { text: 'Pass Rate',  options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'center' } },
   ];
-
   const qaTableRows: any[][] = [qaTableHeader];
-  qaGates.forEach(g => {
+  qaGates.forEach((g, i) => {
     const pr = g.totalTests > 0 ? Math.round((g.passed / g.totalTests) * 100) : 0;
     const prColor = pr >= 80 ? COLOR_GREEN : pr >= 50 ? COLOR_AMBER : COLOR_RED;
-    const statusColor = g.status === 'Passed' ? COLOR_GREEN : g.status === 'Failed' ? COLOR_RED : g.status === 'In Progress' ? COLOR_AMBER : TEXT_GRAY;
+    const stColor = g.status === 'Passed' ? COLOR_GREEN : g.status === 'Failed' ? COLOR_RED : g.status === 'In Progress' ? COLOR_AMBER : VF_GRAY_DARK;
+    const rowFill = i % 2 === 0 ? VF_WHITE : VF_GRAY_LITE;
     qaTableRows.push([
-      { text: g.name, options: { color: TEXT_WHITE, fill: { color: CARD_BG }, bold: true, align: 'left' } },
-      { text: g.status, options: { color: statusColor, fill: { color: CARD_BG }, bold: true, align: 'center' } },
-      { text: g.totalTests.toString(), options: { color: TEXT_WHITE, fill: { color: CARD_BG }, align: 'center' } },
-      { text: g.passed.toString(), options: { color: COLOR_GREEN, fill: { color: CARD_BG }, bold: true, align: 'center' } },
-      { text: g.failed.toString(), options: { color: g.failed > 0 ? COLOR_RED : TEXT_GRAY, fill: { color: CARD_BG }, bold: g.failed > 0, align: 'center' } },
-      { text: (g.blocked || 0).toString(), options: { color: g.blocked ? COLOR_AMBER : TEXT_GRAY, fill: { color: CARD_BG }, align: 'center' } },
-      { text: `${pr}%`, options: { color: prColor, fill: { color: CARD_BG }, bold: true, align: 'center' } },
+      { text: g.name,                       options: { color: VF_BLACK,    fill: { color: rowFill }, bold: true, align: 'left'   } },
+      { text: g.status,                     options: { color: stColor,     fill: { color: rowFill }, bold: true, align: 'center' } },
+      { text: g.totalTests.toString(),      options: { color: VF_BLACK,    fill: { color: rowFill }, align: 'center' } },
+      { text: g.passed.toString(),          options: { color: COLOR_GREEN, fill: { color: rowFill }, bold: true, align: 'center' } },
+      { text: g.failed.toString(),          options: { color: g.failed > 0 ? COLOR_RED : VF_GRAY_DARK, fill: { color: rowFill }, bold: g.failed > 0, align: 'center' } },
+      { text: (g.blocked || 0).toString(), options: { color: g.blocked ? COLOR_AMBER : VF_GRAY_DARK, fill: { color: rowFill }, align: 'center' } },
+      { text: `${pr}%`,                     options: { color: prColor, fill: { color: rowFill }, bold: true, align: 'center' } },
     ]);
   });
   slide5.addTable(qaTableRows, {
-    x: 0.5, y: 2.6, w: 12.3, h: Math.min(4.2, 0.4 + qaGates.length * 0.45),
-    border: { type: 'solid', color: '1e293b', pt: 1 },
-    fontSize: 11, fontFace: 'Outfit', valign: 'middle',
-    colW: [1.6, 1.5, 1.4, 1.2, 1.2, 1.2, 1.2]
+    x: 0.5, y: 2.4, w: 12.3, h: Math.min(4.5, 0.45 + qaGates.length * 0.45),
+    border: { type: 'solid', color: VF_GRAY_MID, pt: 1 },
+    fontSize: 11, fontFace: 'Calibri', valign: 'middle',
+    colW: [1.6, 1.6, 1.2, 1.2, 1.2, 1.2, 1.3]
   });
 
-  // SLIDE 5b: Defects Breakdown
+  // ── SLIDE 5b: Defects ─────────────────────────────────────────────────────
   const slide5b = pptx.addSlide();
-  addSlideHeader(slide5b, 'Defects Log & Breakdown');
+  addSlideHeader(slide5b, 'Defects Log & Breakdown', 6);
 
-  // Defect summary KPIs
-  const openDefs = defects.filter(d => d.status !== 'Closed');
-  const p1p2 = defects.filter(d => d.severity === 'P1' || d.severity === 'P2');
+  const openDefs   = defects.filter(d => d.status !== 'Closed');
+  const p1p2       = defects.filter(d => d.severity === 'P1' || d.severity === 'P2');
   const closedDefs = defects.filter(d => d.status === 'Closed');
 
   const defKpis = [
-    { label: 'Total Defects', val: defects.length.toString(), color: CYAN },
-    { label: 'Open', val: openDefs.length.toString(), color: openDefs.length > 0 ? COLOR_RED : COLOR_GREEN },
-    { label: 'P1/P2 Critical', val: p1p2.length.toString(), color: p1p2.length > 0 ? COLOR_RED : COLOR_GREEN },
-    { label: 'Closed', val: closedDefs.length.toString(), color: COLOR_GREEN },
+    { label: 'Total Defects', val: defects.length.toString(),   color: VF_RED },
+    { label: 'Open',          val: openDefs.length.toString(),   color: openDefs.length > 0 ? COLOR_RED : COLOR_GREEN },
+    { label: 'P1/P2 Critical',val: p1p2.length.toString(),      color: p1p2.length > 0 ? COLOR_RED : COLOR_GREEN },
+    { label: 'Closed',        val: closedDefs.length.toString(), color: COLOR_GREEN },
   ];
   defKpis.forEach((kpi, i) => {
-    const kx = 0.5 + i * 3.1;
-    slide5b.addShape(pptx.ShapeType.rect, { x: kx, y: 1.4, w: 2.8, h: 1.0, fill: { color: CARD_BG }, line: { color: kpi.color, width: 1.5 } });
-    slide5b.addText(kpi.label, { x: kx + 0.1, y: 1.5, w: 2.6, h: 0.3, fontSize: 10, color: TEXT_GRAY, fontFace: 'Outfit' });
-    slide5b.addText(kpi.val, { x: kx + 0.1, y: 1.8, w: 2.6, h: 0.4, fontSize: 22, bold: true, color: kpi.color, fontFace: 'Outfit' });
+    const kx = 0.4 + i * 3.2;
+    slide5b.addShape(pptx.ShapeType.rect, { x: kx, y: 1.2, w: 3.0, h: 1.0, fill: { color: VF_GRAY_LITE }, line: { color: VF_GRAY_MID, width: 0.75 } });
+    slide5b.addShape(pptx.ShapeType.rect, { x: kx, y: 1.2, w: 3.0, h: 0.07, fill: { color: kpi.color } });
+    slide5b.addText(kpi.label, { x: kx + 0.15, y: 1.3, w: 2.7, h: 0.3, fontSize: 10, color: VF_GRAY_DARK, fontFace: 'Calibri' });
+    slide5b.addText(kpi.val,   { x: kx + 0.15, y: 1.6, w: 2.7, h: 0.45, fontSize: 22, bold: true, color: kpi.color, fontFace: 'Calibri' });
   });
 
-  // Defects table
   const defTableHeader: any[] = [
-    { text: 'ID', options: { bold: true, color: BG_COLOR, fill: { color: CYAN } } },
-    { text: 'Title', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'left' } },
-    { text: 'Phase', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'center' } },
-    { text: 'Squad', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'left' } },
-    { text: 'Severity', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'center' } },
-    { text: 'Status', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'center' } },
+    { text: 'ID',       options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'center' } },
+    { text: 'Title',    options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'left'   } },
+    { text: 'Phase',    options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'center' } },
+    { text: 'Squad',    options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'left'   } },
+    { text: 'Severity', options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'center' } },
+    { text: 'Status',   options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'center' } },
   ];
-
   const defTableRows: any[][] = [defTableHeader];
-  defects.slice(0, 18).forEach(d => {
-    const sevColor = d.severity === 'P1' ? COLOR_RED : d.severity === 'P2' ? COLOR_AMBER : TEXT_GRAY;
-    const stColor = d.status === 'Closed' ? COLOR_GREEN : d.status === 'In Progress' || d.status === 'Retesting' ? COLOR_AMBER : COLOR_RED;
+  defects.slice(0, 18).forEach((d, i) => {
+    const sevColor = d.severity === 'P1' ? COLOR_RED : d.severity === 'P2' ? COLOR_AMBER : VF_GRAY_DARK;
+    const stColor  = d.status === 'Closed' ? COLOR_GREEN : d.status === 'In Progress' || d.status === 'Retesting' ? COLOR_AMBER : COLOR_RED;
+    const rowFill = i % 2 === 0 ? VF_WHITE : VF_GRAY_LITE;
     defTableRows.push([
-      { text: d.id, options: { color: CYAN, fill: { color: CARD_BG }, bold: true, align: 'center' } },
-      { text: d.title, options: { color: TEXT_WHITE, fill: { color: CARD_BG }, align: 'left' } },
-      { text: d.phase || '-', options: { color: TEXT_GRAY, fill: { color: CARD_BG }, align: 'center' } },
-      { text: d.squad, options: { color: TEXT_GRAY, fill: { color: CARD_BG }, align: 'left' } },
-      { text: d.severity, options: { color: sevColor, fill: { color: CARD_BG }, bold: true, align: 'center' } },
-      { text: d.status, options: { color: stColor, fill: { color: CARD_BG }, bold: true, align: 'center' } },
+      { text: d.id,           options: { color: VF_RED,      fill: { color: rowFill }, bold: true, align: 'center' } },
+      { text: d.title,        options: { color: VF_BLACK,    fill: { color: rowFill }, align: 'left'   } },
+      { text: d.phase || '-', options: { color: VF_GRAY_DARK,fill: { color: rowFill }, align: 'center' } },
+      { text: d.squad,        options: { color: VF_GRAY_DARK,fill: { color: rowFill }, align: 'left'   } },
+      { text: d.severity,     options: { color: sevColor,    fill: { color: rowFill }, bold: true, align: 'center' } },
+      { text: d.status,       options: { color: stColor,     fill: { color: rowFill }, bold: true, align: 'center' } },
     ]);
   });
-
   if (defTableRows.length > 1) {
     slide5b.addTable(defTableRows, {
-      x: 0.5, y: 2.6, w: 12.3, h: Math.min(4.2, 0.4 + (defTableRows.length - 1) * 0.35),
-      border: { type: 'solid', color: '1e293b', pt: 1 },
-      fontSize: 10, fontFace: 'Outfit', valign: 'middle',
+      x: 0.5, y: 2.4, w: 12.3, h: Math.min(4.5, 0.45 + (defTableRows.length - 1) * 0.35),
+      border: { type: 'solid', color: VF_GRAY_MID, pt: 1 },
+      fontSize: 10, fontFace: 'Calibri', valign: 'middle',
       colW: [1.2, 3.8, 1.0, 2.3, 1.2, 1.5]
     });
   } else {
-    slide5b.addText('No defects logged yet.', { x: 0.5, y: 3.5, w: 12.3, h: 0.5, fontSize: 14, color: TEXT_GRAY, fontFace: 'Outfit', align: 'center' });
+    slide5b.addText('No defects logged yet.', { x: 0.5, y: 3.5, w: 12.3, h: 0.5, fontSize: 14, color: VF_GRAY_DARK, fontFace: 'Calibri', align: 'center' });
   }
 
-  // SLIDE 6: Risks
+  // ── SLIDE 6: RAID Log ─────────────────────────────────────────────────────
   const slide6 = pptx.addSlide();
-  addSlideHeader(slide6, 'RAID Log');
-  const riskTableRows: any[][] = [
-    [
-      { text: 'Ref ID', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
-      { text: 'Type', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
-      { text: 'Risk Description / Trigger', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
-      { text: 'Impact', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
-      { text: 'Mitigation Plan', options: { bold: true, color: CYAN, fill: { color: '050812' } } },
-      { text: 'Status', options: { bold: true, color: CYAN, fill: { color: '050812' } } }
-    ]
-  ];
-  risks.forEach(r => {
+  addSlideHeader(slide6, 'RAID Log', 7);
+  const riskTableRows: any[][] = [[
+    { text: 'Ref ID',                    options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'left' } },
+    { text: 'Type',                      options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'left' } },
+    { text: 'Risk Description / Trigger',options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'left' } },
+    { text: 'Impact',                    options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'center' } },
+    { text: 'Mitigation Plan',           options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'left' } },
+    { text: 'Status',                    options: { bold: true, color: VF_WHITE, fill: { color: VF_RED }, align: 'center' } }
+  ]];
+  risks.forEach((r, i) => {
+    const rowFill = i % 2 === 0 ? VF_WHITE : VF_GRAY_LITE;
     riskTableRows.push([
-      { text: r.id, options: { color: TEXT_WHITE, fill: { color: CARD_BG } } },
-      { text: r.type, options: { color: PURPLE, bold: true, fill: { color: CARD_BG } } },
-      { text: r.title, options: { color: TEXT_WHITE, fill: { color: CARD_BG } } },
-      { text: r.impact, options: { color: r.impact === 'Critical' || r.impact === 'High' ? COLOR_RED : COLOR_AMBER, bold: true, fill: { color: CARD_BG } } },
-      { text: r.mitigation, options: { color: TEXT_GRAY, fill: { color: CARD_BG } } },
-      { text: r.status.toUpperCase(), options: { color: r.status === 'Open' ? COLOR_RED : COLOR_GREEN, bold: true, fill: { color: CARD_BG } } }
+      { text: r.id,     options: { color: VF_RED,      fill: { color: rowFill }, bold: true, align: 'left'   } },
+      { text: r.type,   options: { color: VF_BLACK,    fill: { color: rowFill }, bold: true, align: 'left'   } },
+      { text: r.title,  options: { color: VF_BLACK,    fill: { color: rowFill }, align: 'left'   } },
+      { text: r.impact, options: { color: r.impact === 'Critical' || r.impact === 'High' ? COLOR_RED : COLOR_AMBER, fill: { color: rowFill }, bold: true, align: 'center' } },
+      { text: r.mitigation, options: { color: VF_GRAY_DARK, fill: { color: rowFill }, align: 'left' } },
+      { text: r.status.toUpperCase(), options: { color: r.status === 'Open' ? COLOR_RED : COLOR_GREEN, fill: { color: rowFill }, bold: true, align: 'center' } }
     ]);
   });
-  slide6.addTable(riskTableRows, { x: 0.5, y: 1.5, w: 12.3, h: 5.0, border: { type: 'solid', color: '1e293b', pt: 1 }, fontSize: 10, fontFace: 'Outfit', align: 'left', valign: 'middle'  });
+  slide6.addTable(riskTableRows, {
+    x: 0.5, y: 1.3, w: 12.3, h: 5.8,
+    border: { type: 'solid', color: VF_GRAY_MID, pt: 1 },
+    fontSize: 10, fontFace: 'Calibri', align: 'left', valign: 'middle'
+  });
 
-  // SLIDE 7: AI Executive Summary & Financials (Part 1)
+  // ── SLIDES 7–10: AI Analytics ─────────────────────────────────────────────
   const splitIndex1 = aiAnalysis.search(/(?:\r?\n)(?:2\.|2\s+FINANCIAL|FINANCIAL\s+HEALTH)/i);
   let part1 = aiAnalysis;
   let part2 = '';
@@ -271,12 +303,10 @@ export const exportToPPT = (
     part1 = aiAnalysis.substring(0, splitIndex1).trim();
     const remainingAfter1 = aiAnalysis.substring(splitIndex1).trim();
     const splitIndex2 = remainingAfter1.search(/(?:\r?\n)(?:3\.|3\s+QUALITY|QUALITY\s*&\s*TESTING)/i);
-    
     if (splitIndex2 !== -1) {
       part2 = remainingAfter1.substring(0, splitIndex2).trim();
       const remainingAfter2 = remainingAfter1.substring(splitIndex2).trim();
       const splitIndex3 = remainingAfter2.search(/(?:\r?\n)(?:4\.|4\s+KEY|KEY\s+RECOMMENDATIONS)/i);
-      
       if (splitIndex3 !== -1) {
         part3 = remainingAfter2.substring(0, splitIndex3).trim();
         part4 = remainingAfter2.substring(splitIndex3).trim();
@@ -288,42 +318,31 @@ export const exportToPPT = (
     }
   }
 
-  const slide7 = pptx.addSlide();
-  addSlideHeader(slide7, 'AI Executive Summary');
-  slide7.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.5, w: 12.3, h: 5.4, fill: { color: CARD_BG }, line: { color: CYAN, width: 1 } });
-  slide7.addText('Nexus AI Analytics - Part 1', { x: 0.8, y: 1.7, w: 11.0, h: 0.3, fontSize: 16, bold: true, color: PURPLE, fontFace: 'Outfit' });
-  slide7.addText(part1, { x: 0.8, y: 2.1, w: 11.7, h: 4.7, fontSize: 10, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top', lineSpacing: 14 });
+  const aiSlides: { title: string; label: string; content: string }[] = [
+    { title: 'AI Executive Summary',  label: 'Part 1 – Executive Summary & Overview', content: part1 },
+    { title: 'AI Financial Health',   label: 'Part 2 – Financial Health',              content: part2 },
+    { title: 'AI Quality & Testing',  label: 'Part 3 – Quality & Testing',             content: part3 },
+    { title: 'AI Recommendations',    label: 'Part 4 – Key Recommendations',           content: part4 },
+  ].filter(s => s.content.trim() !== '');
 
-  if (part2) {
-    // SLIDE 8: AI Financial Health (Part 2)
-    const slide8 = pptx.addSlide();
-    addSlideHeader(slide8, 'AI Financial Health');
-    slide8.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.5, w: 12.3, h: 5.4, fill: { color: CARD_BG }, line: { color: CYAN, width: 1 } });
-    slide8.addText('Nexus AI Analytics - Part 2', { x: 0.8, y: 1.7, w: 11.0, h: 0.3, fontSize: 16, bold: true, color: PURPLE, fontFace: 'Outfit' });
-    slide8.addText(part2, { x: 0.8, y: 2.1, w: 11.7, h: 4.7, fontSize: 10, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top', lineSpacing: 14 });
-  }
-
-  if (part3) {
-    // SLIDE 9: AI Quality & Testing (Part 3)
-    const slide9 = pptx.addSlide();
-    addSlideHeader(slide9, 'AI Quality & Testing');
-    slide9.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.5, w: 12.3, h: 5.4, fill: { color: CARD_BG }, line: { color: CYAN, width: 1 } });
-    slide9.addText('Nexus AI Analytics - Part 3', { x: 0.8, y: 1.7, w: 11.0, h: 0.3, fontSize: 16, bold: true, color: PURPLE, fontFace: 'Outfit' });
-    slide9.addText(part3, { x: 0.8, y: 2.1, w: 11.7, h: 4.7, fontSize: 10, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top', lineSpacing: 14 });
-  }
-
-  if (part4) {
-    // SLIDE 10: AI Recommendations (Part 4)
-    const slide10 = pptx.addSlide();
-    addSlideHeader(slide10, 'AI Recommendations');
-    slide10.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.5, w: 12.3, h: 5.4, fill: { color: CARD_BG }, line: { color: CYAN, width: 1 } });
-    slide10.addText('Nexus AI Analytics - Part 4', { x: 0.8, y: 1.7, w: 11.0, h: 0.3, fontSize: 16, bold: true, color: PURPLE, fontFace: 'Outfit' });
-    slide10.addText(part4, { x: 0.8, y: 2.1, w: 11.7, h: 4.7, fontSize: 10, color: TEXT_WHITE, fontFace: 'Outfit', align: 'left', valign: 'top', lineSpacing: 14 });
-  }
+  aiSlides.forEach((s, i) => {
+    const aiSlide = pptx.addSlide();
+    addSlideHeader(aiSlide, s.title, 8 + i);
+    // Light red content card
+    aiSlide.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.2, w: 12.3, h: 5.8, fill: { color: VF_RED_LITE }, line: { color: VF_GRAY_MID, width: 0.75 } });
+    aiSlide.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.2, w: 0.08, h: 5.8, fill: { color: VF_RED } });
+    aiSlide.addText(s.label, { x: 0.75, y: 1.25, w: 11.0, h: 0.35, fontSize: 13, bold: true, color: VF_RED, fontFace: 'Calibri' });
+    aiSlide.addText(s.content, {
+      x: 0.75, y: 1.7, w: 11.8, h: 5.2,
+      fontSize: 10, color: VF_BLACK, fontFace: 'Calibri',
+      align: 'left', valign: 'top', lineSpacing: 14
+    });
+  });
 
   // Save
   pptx.writeFile({ fileName: `TDM_SteerCo_Report_${new Date().toISOString().split('T')[0]}.pptx` });
-};
+
+
 
 export const exportPOAPToPPT = (
   poapData: POAPData,
