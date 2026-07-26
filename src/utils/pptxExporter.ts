@@ -122,14 +122,117 @@ export const exportToPPT = (
     slide4.addText(`${s.progress}%`, { x: 9.6, y: yOffset + 0.25, w: 0.8, h: 0.3, fontSize: 12, bold: true, color: CYAN, fontFace: 'Outfit' });
   });
 
-  // SLIDE 5: QA
+  // SLIDE 5: QA Gates Overview
   const slide5 = pptx.addSlide();
-  addSlideHeader(slide5, 'QA Gates Testing');
-  let sit = qaGates.find(g => g.name === 'SIT');
-  if (sit) {
-    slide5.addText(`SIT Total Tests: ${sit.totalTests}`, { x: 0.5, y: 1.5, w: 4, h: 0.5, fontSize: 16, color: TEXT_WHITE });
-    slide5.addText(`SIT Passed: ${sit.passed}`, { x: 0.5, y: 2.0, w: 4, h: 0.5, fontSize: 16, color: COLOR_GREEN });
-    slide5.addText(`SIT Failed: ${sit.failed}`, { x: 0.5, y: 2.5, w: 4, h: 0.5, fontSize: 16, color: COLOR_RED });
+  addSlideHeader(slide5, 'Testing & Quality Gates');
+
+  // Summary KPI row at top
+  const totalTests = qaGates.reduce((s, g) => s + g.totalTests, 0);
+  const totalPassed = qaGates.reduce((s, g) => s + g.passed, 0);
+  const totalFailed = qaGates.reduce((s, g) => s + g.failed, 0);
+  const overallPassRate = totalTests > 0 ? Math.round((totalPassed / totalTests) * 100) : 0;
+
+  const kpis = [
+    { label: 'Total Tests', val: totalTests.toString(), color: CYAN },
+    { label: 'Passed', val: totalPassed.toString(), color: COLOR_GREEN },
+    { label: 'Failed', val: totalFailed.toString(), color: COLOR_RED },
+    { label: 'Pass Rate', val: `${overallPassRate}%`, color: overallPassRate >= 80 ? COLOR_GREEN : overallPassRate >= 50 ? COLOR_AMBER : COLOR_RED },
+  ];
+  kpis.forEach((kpi, i) => {
+    const kx = 0.5 + i * 3.1;
+    slide5.addShape(pptx.ShapeType.rect, { x: kx, y: 1.4, w: 2.8, h: 1.0, fill: { color: CARD_BG }, line: { color: kpi.color, width: 1.5 } });
+    slide5.addText(kpi.label, { x: kx + 0.1, y: 1.5, w: 2.6, h: 0.3, fontSize: 10, color: TEXT_GRAY, fontFace: 'Outfit', bold: false });
+    slide5.addText(kpi.val, { x: kx + 0.1, y: 1.8, w: 2.6, h: 0.4, fontSize: 22, bold: true, color: kpi.color, fontFace: 'Outfit' });
+  });
+
+  // QA Gates table
+  const qaTableHeader: any[] = [
+    { text: 'Gate', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'left' } },
+    { text: 'Status', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'center' } },
+    { text: 'Total Tests', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'center' } },
+    { text: 'Passed', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'center' } },
+    { text: 'Failed', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'center' } },
+    { text: 'Blocked', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'center' } },
+    { text: 'Pass Rate', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'center' } },
+  ];
+
+  const qaTableRows: any[][] = [qaTableHeader];
+  qaGates.forEach(g => {
+    const pr = g.totalTests > 0 ? Math.round((g.passed / g.totalTests) * 100) : 0;
+    const prColor = pr >= 80 ? COLOR_GREEN : pr >= 50 ? COLOR_AMBER : COLOR_RED;
+    const statusColor = g.status === 'Passed' ? COLOR_GREEN : g.status === 'Failed' ? COLOR_RED : g.status === 'In Progress' ? COLOR_AMBER : TEXT_GRAY;
+    qaTableRows.push([
+      { text: g.name, options: { color: TEXT_WHITE, fill: { color: CARD_BG }, bold: true, align: 'left' } },
+      { text: g.status, options: { color: statusColor, fill: { color: CARD_BG }, bold: true, align: 'center' } },
+      { text: g.totalTests.toString(), options: { color: TEXT_WHITE, fill: { color: CARD_BG }, align: 'center' } },
+      { text: g.passed.toString(), options: { color: COLOR_GREEN, fill: { color: CARD_BG }, bold: true, align: 'center' } },
+      { text: g.failed.toString(), options: { color: g.failed > 0 ? COLOR_RED : TEXT_GRAY, fill: { color: CARD_BG }, bold: g.failed > 0, align: 'center' } },
+      { text: (g.blocked || 0).toString(), options: { color: g.blocked ? COLOR_AMBER : TEXT_GRAY, fill: { color: CARD_BG }, align: 'center' } },
+      { text: `${pr}%`, options: { color: prColor, fill: { color: CARD_BG }, bold: true, align: 'center' } },
+    ]);
+  });
+  slide5.addTable(qaTableRows, {
+    x: 0.5, y: 2.6, w: 12.3, h: Math.min(4.2, 0.4 + qaGates.length * 0.45),
+    border: { type: 'solid', color: '1e293b', pt: 1 },
+    fontSize: 11, fontFace: 'Outfit', valign: 'middle',
+    colW: [1.6, 1.5, 1.4, 1.2, 1.2, 1.2, 1.2]
+  });
+
+  // SLIDE 5b: Defects Breakdown
+  const slide5b = pptx.addSlide();
+  addSlideHeader(slide5b, 'Defects Log & Breakdown');
+
+  // Defect summary KPIs
+  const openDefs = defects.filter(d => d.status !== 'Closed');
+  const p1p2 = defects.filter(d => d.severity === 'P1' || d.severity === 'P2');
+  const closedDefs = defects.filter(d => d.status === 'Closed');
+
+  const defKpis = [
+    { label: 'Total Defects', val: defects.length.toString(), color: CYAN },
+    { label: 'Open', val: openDefs.length.toString(), color: openDefs.length > 0 ? COLOR_RED : COLOR_GREEN },
+    { label: 'P1/P2 Critical', val: p1p2.length.toString(), color: p1p2.length > 0 ? COLOR_RED : COLOR_GREEN },
+    { label: 'Closed', val: closedDefs.length.toString(), color: COLOR_GREEN },
+  ];
+  defKpis.forEach((kpi, i) => {
+    const kx = 0.5 + i * 3.1;
+    slide5b.addShape(pptx.ShapeType.rect, { x: kx, y: 1.4, w: 2.8, h: 1.0, fill: { color: CARD_BG }, line: { color: kpi.color, width: 1.5 } });
+    slide5b.addText(kpi.label, { x: kx + 0.1, y: 1.5, w: 2.6, h: 0.3, fontSize: 10, color: TEXT_GRAY, fontFace: 'Outfit' });
+    slide5b.addText(kpi.val, { x: kx + 0.1, y: 1.8, w: 2.6, h: 0.4, fontSize: 22, bold: true, color: kpi.color, fontFace: 'Outfit' });
+  });
+
+  // Defects table
+  const defTableHeader: any[] = [
+    { text: 'ID', options: { bold: true, color: BG_COLOR, fill: { color: CYAN } } },
+    { text: 'Title', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'left' } },
+    { text: 'Phase', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'center' } },
+    { text: 'Squad', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'left' } },
+    { text: 'Severity', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'center' } },
+    { text: 'Status', options: { bold: true, color: BG_COLOR, fill: { color: CYAN }, align: 'center' } },
+  ];
+
+  const defTableRows: any[][] = [defTableHeader];
+  defects.slice(0, 18).forEach(d => {
+    const sevColor = d.severity === 'P1' ? COLOR_RED : d.severity === 'P2' ? COLOR_AMBER : TEXT_GRAY;
+    const stColor = d.status === 'Closed' ? COLOR_GREEN : d.status === 'In Progress' || d.status === 'Retesting' ? COLOR_AMBER : COLOR_RED;
+    defTableRows.push([
+      { text: d.id, options: { color: CYAN, fill: { color: CARD_BG }, bold: true, align: 'center' } },
+      { text: d.title, options: { color: TEXT_WHITE, fill: { color: CARD_BG }, align: 'left' } },
+      { text: d.phase || '-', options: { color: TEXT_GRAY, fill: { color: CARD_BG }, align: 'center' } },
+      { text: d.squad, options: { color: TEXT_GRAY, fill: { color: CARD_BG }, align: 'left' } },
+      { text: d.severity, options: { color: sevColor, fill: { color: CARD_BG }, bold: true, align: 'center' } },
+      { text: d.status, options: { color: stColor, fill: { color: CARD_BG }, bold: true, align: 'center' } },
+    ]);
+  });
+
+  if (defTableRows.length > 1) {
+    slide5b.addTable(defTableRows, {
+      x: 0.5, y: 2.6, w: 12.3, h: Math.min(4.2, 0.4 + (defTableRows.length - 1) * 0.35),
+      border: { type: 'solid', color: '1e293b', pt: 1 },
+      fontSize: 10, fontFace: 'Outfit', valign: 'middle',
+      colW: [1.2, 3.8, 1.0, 2.3, 1.2, 1.5]
+    });
+  } else {
+    slide5b.addText('No defects logged yet.', { x: 0.5, y: 3.5, w: 12.3, h: 0.5, fontSize: 14, color: TEXT_GRAY, fontFace: 'Outfit', align: 'center' });
   }
 
   // SLIDE 6: Risks

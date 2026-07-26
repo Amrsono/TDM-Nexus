@@ -106,9 +106,23 @@ export const exportToExcel = (
     'Total Tests': g.totalTests,
     'Passed': g.passed,
     'Failed': g.failed,
-    'Blocked': g.blocked,
+    'Blocked': g.blocked || 0,
     'Pass Rate (%)': g.totalTests > 0 ? Math.round((g.passed / g.totalTests) * 100) : 0
   }));
+  // Add totals summary row
+  const totalTests = qaGates.reduce((s, g) => s + g.totalTests, 0);
+  const totalPassed = qaGates.reduce((s, g) => s + g.passed, 0);
+  const totalFailed = qaGates.reduce((s, g) => s + g.failed, 0);
+  const totalBlocked = qaGates.reduce((s, g) => s + (g.blocked || 0), 0);
+  qaOverview.push({
+    Gate: 'TOTAL',
+    Status: '-',
+    'Total Tests': totalTests,
+    'Passed': totalPassed,
+    'Failed': totalFailed,
+    'Blocked': totalBlocked,
+    'Pass Rate (%)': totalTests > 0 ? Math.round((totalPassed / totalTests) * 100) : 0
+  });
   const wsQA = XLSX.utils.json_to_sheet(qaOverview);
   XLSX.utils.book_append_sheet(wb, wsQA, 'QA Gates');
 
