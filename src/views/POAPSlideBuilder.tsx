@@ -399,24 +399,24 @@ function SlidePreview({ form, activeSlide }: { form: POAPSlideData; activeSlide:
       return { left: `${left}%`, width: `${width}%` };
     };
 
-    // ── Official Vodafone brand palette mapped to POAP phases ─────────────
+    // ── Official VOIS brand palette mapped to POAP phases ─────────────
     const phaseColorMap: Record<string, { border: string; text: string; bg: string; bgLight: string }> = {
-      Inception:    { border: '#EB9800', text: '#EB9800', bg: '#FEF0CC', bgLight: '#FEF7E4' }, // Vodafone Orange
-      Elaboration:  { border: '#00B0CA', text: '#007C92', bg: '#CCF0F5', bgLight: '#E5F8FB' }, // Vodafone Cerulean
-      Construction: { border: '#007C92', text: '#007C92', bg: '#CCE8ED', bgLight: '#E0F4F7' }, // Vodafone Blue Lagoon
-      Transition:   { border: '#9C2AA0', text: '#9C2AA0', bg: '#F0D9F1', bgLight: '#F8EEF8' }, // Vodafone Seance
+      Inception:    { border: '#EB9800', text: '#EB9800', bg: '#FEF0CC', bgLight: '#FEF7E4' }, // VOIS Orange
+      Elaboration:  { border: '#00B0CA', text: '#007C92', bg: '#CCF0F5', bgLight: '#E5F8FB' }, // VOIS Cerulean
+      Construction: { border: '#007C92', text: '#007C92', bg: '#CCE8ED', bgLight: '#E0F4F7' }, // VOIS Blue Lagoon
+      Transition:   { border: '#9C2AA0', text: '#9C2AA0', bg: '#F0D9F1', bgLight: '#F8EEF8' }, // VOIS Seance
     };
     const getPhaseColor = (phase: string) =>
-      phaseColorMap[phase] ?? { border: '#4A4D4E', text: '#4A4D4E', bg: '#F2F2F2', bgLight: '#F9F9F9' }; // Vodafone Abbey
+      phaseColorMap[phase] ?? { border: '#4A4D4E', text: '#4A4D4E', bg: '#F2F2F2', bgLight: '#F9F9F9' }; // VOIS Abbey
 
     const getTaskColor = (ms: MilestoneRow): string => {
-      if (ms.track === 'Governance') return '#E60000';       // Vodafone Red
-      if (ms.track === 'Sprints' || ms.track === 'Support') return '#007C92'; // Vodafone Blue Lagoon
-      if (ms.track === 'Testing') return '#00B0CA';           // Vodafone Cerulean
-      if (ms.track === 'Transition') return '#9C2AA0';        // Vodafone Seance
-      if (ms.phase === 'Inception') return '#EB9800';         // Vodafone Orange
-      if (ms.phase === 'Elaboration') return '#00B0CA';       // Vodafone Cerulean
-      return '#4A4D4E';                                       // Vodafone Abbey
+      if (ms.track === 'Governance') return '#E60000';       // VOIS Red
+      if (ms.track === 'Sprints' || ms.track === 'Support') return '#007C92'; // VOIS Blue Lagoon
+      if (ms.track === 'Testing') return '#00B0CA';           // VOIS Cerulean
+      if (ms.track === 'Transition') return '#9C2AA0';        // VOIS Seance
+      if (ms.phase === 'Inception') return '#EB9800';         // VOIS Orange
+      if (ms.phase === 'Elaboration') return '#00B0CA';       // VOIS Cerulean
+      return '#4A4D4E';                                       // VOIS Abbey
     };
 
     // Compute phase overlay positions (% of chart width)
@@ -1091,12 +1091,12 @@ export function POAPSlideBuilder() {
       const xPos = colStartX + i * colW;
       const phase = getMonthPhase(m.dateStart, phaseRanges);
       
-      let pColor = '4A4D4E'; // Vodafone Abbey
+      let pColor = '4A4D4E'; // VOIS Abbey
       let pBg = 'F2F2F2';
-      if (phase === 'Inception')    { pColor = 'EB9800'; pBg = 'FEF0CC'; } // Vodafone Orange
-      else if (phase === 'Elaboration')  { pColor = '00B0CA'; pBg = 'CCF0F5'; } // Vodafone Cerulean
-      else if (phase === 'Construction') { pColor = '007C92'; pBg = 'CCE8ED'; } // Vodafone Blue Lagoon
-      else if (phase === 'Transition')   { pColor = '9C2AA0'; pBg = 'F0D9F1'; } // Vodafone Seance
+      if (phase === 'Inception')    { pColor = 'EB9800'; pBg = 'FEF0CC'; } // VOIS Orange
+      else if (phase === 'Elaboration')  { pColor = '00B0CA'; pBg = 'CCF0F5'; } // VOIS Cerulean
+      else if (phase === 'Construction') { pColor = '007C92'; pBg = 'CCE8ED'; } // VOIS Blue Lagoon
+      else if (phase === 'Transition')   { pColor = '9C2AA0'; pBg = 'F0D9F1'; } // VOIS Seance
 
       s3.addShape(pptx.ShapeType.rect, {
         x: xPos, y: 0.8, w: colW, h: 5.4,
@@ -1172,13 +1172,13 @@ export function POAPSlideBuilder() {
           if (taskX + taskW > colStartX + colAreaWidth) taskW = colStartX + colAreaWidth - taskX;
           if (taskW < 0.15) taskW = 0.15;
 
-          let colorHex = '4A4D4E'; // Vodafone Abbey (default)
-          if (ms.track === 'Governance') colorHex = 'E60000'; // Vodafone Red
-          else if (ms.track === 'Sprints' || ms.track === 'Support' || ms.name.toLowerCase().includes('sprint')) colorHex = '007C92'; // Vodafone Blue Lagoon
-          else if (ms.track === 'Testing') colorHex = '00B0CA'; // Vodafone Cerulean
-          else if (ms.track === 'Transition') colorHex = '9C2AA0'; // Vodafone Seance
-          else if (ms.phase === 'Inception') colorHex = 'EB9800'; // Vodafone Orange
-          else if (ms.phase === 'Elaboration') colorHex = '00B0CA'; // Vodafone Cerulean
+          let colorHex = '4A4D4E'; // VOIS Abbey (default)
+          if (ms.track === 'Governance') colorHex = 'E60000'; // VOIS Red
+          else if (ms.track === 'Sprints' || ms.track === 'Support' || ms.name.toLowerCase().includes('sprint')) colorHex = '007C92'; // VOIS Blue Lagoon
+          else if (ms.track === 'Testing') colorHex = '00B0CA'; // VOIS Cerulean
+          else if (ms.track === 'Transition') colorHex = '9C2AA0'; // VOIS Seance
+          else if (ms.phase === 'Inception') colorHex = 'EB9800'; // VOIS Orange
+          else if (ms.phase === 'Elaboration') colorHex = '00B0CA'; // VOIS Cerulean
 
           const shapeH = rowH * 0.75;
           const shapeY = rowY + (rowH - shapeH) / 2;

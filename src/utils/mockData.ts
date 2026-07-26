@@ -132,7 +132,7 @@ export const initialADOWorkItems: ADOWorkItem[] = [
 
 export const initialSquads: PortfolioSquad[] = [
   { id: 'sq-1', name: 'Raptors (MVO)', lead: 'Sarah Jenkins', progress: 85, status: 'In Progress', targetRelease: 'CCS 26.6', description: 'Digital eShop sales journeys.' },
-  { id: 'sq-2', name: 'MVA-Alex (MVA)', lead: 'David Chen', progress: 72, status: 'In Progress', targetRelease: 'CCS 26.6A', description: 'My Vodafone App core experience.' },
+  { id: 'sq-2', name: 'MVA-Alex (MVA)', lead: 'David Chen', progress: 72, status: 'In Progress', targetRelease: 'CCS 26.6A', description: 'My VOIS App core experience.' },
   { id: 'sq-3', name: 'Care Bears (eCare)', lead: 'Elena Rostova', progress: 50, status: 'In Progress', targetRelease: 'CCS 26.8', description: 'Customer self-service portal.' },
   { id: 'sq-4', name: 'TOBi Nova', lead: 'Marcus Brody', progress: 30, status: 'Blocked', targetRelease: 'SD 26.10', description: 'Chatbot intent handling.' },
   { id: 'sq-5', name: 'Gravity (Platform)', lead: 'Aaron Vance', progress: 100, status: 'Completed', targetRelease: 'CCS 26.4', description: 'Shared platform integrations.' }

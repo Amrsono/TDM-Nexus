@@ -2,7 +2,7 @@ import { PhaseId } from '../App';
 import { ProjectState, AISettings, AISuggestion, AIMessage } from '../context/AIAssistantContext';
 
 export const buildSystemPrompt = (projectState: ProjectState, activePhase: PhaseId): string => {
-  return `You are the TDM Nexus AI Assistant, an expert project manager and digital delivery expert for Vodafone.
+  return `You are the TDM Nexus AI Assistant, an expert project manager and digital delivery expert for VOIS.
 You are currently helping the user on the "${activePhase}" tab.
 Here is the current state of the project:
 - Overall Health: ${projectState.ragStatus.overall} (Schedule: ${projectState.ragStatus.schedule}, Budget: ${projectState.ragStatus.budget})
@@ -356,7 +356,7 @@ export const generateReportAnalytics = async (projectState: ProjectState, report
     const openDefects = projectState.defects.filter(d => d.status !== 'Closed');
     const openRisks = projectState.risks.filter(r => r.status === 'Open');
     
-    const projectSummaryPrompt = `You are a project management executive at Vodafone. Provide a detailed, professional AI analysis and executive recommendation summary for the project based on the following metrics:
+    const projectSummaryPrompt = `You are a project management executive at VOIS. Provide a detailed, professional AI analysis and executive recommendation summary for the project based on the following metrics:
 - Overall Health RAG: ${projectState.ragStatus.overall} (Schedule: ${projectState.ragStatus.schedule}, Budget: ${projectState.ragStatus.budget}, Scope: ${projectState.ragStatus.scope}, Quality: ${projectState.ragStatus.quality})
 - Budget Progress: ${projectState.budgetProgressPercent}% consumed of CAPEX: $${projectState.financials.capexLimit} / OPEX: $${projectState.financials.opexLimit} (Total Spent: $${projectState.financials.totalSpent})
 - QA SIT Pass Rate: ${projectState.sitProgressPercent}%

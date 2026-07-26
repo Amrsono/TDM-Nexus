@@ -398,7 +398,7 @@ function renderStep1(data: WalkthroughData, handleChange: Function) {
             <option value="">Select a Portfolio...</option>
             <option value="MVO (eShop)">MVO (eShop)</option>
             <option value="eCare">eCare</option>
-            <option value="My Vodafone App (MVA)">My Vodafone App (MVA)</option>
+            <option value="My VOIS App (MVA)">My VOIS App (MVA)</option>
             <option value="TOBi">TOBi</option>
             <option value="Platform">Platform / Shared</option>
           </select>

@@ -87,7 +87,7 @@ export function Settings({ theme, setTheme }: SettingsProps) {
                 <div className={`map-node ${theme === 'light' ? 'active' : ''}`} onClick={() => setTheme('light')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1.5rem' }}>
                   <Sun size={32} style={{ color: theme === 'light' ? 'var(--color-cyan)' : 'var(--color-text-secondary)', marginBottom: '0.75rem' }} />
                   <div className="map-node-title">Light Mode</div>
-                  <div className="map-node-lead">Vodafone White & Red</div>
+                  <div className="map-node-lead">VOIS White & Red</div>
                 </div>
 
                 <div className={`map-node ${theme === 'medium' ? 'active' : ''}`} onClick={() => setTheme('medium')} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1.5rem' }}>

@@ -58,7 +58,7 @@ export const exportWalkthroughToPPT = (data: WalkthroughData) => {
   const pres = new pptxgen();
 
   pres.author = 'TDM Nexus';
-  pres.company = 'Vodafone';
+  pres.company = 'VOIS';
   pres.subject = 'Digital Compass Walkthrough Report';
   pres.title = `${data.epicName} - Walkthrough Report`;
 

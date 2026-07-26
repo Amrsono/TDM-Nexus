@@ -25,23 +25,23 @@ export const exportToPPT = (
   const pptx = new pptxgen();
   pptx.layout = 'LAYOUT_WIDE';
 
-  // ── Vodafone Official Brand Colours ──────────────────────────────────────
-  const VF_RED        = 'E60000';   // Vodafone Primary Red
+  // ── VOIS Official Brand Colours ──────────────────────────────────────
+  const VF_RED        = 'E60000';   // VOIS Primary Red
   const VF_WHITE      = 'FFFFFF';   // White
-  const VF_BLACK      = '333333';   // Vodafone Black
-  const VF_AUBERGINE  = '5E2750';   // Vodafone Finn / Aubergine
-  const VF_ABBEY      = '4A4D4E';   // Vodafone Abbey – secondary text
-  const VF_CERULEAN   = '00B0CA';   // Vodafone Cerulean – info accents
-  const VF_LAGOON     = '007C92';   // Vodafone Blue Lagoon – deep info
-  const VF_SEANCE     = '9C2AA0';   // Vodafone Seance – purple accent
+  const VF_BLACK      = '333333';   // VOIS Black
+  const VF_AUBERGINE  = '5E2750';   // VOIS Finn / Aubergine
+  const VF_ABBEY      = '4A4D4E';   // VOIS Abbey – secondary text
+  const VF_CERULEAN   = '00B0CA';   // VOIS Cerulean – info accents
+  const VF_LAGOON     = '007C92';   // VOIS Blue Lagoon – deep info
+  const VF_SEANCE     = '9C2AA0';   // VOIS Seance – purple accent
   const VF_GRAY_MID   = 'D6D6D6';   // Neutral mid-grey borders
   const VF_GRAY_LITE  = 'F4F4F4';   // Neutral light-grey card fill
-  const VF_RED_LITE   = 'FCEAEA';   // Soft Vodafone red tint
+  const VF_RED_LITE   = 'FCEAEA';   // Soft VOIS red tint
 
-  // RAG status colours – Vodafone brand-aligned
-  const COLOR_GREEN = '428600';   // Vodafone status green
-  const COLOR_AMBER = 'EB9700';   // Vodafone status amber
-  const COLOR_RED   = 'E60000';   // Vodafone status red
+  // RAG status colours – VOIS brand-aligned
+  const COLOR_GREEN = '428600';   // VOIS status green
+  const COLOR_AMBER = 'EB9700';   // VOIS status amber
+  const COLOR_RED   = 'E60000';   // VOIS status red
 
   // Font – matches the web app
   const VF_FONT = 'Outfit';
@@ -69,9 +69,9 @@ export const exportToPPT = (
     slide.addText('TDM NEXUS  •  Steering Committee Report', {
       x: 0.3, y: 7.32, w: 8.0, h: 0.15, fontSize: 7, color: VF_GRAY_MID, fontFace: VF_FONT
     });
-    // Vodafone branding badge bottom-right
+    // VOIS branding badge bottom-right
     slide.addShape(pptx.ShapeType.rect, { x: 12.0, y: 7.05, w: 1.3, h: 0.4, fill: { color: VF_RED } });
-    slide.addText('vodafone', {
+    slide.addText('VOIS', {
       x: 12.0, y: 7.05, w: 1.3, h: 0.4, fontSize: 9, bold: true,
       color: VF_WHITE, fontFace: VF_FONT, align: 'center', valign: 'middle'
     });
@@ -102,9 +102,9 @@ export const exportToPPT = (
     { text: 'Overall Status: ', options: { bold: true, color: VF_BLACK } },
     { text: ragStatus.overall.toUpperCase(), options: { color: getRagHex(ragStatus.overall), bold: true } }
   ], { x: 1.0, y: 3.55, w: 5.5, h: 1.3, fontSize: 13, fontFace: VF_FONT, lineSpacing: 24 });
-  // Vodafone branding badge bottom-right
+  // VOIS branding badge bottom-right
   slide1.addShape(pptx.ShapeType.rect, { x: 11.8, y: 6.8, w: 1.5, h: 0.6, fill: { color: VF_RED } });
-  slide1.addText('vodafone', { x: 11.8, y: 6.8, w: 1.5, h: 0.6, fontSize: 11, bold: true, color: VF_WHITE, fontFace: VF_FONT, align: 'center', valign: 'middle' });
+  slide1.addText('VOIS', { x: 11.8, y: 6.8, w: 1.5, h: 0.6, fontSize: 11, bold: true, color: VF_WHITE, fontFace: VF_FONT, align: 'center', valign: 'middle' });
 
   // ── SLIDE 2: RAG Status ───────────────────────────────────────────────────
   const slide2 = pptx.addSlide();
