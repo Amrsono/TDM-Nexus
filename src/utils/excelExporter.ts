@@ -114,7 +114,7 @@ export const exportToExcel = (
   const totalPassed = qaGates.reduce((s, g) => s + g.passed, 0);
   const totalFailed = qaGates.reduce((s, g) => s + g.failed, 0);
   const totalBlocked = qaGates.reduce((s, g) => s + (g.blocked || 0), 0);
-  qaOverview.push({
+  (qaOverview as any[]).push({
     Gate: 'TOTAL',
     Status: '-',
     'Total Tests': totalTests,
