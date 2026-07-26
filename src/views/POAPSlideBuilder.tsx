@@ -971,28 +971,50 @@ export function POAPSlideBuilder() {
     // Milestones table
     s1.addShape(pptx.ShapeType.rect, { x: 6.0, y: 1.1, w: 7.1, h: 0.3, fill: { color: DARK_RED } });
     const msHeaders = ['', 'Project Milestones', 'Status', 'Targeted\nDate', 'Release\nDate', 'Actual\nDate'];
-    const msColWidths = [0.35, 2.2, 1.0, 1.0, 1.0, 1.0];
+    const msColWidths = [0.35, 2.7, 0.85, 1.0, 1.1, 1.1];
     let msX = 6.0;
     msHeaders.forEach((h, i) => {
       s1.addText(h, { x: msX, y: 1.1, w: msColWidths[i], h: 0.3, fontSize: 7, bold: true, color: WHITE, fontFace: 'Arial', align: 'center', valign: 'middle' });
       msX += msColWidths[i];
     });
 
-    form.milestones.forEach((ms, rowIdx) => {
+    const maxRows = 10;
+    const tableData = [...form.milestones];
+    while(tableData.length < maxRows) {
+      tableData.push({ id: -1, name: '', status: '', targetedDate: '', releaseDate: '', actualDate: '' } as any);
+    }
+
+    tableData.slice(0, maxRows).forEach((ms, rowIdx) => {
       let colX = 6.0;
       const yPos = 1.42 + rowIdx * 0.42;
       const rowFill = rowIdx % 2 === 0 ? LIGHT_GRAY : WHITE;
-      const cellData = [String(rowIdx + 1), ms.name || '', ms.status || '', ms.targetedDate || '', ms.releaseDate || '', ms.actualDate || ''];
+      const cellData = [ms.id === -1 ? '' : String(rowIdx + 1), ms.name || '', ms.status || '', ms.targetedDate || '', ms.releaseDate || '', ms.actualDate || ''];
       cellData.forEach((cellText, cIdx) => {
         s1.addShape(pptx.ShapeType.rect, { x: colX, y: yPos, w: msColWidths[cIdx], h: 0.42, fill: { color: rowFill }, line: { color: BORDER_GRAY, width: 0.5 } });
         let textColor = BLACK;
-        if (cIdx === 2) { const lower = (cellText || '').toLowerCase(); if (lower === 'completed' || lower === 'done') textColor = '00B050'; else if (lower.includes('progress')) textColor = 'FFC000'; else if (lower.includes('not started')) textColor = 'FF0000'; }
-        s1.addText(cellText, { x: colX, y: yPos, w: msColWidths[cIdx], h: 0.42, fontSize: 7, color: textColor, fontFace: 'Arial', align: 'center', valign: 'middle', bold: cIdx === 2 });
+        let alignText: 'left' | 'center' | 'right' = 'center';
+        let textX = colX;
+        let textW = msColWidths[cIdx];
+        
+        if (cIdx === 1) {
+          alignText = 'left';
+          textX = colX + 0.05;
+          textW = msColWidths[cIdx] - 0.1;
+        }
+
+        if (cIdx === 2) { 
+          const lower = (cellText || '').toLowerCase(); 
+          if (lower === 'completed' || lower === 'done') textColor = '00B050'; 
+          else if (lower.includes('progress')) textColor = 'FFC000'; 
+          else if (lower.includes('not started')) textColor = 'FF0000'; 
+        }
+        
+        s1.addText(cellText, { x: textX, y: yPos, w: textW, h: 0.42, fontSize: 7, color: textColor, fontFace: 'Arial', align: alignText, valign: 'middle', bold: cIdx === 2 });
         colX += msColWidths[cIdx];
       });
     });
 
-    const obstacleY = 5.6;
+    const obstacleY = 5.7;
     s1.addText('What are the obstacles that SteerCo/ExCo need to help overcome to execute successfully?', { x: 0.2, y: obstacleY, w: 12.9, h: 0.25, fontSize: 8, bold: true, color: BLACK, fontFace: 'Arial' });
     s1.addText(form.obstacles || '', { x: 0.3, y: obstacleY + 0.3, w: 12.7, h: 0.6, fontSize: 8, color: '333333', fontFace: 'Arial', valign: 'top' });
 
