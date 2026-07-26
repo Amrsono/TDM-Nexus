@@ -1241,31 +1241,33 @@ export function POAPSlideBuilder() {
       currentY += trackHeight + 0.05;
     });
 
+    s3.addShape(pptx.ShapeType.line, { x: 0.3, y: 6.8, w: 12.7, h: 0, line: { color: 'BFBFBF', width: 0.5 } });
+
     s3.addText('NOTES:\n• Agile SCRUM delivery approach\n• Key gates align with SteerCo review dates', {
-      x: 0.3, y: 6.3, w: 4.5, h: 0.5, fontSize: 7, color: '555555', fontFace: 'Arial'
+      x: 0.3, y: 6.9, w: 4.5, h: 0.5, fontSize: 7, color: '555555', fontFace: 'Arial'
     });
 
     const legX = 5.0;
-    s3.addShape(pptx.ShapeType.rect, { x: legX, y: 6.4, w: 0.15, h: 0.1, fill: { color: 'EB9800' } }); // VF Orange
-    s3.addText('Inception', { x: legX + 0.2, y: 6.35, w: 0.8, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
+    s3.addShape(pptx.ShapeType.rect, { x: legX, y: 7.0, w: 0.15, h: 0.1, fill: { color: 'EB9800' } }); // VF Orange
+    s3.addText('Inception', { x: legX + 0.2, y: 6.95, w: 0.8, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
 
-    s3.addShape(pptx.ShapeType.rect, { x: legX + 1.1, y: 6.4, w: 0.15, h: 0.1, fill: { color: '00B0CA' } }); // VF Cerulean
-    s3.addText('Elaboration', { x: legX + 1.3, y: 6.35, w: 1.0, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
+    s3.addShape(pptx.ShapeType.rect, { x: legX + 1.1, y: 7.0, w: 0.15, h: 0.1, fill: { color: '00B0CA' } }); // VF Cerulean
+    s3.addText('Elaboration', { x: legX + 1.3, y: 6.95, w: 1.0, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
 
-    s3.addShape(pptx.ShapeType.rect, { x: legX + 2.4, y: 6.4, w: 0.15, h: 0.1, fill: { color: '007C92' } }); // VF Blue Lagoon
-    s3.addText('Construction / Sprints', { x: legX + 2.6, y: 6.35, w: 1.2, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
+    s3.addShape(pptx.ShapeType.rect, { x: legX + 2.4, y: 7.0, w: 0.15, h: 0.1, fill: { color: '007C92' } }); // VF Blue Lagoon
+    s3.addText('Construction / Sprints', { x: legX + 2.6, y: 6.95, w: 1.2, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
 
-    s3.addShape(pptx.ShapeType.rect, { x: legX + 3.9, y: 6.4, w: 0.15, h: 0.1, fill: { color: 'E60000' } }); // VF Red
-    s3.addText('Governance', { x: legX + 4.1, y: 6.35, w: 0.8, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
+    s3.addShape(pptx.ShapeType.rect, { x: legX + 3.9, y: 7.0, w: 0.15, h: 0.1, fill: { color: 'E60000' } }); // VF Red
+    s3.addText('Governance', { x: legX + 4.1, y: 6.95, w: 0.8, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
 
-    s3.addShape(pptx.ShapeType.rect, { x: legX + 5.0, y: 6.4, w: 0.15, h: 0.1, fill: { color: '9C2AA0' } }); // VF Seance
-    s3.addText('Transition', { x: legX + 5.2, y: 6.35, w: 0.8, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
+    s3.addShape(pptx.ShapeType.rect, { x: legX + 5.0, y: 7.0, w: 0.15, h: 0.1, fill: { color: '9C2AA0' } }); // VF Seance
+    s3.addText('Transition', { x: legX + 5.2, y: 6.95, w: 0.8, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
 
-    s3.addShape(pptx.ShapeType.diamond, { x: legX + 6.1, y: 6.4, w: 0.1, h: 0.1, fill: { color: 'E60000' } }); // VF Red
-    s3.addText('Sign-Off', { x: legX + 6.25, y: 6.35, w: 0.8, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
+    s3.addShape(pptx.ShapeType.diamond, { x: legX + 6.1, y: 7.0, w: 0.1, h: 0.1, fill: { color: 'E60000' } }); // VF Red
+    s3.addText('Sign-Off', { x: legX + 6.25, y: 6.95, w: 0.8, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
 
     s3.addText('VOIS', {
-      x: 11.0, y: 6.2, w: 2.0, h: 0.4, fontSize: 20, bold: true, color: DARK_RED, fontFace: 'Arial', align: 'right'
+      x: 11.0, y: 6.8, w: 2.0, h: 0.4, fontSize: 20, bold: true, color: DARK_RED, fontFace: 'Arial', align: 'right'
     });
 
     pptx.writeFile({ fileName: `${form.projectName || 'POAP'}_StatusReport.pptx` });
