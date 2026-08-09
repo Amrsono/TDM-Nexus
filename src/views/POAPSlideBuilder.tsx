@@ -1332,7 +1332,7 @@ export function POAPSlideBuilder() {
         {/* Section 3: Milestones */}
         <fieldset style={{ border: '1px solid var(--color-border)', borderRadius: '10px', padding: '1rem' }}>
           <legend className="mono" style={{ color: 'var(--color-cyan)', fontSize: '0.75rem', padding: '0 0.5rem', fontWeight: 700 }}>Project Milestones</legend>
-          <div className="cyber-table-container" style={{ overflowX: 'auto' }}>
+          <div className="cyber-table-container" style={{ overflowX: 'visible' }}>
             <table className="cyber-table" style={{ minWidth: '1100px' }}>
               <thead>
                 <tr>
