@@ -461,10 +461,17 @@ select.cyber-input option:checked {
   flex: 1;
   min-height: 0;
   height: 100%;
-  overflow-y: auto;
+  overflow: auto;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
+  overscroll-behavior: contain;
   scrollbar-width: none;
+}
+.scroll-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 100%;
+  width: max-content;
 }
 .ui-overlay-container::-webkit-scrollbar {
   display: none;
@@ -512,13 +519,10 @@ select.cyber-input option:checked {
 .active-view-overlay {
   pointer-events: auto;
   flex-grow: 1;
-  min-width: 0;
   margin: 1rem 1.5rem 1.5rem 1.5rem;
   display: flex;
   flex-direction: column;
   max-width: 1000px;
-  align-self: flex-start;
-  width: calc(100% - 3rem);
   box-shadow: 0 15px 35px rgba(0,0,0,0.15);
   animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   background: var(--bg-card);
@@ -832,7 +836,6 @@ select.cyber-input option:checked {
 }
 .poap-slide-builder-form-pane {
   flex: 1;
-  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -854,7 +857,6 @@ select.cyber-input option:checked {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  min-width: 0;
 }
 .poap-header {
   border-bottom: 1px solid var(--color-border);

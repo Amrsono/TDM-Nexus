@@ -418,6 +418,7 @@ export default function App() {
 
         {/* Front Panel HUD and Active View Card */}
         <div className="ui-overlay-container">
+          <div className="scroll-content-wrapper">
           {/* Top HUD Banner */}
           <header className="hud-banner glass-panel">
             <div style={{ display: 'flex', alignItems: 'center' }}>
