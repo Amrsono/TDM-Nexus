@@ -98,7 +98,7 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow: hidden;
   height: 100dvh;
   background-image: var(--body-bg-image);
   background-attachment: fixed;
@@ -106,15 +106,18 @@ body {
 }
 
 /* Universal touch scroll improvements */
-.view-body, 
+.ui-overlay-container,
 .sidebar, 
-.poap-slide-builder-form-pane, 
-.nav-list,
-.data-table-container,
-.cyber-table-container {
+.nav-list {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   touch-action: pan-y pinch-zoom;
+}
+
+.data-table-container,
+.cyber-table-container {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
 }
 
 /* Webkit Scrollbars */
