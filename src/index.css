@@ -824,7 +824,6 @@ select.cyber-input option:checked {
 .poap-slide-builder-layout {
   display: flex;
   gap: 1.25rem;
-  height: 100%;
 }
 .poap-slide-builder-form-pane {
   flex: 1;
