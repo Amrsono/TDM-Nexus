@@ -455,8 +455,9 @@ select.cyber-input option:checked {
   z-index: 2;
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
   height: 100%;
-  pointer-events: none; /* Let clicks pass to 3D canvas if clicking background */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
@@ -508,6 +509,7 @@ select.cyber-input option:checked {
 .active-view-overlay {
   pointer-events: auto;
   flex-grow: 1;
+  min-width: 0;
   margin: 1rem 1.5rem 1.5rem 1.5rem;
   display: flex;
   flex-direction: column;
@@ -827,6 +829,7 @@ select.cyber-input option:checked {
 }
 .poap-slide-builder-form-pane {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -848,6 +851,7 @@ select.cyber-input option:checked {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  min-width: 0;
 }
 .poap-header {
   border-bottom: 1px solid var(--color-border);
