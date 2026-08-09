@@ -105,6 +105,18 @@ body {
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
+/* Universal touch scroll improvements */
+.view-body, 
+.sidebar, 
+.poap-slide-builder-form-pane, 
+.nav-list,
+.data-table-container,
+.cyber-table-container {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y pinch-zoom;
+}
+
 /* Webkit Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
