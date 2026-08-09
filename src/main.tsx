@@ -3,11 +3,13 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { AIAssistantProvider } from './context/AIAssistantContext'
+import { Analytics } from "@vercel/analytics/react"
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AIAssistantProvider>
       <App />
     </AIAssistantProvider>
+    <Analytics />
   </StrictMode>,
 )
