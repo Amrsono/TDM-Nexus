@@ -7,9 +7,11 @@ import { Analytics } from "@vercel/analytics/react"
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AIAssistantProvider>
-      <App />
-    </AIAssistantProvider>
-    <Analytics />
+    <>
+      <AIAssistantProvider>
+        <App />
+      </AIAssistantProvider>
+      <Analytics />
+    </>
   </StrictMode>,
 )
