@@ -472,7 +472,7 @@ select.cyber-input option:checked {
   flex-direction: column;
   flex: 1;
   min-width: 100%;
-  width: max-content;
+  width: 100%;
 }
 .ui-overlay-container::-webkit-scrollbar {
   display: none;
