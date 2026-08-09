@@ -99,7 +99,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-  height: 100vh;
+  height: 100dvh;
   background-image: var(--body-bg-image);
   background-attachment: fixed;
   transition: background-color 0.4s ease, color 0.4s ease;
@@ -319,7 +319,7 @@ select.cyber-input option:checked {
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   z-index: -1;
   background-size: 40px 40px;
   background-image: 
@@ -341,7 +341,7 @@ select.cyber-input option:checked {
 .dashboard-container {
   display: grid;
   grid-template-columns: 280px 1fr;
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   position: relative;
 }
@@ -355,6 +355,7 @@ select.cyber-input option:checked {
   z-index: 10;
   background: var(--bg-card);
   backdrop-filter: blur(16px);
+  overflow-y: auto;
 }
 
 .sidebar-logo {
@@ -389,7 +390,7 @@ select.cyber-input option:checked {
   flex-direction: column;
   gap: 0.5rem;
   flex-grow: 1;
-  overflow-y: auto;
+  overflow-y: visible;
 }
 
 .nav-item {
@@ -421,7 +422,7 @@ select.cyber-input option:checked {
 .main-content {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   position: relative;
 }
@@ -454,11 +455,14 @@ select.cyber-input option:checked {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
   flex-shrink: 0;
 }
 
 .hud-stat-group {
   display: flex;
+  flex-wrap: wrap;
   gap: 2rem;
 }
 
@@ -487,8 +491,8 @@ select.cyber-input option:checked {
   flex-grow: 1;
   margin: 1rem 1.5rem 1.5rem 1.5rem;
   overflow: hidden;
-  display: grid;
-  grid-template-rows: auto 1fr;
+  display: flex;
+  flex-direction: column;
   max-width: 1000px;
   align-self: flex-start;
   width: calc(100% - 3rem);
@@ -515,6 +519,7 @@ select.cyber-input option:checked {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .view-title {
@@ -530,8 +535,9 @@ select.cyber-input option:checked {
 
 .view-body {
   padding: 1.5rem;
+  flex: 1;
   overflow-y: auto;
-  max-height: calc(100vh - 250px);
+  min-height: 0;
 }
 
 /* Form Styles */
@@ -1064,7 +1070,7 @@ select.cyber-input option:checked {
     left: 0;
     bottom: 0;
     width: 280px;
-    height: 100vh;
+    height: 100dvh;
     transform: translateX(-100%);
     transition: transform var(--transition-normal);
     z-index: 1000;
@@ -1135,7 +1141,6 @@ select.cyber-input option:checked {
   }
   
   .view-body {
-    max-height: calc(100dvh - 220px);
     padding: 1rem;
   }
   
