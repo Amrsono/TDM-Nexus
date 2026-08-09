@@ -111,7 +111,7 @@ body {
 .nav-list {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  touch-action: pan-y pinch-zoom;
+  /* Removed touch-action: pan-y pinch-zoom as it strictly blocks horizontal panning! */
 }
 
 .data-table-container,
@@ -461,7 +461,8 @@ select.cyber-input option:checked {
   flex: 1;
   min-height: 0;
   height: 100%;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   scrollbar-width: none;
@@ -594,7 +595,7 @@ select.cyber-input option:checked {
 
 /* Tables in Cyber Style */
 .cyber-table-container {
-  overflow-x: visible;
+  overflow-x: auto;
   border: 1px solid var(--color-border);
   border-radius: 8px;
   background: var(--bg-secondary);
@@ -836,6 +837,7 @@ select.cyber-input option:checked {
 }
 .poap-slide-builder-form-pane {
   flex: 1;
+  min-width: 0; /* Critical for flex shrinking responsive tables */
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
