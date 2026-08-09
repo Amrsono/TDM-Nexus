@@ -457,6 +457,13 @@ select.cyber-input option:checked {
   flex-direction: column;
   height: 100%;
   pointer-events: none; /* Let clicks pass to 3D canvas if clicking background */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  scrollbar-width: none;
+}
+.ui-overlay-container::-webkit-scrollbar {
+  display: none;
 }
 
 /* HUD Banner */
@@ -502,7 +509,6 @@ select.cyber-input option:checked {
   pointer-events: auto;
   flex-grow: 1;
   margin: 1rem 1.5rem 1.5rem 1.5rem;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   max-width: 1000px;
@@ -547,9 +553,7 @@ select.cyber-input option:checked {
 
 .view-body {
   padding: 1.5rem;
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
+  flex-grow: 1;
 }
 
 /* Form Styles */
@@ -824,7 +828,6 @@ select.cyber-input option:checked {
 }
 .poap-slide-builder-form-pane {
   flex: 1;
-  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -836,6 +839,9 @@ select.cyber-input option:checked {
   flex-direction: column;
   gap: 0.75rem;
   min-width: 0;
+  position: sticky;
+  top: 1.5rem;
+  align-self: flex-start;
 }
 
 /* POAP View base styles */
