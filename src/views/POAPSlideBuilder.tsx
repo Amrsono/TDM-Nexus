@@ -1032,38 +1032,50 @@ export function POAPSlideBuilder() {
     });
     s1.addText('VOIS', { x: 11.0, y: 6.9, w: 2.0, h: 0.4, fontSize: 22, bold: true, color: DARK_RED, fontFace: 'Arial', align: 'right' });
 
-    /* ── SLIDE 2 ── */
-    const s2 = pptx.addSlide();
-    s2.background = { color: WHITE };
-    s2.addText(`${form.projectName || 'Project Name'}| Milestones Plan`, { x: 0.2, y: 0.2, w: 8.0, h: 0.5, fontSize: 18, bold: true, color: BLACK, fontFace: 'Arial' });
+    /* ── SLIDE 2+ (Milestones) ── */
+    const MAX_PER_SLIDE = 4;
+    const milestoneChunks = [];
+    for (let i = 0; i < form.milestones.length; i += MAX_PER_SLIDE) {
+      milestoneChunks.push(form.milestones.slice(i, i + MAX_PER_SLIDE));
+    }
+    if (milestoneChunks.length === 0) milestoneChunks.push([]);
 
-    s2.addText('RAG Legend:', { x: 10.0, y: 0.2, w: 1.0, h: 0.2, fontSize: 7, bold: true, color: BLACK, fontFace: 'Arial' });
-    [{ label: 'Critical Risk', color: RED }, { label: 'On Track', color: '00B050' }, { label: 'Behind/Risk', color: 'FFC000' }, { label: 'Off Track', color: 'A6A6A6' }]
-      .forEach((item, i) => {
-        const col = i % 2;
-        const row = Math.floor(i / 2);
-        const startX = 10.0 + col * 1.5;
-        const startY = 0.45 + row * 0.2;
-        
-        s2.addShape(pptx.ShapeType.rect, { x: startX, y: startY + 0.03, w: 0.15, h: 0.15, fill: { color: item.color } });
-        s2.addText(item.label, { x: startX + 0.2, y: startY, w: 1.2, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
+    milestoneChunks.forEach((chunk, chunkIdx) => {
+      const s2 = pptx.addSlide();
+      s2.background = { color: WHITE };
+      const titleSuffix = milestoneChunks.length > 1 ? ` (Page ${chunkIdx + 1}/${milestoneChunks.length})` : '';
+      s2.addText(`${form.projectName || 'Project Name'}| Milestones Plan${titleSuffix}`, { x: 0.2, y: 0.2, w: 10.0, h: 0.5, fontSize: 18, bold: true, color: BLACK, fontFace: 'Arial' });
+
+      s2.addText('RAG Legend:', { x: 10.0, y: 0.2, w: 1.0, h: 0.2, fontSize: 7, bold: true, color: BLACK, fontFace: 'Arial' });
+      [{ label: 'Critical Risk', color: RED }, { label: 'On Track', color: '00B050' }, { label: 'Behind/Risk', color: 'FFC000' }, { label: 'Off Track', color: 'A6A6A6' }]
+        .forEach((item, i) => {
+          const col = i % 2;
+          const row = Math.floor(i / 2);
+          const startX = 10.0 + col * 1.5;
+          const startY = 0.45 + row * 0.2;
+          
+          s2.addShape(pptx.ShapeType.rect, { x: startX, y: startY + 0.03, w: 0.15, h: 0.15, fill: { color: item.color } });
+          s2.addText(item.label, { x: startX + 0.2, y: startY, w: 1.2, h: 0.2, fontSize: 6, color: BLACK, fontFace: 'Arial' });
+        });
+
+      chunk.forEach((ms, idx) => {
+        const laneY = 1.2 + idx * 1.2; // Spaced out slightly more
+        s2.addShape(pptx.ShapeType.roundRect, { x: 0.3, y: laneY, w: 1.8, h: 0.55, fill: { color: DARK_RED }, rectRadius: 0.05 });
+        s2.addText(`Milestone ${(chunkIdx * MAX_PER_SLIDE) + idx + 1}\n"${ms.name || '...'}"`, { x: 0.3, y: laneY, w: 1.8, h: 0.55, fontSize: 7, bold: true, color: WHITE, fontFace: 'Arial', align: 'center', valign: 'middle' });
+        const bc = ms.status?.toLowerCase().includes('completed') || ms.status?.toLowerCase() === 'done' ? '00B050' : ms.status?.toLowerCase().includes('progress') ? 'FFC000' : 'A6A6A6';
+        s2.addShape(pptx.ShapeType.rect, { x: 2.5, y: laneY + 0.15, w: 6.0, h: 0.25, fill: { color: bc } });
+        s2.addShape(pptx.ShapeType.rect, { x: 8.2, y: laneY + 0.1, w: 0.15, h: 0.15, fill: { color: '0070C0' }, rotate: 45 });
+        if (ms.targetedDate) s2.addText(ms.targetedDate, { x: 8.5, y: laneY + 0.05, w: 1.5, h: 0.25, fontSize: 7, color: BLACK, fontFace: 'Arial' });
       });
 
-    form.milestones.forEach((ms, idx) => {
-      const laneY = 1.2 + idx * 1.1;
-      s2.addShape(pptx.ShapeType.roundRect, { x: 0.3, y: laneY, w: 1.8, h: 0.55, fill: { color: DARK_RED }, rectRadius: 0.05 });
-      s2.addText(`Milestone${idx + 1}\n"${ms.name || '...'}"`, { x: 0.3, y: laneY, w: 1.8, h: 0.55, fontSize: 7, bold: true, color: WHITE, fontFace: 'Arial', align: 'center', valign: 'middle' });
-      const bc = ms.status?.toLowerCase().includes('completed') || ms.status?.toLowerCase() === 'done' ? '00B050' : ms.status?.toLowerCase().includes('progress') ? 'FFC000' : 'A6A6A6';
-      s2.addShape(pptx.ShapeType.rect, { x: 2.5, y: laneY + 0.15, w: 6.0, h: 0.25, fill: { color: bc } });
-      s2.addShape(pptx.ShapeType.rect, { x: 8.2, y: laneY + 0.1, w: 0.15, h: 0.15, fill: { color: '0070C0' }, rotate: 45 });
-      if (ms.targetedDate) s2.addText(ms.targetedDate, { x: 8.5, y: laneY + 0.05, w: 1.5, h: 0.25, fontSize: 7, color: BLACK, fontFace: 'Arial' });
+      if (chunkIdx === milestoneChunks.length - 1) {
+        const assY = 1.2 + chunk.length * 1.2 + 0.3;
+        s2.addText('Plan Assumptions:', { x: 0.3, y: assY, w: 12.0, h: 0.25, fontSize: 9, bold: true, underline: { style: 'sng' }, color: BLACK, fontFace: 'Arial' });
+        const aLines = (form.planAssumptions || '').split('\n').filter(Boolean);
+        const aRuns = aLines.map(line => ({ text: `• ${line}\n`, options: { fontSize: 7, color: '333333' as string, fontFace: 'Arial' as const } }));
+        if (aRuns.length > 0) s2.addText(aRuns, { x: 0.5, y: assY + 0.3, w: 11.5, h: 1.5, valign: 'top', lineSpacing: 13 });
+      }
     });
-
-    const assY = 1.2 + form.milestones.length * 1.1 + 0.3;
-    s2.addText('Plan Assumptions:', { x: 0.3, y: assY, w: 12.0, h: 0.25, fontSize: 9, bold: true, underline: { style: 'sng' }, color: BLACK, fontFace: 'Arial' });
-    const aLines = (form.planAssumptions || '').split('\n').filter(Boolean);
-    const aRuns = aLines.map(line => ({ text: `• ${line}\n`, options: { fontSize: 7, color: '333333' as string, fontFace: 'Arial' as const } }));
-    if (aRuns.length > 0) s2.addText(aRuns, { x: 0.5, y: assY + 0.3, w: 11.5, h: 1.5, valign: 'top', lineSpacing: 13 });
 
     /* ── SLIDE 3: Delivery Plan Timeline ── */
     const s3 = pptx.addSlide();
