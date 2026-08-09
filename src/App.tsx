@@ -496,6 +496,7 @@ export default function App() {
               {renderActiveView()}
             </div>
           </div>
+          </div>
         </div>
       </main>
     </div>
