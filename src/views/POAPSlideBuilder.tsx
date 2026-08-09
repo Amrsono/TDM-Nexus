@@ -1292,7 +1292,7 @@ export function POAPSlideBuilder() {
         </div>
 
         {/* Section 1: Header */}
-        <fieldset style={{ border: '1px solid var(--color-border)', borderRadius: '10px', padding: '1rem' }}>
+        <fieldset style={{ border: '1px solid var(--color-border)', borderRadius: '10px', padding: '1rem', minWidth: 0 }}>
           <legend className="mono" style={{ color: 'var(--color-cyan)', fontSize: '0.75rem', padding: '0 0.5rem', fontWeight: 700 }}>Project Header</legend>
           <div className="form-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.75rem' }}>
             <div className="form-group"><label>Project Name</label><input className="cyber-input" value={form.projectName} onChange={e => set('projectName', e.target.value)} placeholder="e.g. VOIS Support" /></div>
@@ -1315,7 +1315,7 @@ export function POAPSlideBuilder() {
         </fieldset>
 
         {/* Section 2: Scope & Status */}
-        <fieldset style={{ border: '1px solid var(--color-border)', borderRadius: '10px', padding: '1rem' }}>
+        <fieldset style={{ border: '1px solid var(--color-border)', borderRadius: '10px', padding: '1rem', minWidth: 0 }}>
           <legend className="mono" style={{ color: 'var(--color-cyan)', fontSize: '0.75rem', padding: '0 0.5rem', fontWeight: 700 }}>Scope & Status</legend>
           <div className="form-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
             <div className="form-group">
@@ -1330,7 +1330,7 @@ export function POAPSlideBuilder() {
         </fieldset>
 
         {/* Section 3: Milestones */}
-        <fieldset style={{ border: '1px solid var(--color-border)', borderRadius: '10px', padding: '1rem' }}>
+        <fieldset style={{ border: '1px solid var(--color-border)', borderRadius: '10px', padding: '1rem', minWidth: 0 }}>
           <legend className="mono" style={{ color: 'var(--color-cyan)', fontSize: '0.75rem', padding: '0 0.5rem', fontWeight: 700 }}>Project Milestones</legend>
           <div className="cyber-table-container" style={{ overflowX: 'auto' }}>
             <table className="cyber-table" style={{ minWidth: '1100px' }}>
@@ -1417,7 +1417,7 @@ export function POAPSlideBuilder() {
         </fieldset>
 
         {/* Section 4: Obstacles & Assumptions */}
-        <fieldset style={{ border: '1px solid var(--color-border)', borderRadius: '10px', padding: '1rem' }}>
+        <fieldset style={{ border: '1px solid var(--color-border)', borderRadius: '10px', padding: '1rem', minWidth: 0 }}>
           <legend className="mono" style={{ color: 'var(--color-cyan)', fontSize: '0.75rem', padding: '0 0.5rem', fontWeight: 700 }}>Obstacles & Assumptions</legend>
           <div className="form-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
             <div className="form-group">
