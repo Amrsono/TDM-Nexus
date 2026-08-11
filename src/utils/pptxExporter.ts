@@ -596,3 +596,66 @@ export const exportGovernanceGatesToPPT = (
 
   pptx.writeFile({ fileName });
 };
+
+// Export individual AI Insight/Chat to PowerPoint
+export const exportAIInsightToPPT = (
+  title: string,
+  markdownContent: string
+) => {
+  const pptx = new pptxgen();
+  pptx.layout = 'LAYOUT_WIDE';
+
+  // ── VOIS Official Brand Colours ──────────────────────────────────────
+  const VF_RED        = 'E60000';   // VOIS Primary Red
+  const VF_WHITE      = 'FFFFFF';   // White
+  const VF_BLACK      = '333333';   // VOIS Black
+  const VF_AUBERGINE  = '5E2750';   // VOIS Finn / Aubergine
+  const VF_GRAY_MID   = 'D6D6D6';   // Neutral mid-grey borders
+  const VF_RED_LITE   = 'FCEAEA';   // Soft VOIS red tint
+  const VF_FONT       = 'Outfit';
+
+  // Strip complex markdown tables and replace with simplified text if present, 
+  // or just let pptxgen do its best. A simple cleanup regex to remove some md characters.
+  const cleanContent = markdownContent.replace(/\*\*/g, '').replace(/#/g, '');
+
+  const slide = pptx.addSlide();
+  
+  slide.background = { color: VF_WHITE };
+  // Top red accent bar
+  slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 0.08, fill: { color: VF_RED } });
+  
+  // Title
+  slide.addText('TDM NEXUS AI INSIGHT', {
+    x: 0.5, y: 0.2, w: 10.0, h: 0.6,
+    fontSize: 24, bold: true, color: VF_AUBERGINE, fontFace: VF_FONT
+  });
+  // Thin red underline beneath title
+  slide.addShape(pptx.ShapeType.rect, { x: 0.5, y: 0.85, w: 1.5, h: 0.04, fill: { color: VF_RED } });
+
+  // Light red content card
+  slide.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.2, w: 12.3, h: 5.8, fill: { color: VF_RED_LITE }, line: { color: VF_GRAY_MID, width: 0.75 } });
+  slide.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.2, w: 0.08, h: 5.8, fill: { color: VF_RED } });
+  
+  slide.addText(title, { x: 0.75, y: 1.25, w: 11.0, h: 0.35, fontSize: 14, bold: true, color: VF_RED, fontFace: VF_FONT });
+  
+  slide.addText(cleanContent, {
+    x: 0.75, y: 1.7, w: 11.8, h: 5.2,
+    fontSize: 11, color: VF_BLACK, fontFace: VF_FONT,
+    align: 'left', valign: 'top', lineSpacing: 16
+  });
+
+  // Aubergine footer bar
+  slide.addShape(pptx.ShapeType.rect, { x: 0, y: 7.3, w: '100%', h: 0.2, fill: { color: VF_AUBERGINE } });
+  slide.addText('TDM NEXUS  •  AI Generated Insight', {
+    x: 0.3, y: 7.32, w: 8.0, h: 0.15, fontSize: 7, color: VF_GRAY_MID, fontFace: VF_FONT
+  });
+
+  const badgeX = 12.0;
+  slide.addShape(pptx.ShapeType.rect, { x: badgeX, y: 7.05, w: 1.3, h: 0.4, fill: { color: VF_RED } });
+  slide.addText('VOIS', {
+    x: badgeX, y: 7.05, w: 1.3, h: 0.4, fontSize: 9, bold: true,
+    color: VF_WHITE, fontFace: VF_FONT, align: 'center', valign: 'middle'
+  });
+
+  pptx.writeFile({ fileName: `TDM_AI_Insight_${new Date().getTime()}.pptx` });
+};

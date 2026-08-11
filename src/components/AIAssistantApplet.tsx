@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BrainCircuit, X, MessageSquare, Lightbulb, BarChart2, Send, RefreshCw, AlertTriangle, CheckCircle, Info, Settings as SettingsIcon, Zap, FileText } from 'lucide-react';
+import { BrainCircuit, X, MessageSquare, Lightbulb, BarChart2, Send, RefreshCw, AlertTriangle, CheckCircle, Info, Settings as SettingsIcon, Zap, FileText, Download } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useAIAssistant } from '../context/AIAssistantContext';
 import { PhaseId } from '../App';
+import { exportAIInsightToPPT } from '../utils/pptxExporter';
 import './AIAssistant.css';
 
 interface AIAssistantAppletProps {
@@ -119,8 +122,22 @@ export const AIAssistantApplet: React.FC<AIAssistantAppletProps> = ({ activePhas
               <>
                 <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px', paddingBottom: '10px' }}>
                   {messages.map(m => (
-                    <div key={m.id} className={`ai-chat-msg ${m.role}`}>
-                      {m.content}
+                    <div key={m.id} className={`ai-chat-msg ${m.role}`} style={{ position: 'relative' }}>
+                      <div className="ai-markdown">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {m.content}
+                        </ReactMarkdown>
+                      </div>
+                      {m.role === 'assistant' && (
+                        <button 
+                          className="ai-icon-btn" 
+                          style={{ position: 'absolute', top: '8px', right: '8px', opacity: 0.6 }}
+                          title="Export to PowerPoint"
+                          onClick={() => exportAIInsightToPPT('AI Analysis', m.content)}
+                        >
+                          <Download size={14} />
+                        </button>
+                      )}
                     </div>
                   ))}
                   {isThinking && (
