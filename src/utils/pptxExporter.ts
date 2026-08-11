@@ -308,15 +308,23 @@ export const exportToPPT = (
   });
 
   // ── SLIDES 7–10: AI Analytics ─────────────────────────────────────────────
-  const splitIndex1 = aiAnalysis.search(/(?:\r?\n)(?:2\.|2\s+FINANCIAL|FINANCIAL\s+HEALTH)/i);
-  let part1 = aiAnalysis;
+  const cleanAiAnalysis = aiAnalysis
+    .replace(/\*\*/g, '')
+    .replace(/#/g, '')
+    .replace(/\\ge\b/g, '>=')
+    .replace(/\\le\b/g, '<=')
+    .replace(/\\%/g, '%')
+    .replace(/\$/g, '');
+
+  const splitIndex1 = cleanAiAnalysis.search(/(?:\r?\n)(?:2\.|2\s+FINANCIAL|FINANCIAL\s+HEALTH)/i);
+  let part1 = cleanAiAnalysis;
   let part2 = '';
   let part3 = '';
   let part4 = '';
 
   if (splitIndex1 !== -1) {
-    part1 = aiAnalysis.substring(0, splitIndex1).trim();
-    const remainingAfter1 = aiAnalysis.substring(splitIndex1).trim();
+    part1 = cleanAiAnalysis.substring(0, splitIndex1).trim();
+    const remainingAfter1 = cleanAiAnalysis.substring(splitIndex1).trim();
     const splitIndex2 = remainingAfter1.search(/(?:\r?\n)(?:3\.|3\s+QUALITY|QUALITY\s*&\s*TESTING)/i);
     if (splitIndex2 !== -1) {
       part2 = remainingAfter1.substring(0, splitIndex2).trim();
@@ -340,17 +348,38 @@ export const exportToPPT = (
     { title: 'AI Recommendations',    label: 'Part 4 – Key Recommendations',           content: part4 },
   ].filter(s => s.content.trim() !== '');
 
-  aiSlides.forEach((s, i) => {
-    const aiSlide = pptx.addSlide();
-    addSlideHeader(aiSlide, s.title, 8 + i);
-    // Light red content card
-    aiSlide.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.2, w: 12.3, h: 5.8, fill: { color: VF_RED_LITE }, line: { color: VF_GRAY_MID, width: 0.75 } });
-    aiSlide.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.2, w: 0.08, h: 5.8, fill: { color: VF_RED } });
-    aiSlide.addText(s.label, { x: 0.75, y: 1.25, w: 11.0, h: 0.35, fontSize: 13, bold: true, color: VF_RED, fontFace: VF_FONT });
-    aiSlide.addText(s.content, {
-      x: 0.75, y: 1.7, w: 11.8, h: 5.2,
-      fontSize: 10, color: VF_BLACK, fontFace: VF_FONT,
-      align: 'left', valign: 'top', lineSpacing: 14
+  let currentSlideNum = 8;
+
+  aiSlides.forEach((s) => {
+    const paragraphs = s.content.split(/\n\n|\r\n\r\n/);
+    const chunks: string[] = [];
+    let currentChunk = '';
+
+    paragraphs.forEach(p => {
+      if ((currentChunk.length + p.length) > 1200 && currentChunk.length > 0) {
+        chunks.push(currentChunk.trim());
+        currentChunk = p + '\n\n';
+      } else {
+        currentChunk += p + '\n\n';
+      }
+    });
+    if (currentChunk.trim().length > 0) {
+      chunks.push(currentChunk.trim());
+    }
+
+    chunks.forEach((chunk, chunkIndex) => {
+      const aiSlide = pptx.addSlide();
+      const title = chunks.length > 1 ? `${s.title} (${chunkIndex + 1}/${chunks.length})` : s.title;
+      addSlideHeader(aiSlide, title, currentSlideNum++);
+      
+      aiSlide.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.2, w: 12.3, h: 5.8, fill: { color: VF_RED_LITE }, line: { color: VF_GRAY_MID, width: 0.75 } });
+      aiSlide.addShape(pptx.ShapeType.rect, { x: 0.5, y: 1.2, w: 0.08, h: 5.8, fill: { color: VF_RED } });
+      aiSlide.addText(s.label, { x: 0.75, y: 1.25, w: 11.0, h: 0.35, fontSize: 13, bold: true, color: VF_RED, fontFace: VF_FONT });
+      aiSlide.addText(chunk, {
+        x: 0.75, y: 1.7, w: 11.8, h: 5.2,
+        fontSize: 10, color: VF_BLACK, fontFace: VF_FONT,
+        align: 'left', valign: 'top', lineSpacing: 14
+      });
     });
   });
 
