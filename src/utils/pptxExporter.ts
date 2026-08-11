@@ -377,7 +377,7 @@ export const exportToPPT = (
       aiSlide.addText(s.label, { x: 0.75, y: 1.25, w: 11.0, h: 0.35, fontSize: 13, bold: true, color: VF_RED, fontFace: VF_FONT });
       aiSlide.addText(chunk, {
         x: 0.75, y: 1.7, w: 11.8, h: 5.2,
-        fontSize: 10, color: VF_BLACK, fontFace: VF_FONT,
+        fontSize: 10, color: VF_BLACK, fontFace: 'Arial',
         align: 'left', valign: 'top', lineSpacing: 14
       });
     });
@@ -687,7 +687,7 @@ export const exportAIInsightToPPT = (
     
     slide.addText(chunk, {
       x: 0.75, y: 1.7, w: 11.8, h: 5.2,
-      fontSize: 11, color: VF_BLACK, fontFace: VF_FONT,
+      fontSize: 11, color: VF_BLACK, fontFace: 'Arial',
       align: 'left', valign: 'top', lineSpacing: 16
     });
 
