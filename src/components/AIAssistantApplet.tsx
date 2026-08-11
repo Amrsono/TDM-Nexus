@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BrainCircuit, X, MessageSquare, Lightbulb, BarChart2, Send, RefreshCw, AlertTriangle, CheckCircle, Info, Settings as SettingsIcon } from 'lucide-react';
+import { BrainCircuit, X, MessageSquare, Lightbulb, BarChart2, Send, RefreshCw, AlertTriangle, CheckCircle, Info, Settings as SettingsIcon, Zap, FileText } from 'lucide-react';
 import { useAIAssistant } from '../context/AIAssistantContext';
 import { PhaseId } from '../App';
 import './AIAssistant.css';
@@ -10,9 +10,9 @@ interface AIAssistantAppletProps {
 }
 
 export const AIAssistantApplet: React.FC<AIAssistantAppletProps> = ({ activePhase, onNavigateToSettings }) => {
-  const { settings, messages, chat, suggestions, refreshSuggestions, isThinking } = useAIAssistant();
+  const { settings, messages, chat, suggestions, refreshSuggestions, isThinking, runPredictiveAnalytics, runSmartScheduling, runDocumentation } = useAIAssistant();
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'suggestions' | 'chat' | 'analytics'>('suggestions');
+  const [activeTab, setActiveTab] = useState<'suggestions' | 'chat' | 'analytics' | 'advanced'>('suggestions');
   const [chatInput, setChatInput] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -76,6 +76,9 @@ export const AIAssistantApplet: React.FC<AIAssistantAppletProps> = ({ activePhas
             </button>
             <button className={`ai-tab ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}>
               <BarChart2 size={14} className="inline mr-1" /> Analytics
+            </button>
+            <button className={`ai-tab ${activeTab === 'advanced' ? 'active' : ''}`} onClick={() => setActiveTab('advanced')}>
+              <Zap size={14} className="inline mr-1" /> Advanced
             </button>
           </div>
 
@@ -160,6 +163,58 @@ export const AIAssistantApplet: React.FC<AIAssistantAppletProps> = ({ activePhas
                     </span>
                   )}
                 </div>
+              </div>
+            )}
+
+            {activeTab === 'advanced' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <h4 style={{ color: 'var(--color-cyan)', margin: 0, fontSize: '14px' }}>Advanced AI Actions</h4>
+                <p style={{ color: 'var(--color-text-secondary)', fontSize: '13px', margin: 0 }}>Trigger deep analysis and automated project management tasks.</p>
+                
+                <button 
+                  className="cyber-button" 
+                  disabled={isThinking}
+                  onClick={() => { runPredictiveAnalytics(); setActiveTab('chat'); }}
+                  style={{ width: '100%', justifyContent: 'flex-start', padding: '12px' }}
+                >
+                  <AlertTriangle size={18} style={{ color: 'var(--color-amber)', marginRight: '10px' }} />
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontSize: '14px', fontWeight: 'bold' }}>Predictive Analytics & Risk</div>
+                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', marginTop: '2px' }}>Forecast delays, overruns, and scope creep</div>
+                  </div>
+                </button>
+
+                <button 
+                  className="cyber-button" 
+                  disabled={isThinking}
+                  onClick={() => { runSmartScheduling(); setActiveTab('chat'); }}
+                  style={{ width: '100%', justifyContent: 'flex-start', padding: '12px' }}
+                >
+                  <RefreshCw size={18} style={{ color: 'var(--color-cyan)', marginRight: '10px' }} />
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontSize: '14px', fontWeight: 'bold' }}>Smart Scheduling</div>
+                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', marginTop: '2px' }}>Rebalance team workloads automatically</div>
+                  </div>
+                </button>
+
+                <button 
+                  className="cyber-button" 
+                  disabled={isThinking}
+                  onClick={() => { 
+                    const prompt = window.prompt("What kind of document should I generate? (e.g. Project Charter, Weekly Status Report, Action Items from last meeting)");
+                    if (prompt) {
+                      runDocumentation('Project Document', prompt);
+                      setActiveTab('chat');
+                    }
+                  }}
+                  style={{ width: '100%', justifyContent: 'flex-start', padding: '12px' }}
+                >
+                  <FileText size={18} style={{ color: 'var(--color-green)', marginRight: '10px' }} />
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontSize: '14px', fontWeight: 'bold' }}>Automated Documentation</div>
+                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', marginTop: '2px' }}>Generate status reports & charters</div>
+                  </div>
+                </button>
               </div>
             )}
           </div>

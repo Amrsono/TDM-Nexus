@@ -18,7 +18,7 @@ import {
   PIWizardData,
   WalkthroughData
 } from '../utils/mockData';
-import { getNextBestActions, chat as aiChat } from '../utils/aiService';
+import { getNextBestActions, chat as aiChat, generatePredictiveAnalytics, generateSmartSchedule, generateDocumentation } from '../utils/aiService';
 
 export interface AISettings {
   provider: 'openai' | 'gemini' | 'anthropic' | 'custom';
@@ -83,6 +83,9 @@ interface AIAssistantContextType {
   isThinking: boolean;
   projectState: ProjectState | null;
   setProjectState: (state: ProjectState) => void;
+  runPredictiveAnalytics: () => Promise<void>;
+  runSmartScheduling: () => Promise<void>;
+  runDocumentation: (docType: string, customPrompt: string) => Promise<void>;
 }
 
 const defaultSettings: AISettings = {
@@ -212,6 +215,48 @@ export const AIAssistantProvider: React.FC<{ children: ReactNode }> = ({ childre
     }
   };
 
+  const runPredictiveAnalytics = async () => {
+    if (!projectState) return;
+    addMessage({ role: 'user', content: 'Run Predictive Analytics & Risk Assessment' });
+    setIsThinking(true);
+    try {
+      const report = await generatePredictiveAnalytics(projectState, settings);
+      addMessage({ role: 'assistant', content: report });
+    } catch (error) {
+      addMessage({ role: 'system', content: `Error: ${error instanceof Error ? error.message : String(error)}` });
+    } finally {
+      setIsThinking(false);
+    }
+  };
+
+  const runSmartScheduling = async () => {
+    if (!projectState) return;
+    addMessage({ role: 'user', content: 'Generate Smart Schedule Proposal' });
+    setIsThinking(true);
+    try {
+      const report = await generateSmartSchedule(projectState, settings);
+      addMessage({ role: 'assistant', content: report });
+    } catch (error) {
+      addMessage({ role: 'system', content: `Error: ${error instanceof Error ? error.message : String(error)}` });
+    } finally {
+      setIsThinking(false);
+    }
+  };
+
+  const runDocumentation = async (docType: string, customPrompt: string) => {
+    if (!projectState) return;
+    addMessage({ role: 'user', content: `Generate Documentation: ${docType}\nPrompt: ${customPrompt}` });
+    setIsThinking(true);
+    try {
+      const report = await generateDocumentation(projectState, docType, customPrompt, settings);
+      addMessage({ role: 'assistant', content: report });
+    } catch (error) {
+      addMessage({ role: 'system', content: `Error: ${error instanceof Error ? error.message : String(error)}` });
+    } finally {
+      setIsThinking(false);
+    }
+  };
+
   return (
     <AIAssistantContext.Provider value={{
       settings,
@@ -223,7 +268,10 @@ export const AIAssistantProvider: React.FC<{ children: ReactNode }> = ({ childre
       refreshSuggestions,
       isThinking,
       projectState,
-      setProjectState
+      setProjectState,
+      runPredictiveAnalytics,
+      runSmartScheduling,
+      runDocumentation
     }}>
       {children}
     </AIAssistantContext.Provider>

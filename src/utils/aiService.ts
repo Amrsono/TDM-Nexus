@@ -392,7 +392,142 @@ Keep the tone professional, objective, and action-oriented. Format the response 
     return extractTextFromResponse(settings, data);
   } catch (error) {
     console.error('Error generating report analytics:', error);
-    return `Failed to generate AI Analysis: ${error instanceof Error ? error.message : String(error)}`;
+};
+
+export const generatePredictiveAnalytics = async (projectState: ProjectState, settings: AISettings): Promise<string> => {
+  if (!settings.apiKey) {
+    return "Offline Mode: Predictive Analytics requires an active AI provider. Based on current data, your project budget is " + projectState.budgetProgressPercent + "% consumed, and SIT pass rate is " + projectState.sitProgressPercent + "%. Watch out for scope creep if defect rates increase.";
+  }
+  
+  try {
+    const url = getEndpointUrl(settings);
+    if (!url) throw new Error('Missing API URL');
+
+    const prompt = `You are a specialized AI Project Management Risk Assessor for VOIS. Perform a Predictive Analytics and Risk Identification sweep based on this project state:
+- RAG: ${projectState.ragStatus.overall} (Schedule: ${projectState.ragStatus.schedule}, Budget: ${projectState.ragStatus.budget})
+- Financials: Spent $${projectState.financials.totalSpent} / Limits $${projectState.financials.capexLimit + projectState.financials.opexLimit}
+- Quality: SIT Pass Rate ${projectState.sitProgressPercent}%
+- Open Risks: ${projectState.risks.filter(r => r.status === 'Open').length}
+- Unassigned Work Items: ${projectState.adoWorkItems.filter(w => w.portfolio === 'Unassigned').length}
+
+Identify:
+1. Potential project delays based on QA performance.
+2. Forecasted budget overruns based on current burn rate.
+3. Resource bottlenecks based on unassigned work items.
+4. Scope creep and sequencing conflicts.
+
+Provide a concise, bulleted report of identified risks and recommended mitigations. Format with markdown.`;
+
+    const apiMessages: OpenAIMessage[] = [
+      { role: 'system', content: 'You are an AI predictive risk analysis system for enterprise project management.' },
+      { role: 'user', content: prompt }
+    ];
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: getRequestHeaders(settings),
+      body: JSON.stringify(buildRequestBody(settings, apiMessages))
+    });
+
+    if (!response.ok) {
+      const friendlyError = await parseFriendlyError(response, settings.provider);
+      return \`Failed to generate Predictive Analytics: \${friendlyError}\`;
+    }
+
+    const data = await response.json();
+    return extractTextFromResponse(settings, data);
+  } catch (error) {
+    return \`Failed to run Predictive Analytics: \${error instanceof Error ? error.message : String(error)}\`;
+  }
+};
+
+export const generateSmartSchedule = async (projectState: ProjectState, settings: AISettings): Promise<string> => {
+  if (!settings.apiKey) {
+    return "Offline Mode: Smart Scheduling requires an active AI provider. Please assign unallocated squad members manually.";
+  }
+  
+  try {
+    const url = getEndpointUrl(settings);
+    if (!url) throw new Error('Missing API URL');
+
+    const prompt = \`You are a Smart Scheduling AI for VOIS. Analyze the following squad and workload data:
+- Number of Squads: \${projectState.squads.length}
+- Squad Details: \${projectState.squads.map(s => s.name + " (" + s.headcount + " members)").join(', ')}
+- Unassigned Work Items: \${projectState.adoWorkItems.filter(w => w.portfolio === 'Unassigned').length}
+- Total Work Items: \${projectState.adoWorkItems.length}
+- Milestones remaining: \${projectState.milestones.filter(m => m.status !== 'Completed').length}
+
+Please generate a smart scheduling proposal:
+1. Workload Rebalancing: Suggest how to reallocate the unassigned work items across available squads.
+2. Timeline Adjustments: Identify if any milestones are at risk and propose adjusted target dates.
+3. Resource Optimization: Identify any over/under-utilized squads based on the ratio of work items to headcount.
+
+Provide the recommendations in a clear, formatted markdown layout.\`;
+
+    const apiMessages: OpenAIMessage[] = [
+      { role: 'system', content: 'You are an AI resource allocator and smart scheduling assistant.' },
+      { role: 'user', content: prompt }
+    ];
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: getRequestHeaders(settings),
+      body: JSON.stringify(buildRequestBody(settings, apiMessages))
+    });
+
+    if (!response.ok) {
+      const friendlyError = await parseFriendlyError(response, settings.provider);
+      return \`Failed to generate Smart Schedule: \${friendlyError}\`;
+    }
+
+    const data = await response.json();
+    return extractTextFromResponse(settings, data);
+  } catch (error) {
+    return \`Failed to run Smart Scheduling: \${error instanceof Error ? error.message : String(error)}\`;
+  }
+};
+
+export const generateDocumentation = async (projectState: ProjectState, docType: string, customPrompt: string, settings: AISettings): Promise<string> => {
+  if (!settings.apiKey) {
+    return "Offline Mode: Documentation generation requires an active AI provider. Please configure an API key.";
+  }
+  
+  try {
+    const url = getEndpointUrl(settings);
+    if (!url) throw new Error('Missing API URL');
+
+    const prompt = \`You are an AI Automated Documentation assistant for VOIS project management. Generate a \${docType} based on the current project data and the user's specific request.
+User Request/Transcript/Prompt: "\${customPrompt}"
+
+Project Context:
+- Health: \${projectState.ragStatus.overall}
+- Finances: $\${projectState.financials.totalSpent} Spent
+- Active Phase: In Progress
+- Open Risks: \${projectState.risks.length}
+- Governance Gate Progress: \${projectState.checklistPercent}%
+
+Write a highly professional, ready-to-share document in markdown format.\`;
+
+    const apiMessages: OpenAIMessage[] = [
+      { role: 'system', content: 'You are an AI documentation generator for project charters, status reports, and action items.' },
+      { role: 'user', content: prompt }
+    ];
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: getRequestHeaders(settings),
+      body: JSON.stringify(buildRequestBody(settings, apiMessages))
+    });
+
+    if (!response.ok) {
+      const friendlyError = await parseFriendlyError(response, settings.provider);
+      return \`Failed to generate Documentation: \${friendlyError}\`;
+    }
+
+    const data = await response.json();
+    return extractTextFromResponse(settings, data);
+  } catch (error) {
+    return \`Failed to generate Documentation: \${error instanceof Error ? error.message : String(error)}\`;
   }
 };
 
