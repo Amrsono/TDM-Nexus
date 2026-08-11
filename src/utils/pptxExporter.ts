@@ -614,7 +614,13 @@ export const exportAIInsightToPPT = (
   const VF_RED_LITE   = 'FCEAEA';
   const VF_FONT       = 'Outfit';
 
-  const cleanContent = markdownContent.replace(/\*\*/g, '').replace(/#/g, '');
+  const cleanContent = markdownContent
+    .replace(/\*\*/g, '')
+    .replace(/#/g, '')
+    .replace(/\\ge\b/g, '>=')
+    .replace(/\\le\b/g, '<=')
+    .replace(/\\%/g, '%')
+    .replace(/\$/g, '');
   
   // Split content into chunks of roughly 1200 characters by paragraph
   const paragraphs = cleanContent.split(/\n\n|\r\n\r\n/);
