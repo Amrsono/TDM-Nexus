@@ -431,13 +431,13 @@ Provide a concise, bulleted report of identified risks and recommended mitigatio
 
     if (!response.ok) {
       const friendlyError = await parseFriendlyError(response, settings.provider);
-      return \`Failed to generate Predictive Analytics: \${friendlyError}\`;
+      return `Failed to generate Predictive Analytics: ${friendlyError}`;
     }
 
     const data = await response.json();
     return extractTextFromResponse(settings, data);
   } catch (error) {
-    return \`Failed to run Predictive Analytics: \${error instanceof Error ? error.message : String(error)}\`;
+    return `Failed to run Predictive Analytics: ${error instanceof Error ? error.message : String(error)}`;
   }
 };
 
@@ -450,19 +450,19 @@ export const generateSmartSchedule = async (projectState: ProjectState, settings
     const url = getEndpointUrl(settings);
     if (!url) throw new Error('Missing API URL');
 
-    const prompt = \`You are a Smart Scheduling AI for VOIS. Analyze the following squad and workload data:
-- Number of Squads: \${projectState.squads.length}
-- Squad Details: \${projectState.squads.map(s => s.name + " (" + s.headcount + " members)").join(', ')}
-- Unassigned Work Items: \${projectState.adoWorkItems.filter(w => w.portfolio === 'Unassigned').length}
-- Total Work Items: \${projectState.adoWorkItems.length}
-- Milestones remaining: \${projectState.milestones.filter(m => m.status !== 'Completed').length}
+    const prompt = `You are a Smart Scheduling AI for VOIS. Analyze the following squad and workload data:
+- Number of Squads: ${projectState.squads.length}
+- Squad Details: ${projectState.squads.map(s => s.name + " (" + s.headcount + " members)").join(', ')}
+- Unassigned Work Items: ${projectState.adoWorkItems.filter(w => w.portfolio === 'Unassigned').length}
+- Total Work Items: ${projectState.adoWorkItems.length}
+- Milestones remaining: ${projectState.milestones.filter(m => m.status !== 'Completed').length}
 
 Please generate a smart scheduling proposal:
 1. Workload Rebalancing: Suggest how to reallocate the unassigned work items across available squads.
 2. Timeline Adjustments: Identify if any milestones are at risk and propose adjusted target dates.
 3. Resource Optimization: Identify any over/under-utilized squads based on the ratio of work items to headcount.
 
-Provide the recommendations in a clear, formatted markdown layout.\`;
+Provide the recommendations in a clear, formatted markdown layout.`;
 
     const apiMessages: OpenAIMessage[] = [
       { role: 'system', content: 'You are an AI resource allocator and smart scheduling assistant.' },
@@ -477,13 +477,13 @@ Provide the recommendations in a clear, formatted markdown layout.\`;
 
     if (!response.ok) {
       const friendlyError = await parseFriendlyError(response, settings.provider);
-      return \`Failed to generate Smart Schedule: \${friendlyError}\`;
+      return `Failed to generate Smart Schedule: ${friendlyError}`;
     }
 
     const data = await response.json();
     return extractTextFromResponse(settings, data);
   } catch (error) {
-    return \`Failed to run Smart Scheduling: \${error instanceof Error ? error.message : String(error)}\`;
+    return `Failed to run Smart Scheduling: ${error instanceof Error ? error.message : String(error)}`;
   }
 };
 
@@ -496,17 +496,17 @@ export const generateDocumentation = async (projectState: ProjectState, docType:
     const url = getEndpointUrl(settings);
     if (!url) throw new Error('Missing API URL');
 
-    const prompt = \`You are an AI Automated Documentation assistant for VOIS project management. Generate a \${docType} based on the current project data and the user's specific request.
-User Request/Transcript/Prompt: "\${customPrompt}"
+    const prompt = `You are an AI Automated Documentation assistant for VOIS project management. Generate a ${docType} based on the current project data and the user's specific request.
+User Request/Transcript/Prompt: "${customPrompt}"
 
 Project Context:
-- Health: \${projectState.ragStatus.overall}
-- Finances: $\${projectState.financials.totalSpent} Spent
+- Health: ${projectState.ragStatus.overall}
+- Finances: $${projectState.financials.totalSpent} Spent
 - Active Phase: In Progress
-- Open Risks: \${projectState.risks.length}
-- Governance Gate Progress: \${projectState.checklistPercent}%
+- Open Risks: ${projectState.risks.length}
+- Governance Gate Progress: ${projectState.checklistPercent}%
 
-Write a highly professional, ready-to-share document in markdown format.\`;
+Write a highly professional, ready-to-share document in markdown format.`;
 
     const apiMessages: OpenAIMessage[] = [
       { role: 'system', content: 'You are an AI documentation generator for project charters, status reports, and action items.' },
@@ -521,13 +521,13 @@ Write a highly professional, ready-to-share document in markdown format.\`;
 
     if (!response.ok) {
       const friendlyError = await parseFriendlyError(response, settings.provider);
-      return \`Failed to generate Documentation: \${friendlyError}\`;
+      return `Failed to generate Documentation: ${friendlyError}`;
     }
 
     const data = await response.json();
     return extractTextFromResponse(settings, data);
   } catch (error) {
-    return \`Failed to generate Documentation: \${error instanceof Error ? error.message : String(error)}\`;
+    return `Failed to generate Documentation: ${error instanceof Error ? error.message : String(error)}`;
   }
 };
 
