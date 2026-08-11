@@ -454,7 +454,7 @@ export const generateSmartSchedule = async (projectState: ProjectState, settings
 
     const prompt = `You are a Smart Scheduling AI for VOIS. Analyze the following squad and workload data:
 - Number of Squads: ${projectState.squads.length}
-- Squad Details: ${projectState.squads.map(s => s.name + " (" + s.headcount + " members)").join(', ')}
+- Squad Details: ${projectState.squads.map(s => s.name + " (Lead: " + s.lead + ")").join(', ')}
 - Unassigned Work Items: ${projectState.adoWorkItems.filter(w => w.portfolio === 'Unassigned').length}
 - Total Work Items: ${projectState.adoWorkItems.length}
 - Milestones remaining: ${projectState.milestones.filter(m => m.status !== 'Completed').length}
@@ -462,7 +462,7 @@ export const generateSmartSchedule = async (projectState: ProjectState, settings
 Please generate a smart scheduling proposal:
 1. Workload Rebalancing: Suggest how to reallocate the unassigned work items across available squads.
 2. Timeline Adjustments: Identify if any milestones are at risk and propose adjusted target dates.
-3. Resource Optimization: Identify any over/under-utilized squads based on the ratio of work items to headcount.
+3. Resource Optimization: Identify any over/under-utilized squads based on the ratio of work items to their current workload.
 
 Provide the recommendations in a clear, formatted markdown layout.`;
 
