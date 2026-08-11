@@ -392,6 +392,8 @@ Keep the tone professional, objective, and action-oriented. Format the response 
     return extractTextFromResponse(settings, data);
   } catch (error) {
     console.error('Error generating report analytics:', error);
+    return `Failed to generate AI Analysis: ${error instanceof Error ? error.message : String(error)}`;
+  }
 };
 
 export const generatePredictiveAnalytics = async (projectState: ProjectState, settings: AISettings): Promise<string> => {
