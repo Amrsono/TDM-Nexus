@@ -41,6 +41,9 @@ export function Settings({ theme, setTheme }: SettingsProps) {
       } else if (localSettings.provider === 'custom') {
         url = localSettings.baseUrl || '';
         headers = { 'Authorization': `Bearer ${localSettings.apiKey}` };
+      } else if (localSettings.provider === 'copilot') {
+        url = localSettings.baseUrl || 'https://api.githubcopilot.com/models';
+        headers = { 'Authorization': `Bearer ${localSettings.apiKey}` };
       } else {
         // openai
         url = 'https://api.openai.com/v1/models';
@@ -123,7 +126,7 @@ export function Settings({ theme, setTheme }: SettingsProps) {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'rgba(0,0,0,0.15)', padding: '1.5rem', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
                   
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
-                    {(['openai', 'gemini', 'anthropic', 'custom'] as const).map(provider => (
+                    {(['openai', 'gemini', 'anthropic', 'copilot', 'custom'] as const).map(provider => (
                       <div 
                         key={provider}
                         className={`map-node ${localSettings.provider === provider ? 'active' : ''}`}
@@ -132,6 +135,7 @@ export function Settings({ theme, setTheme }: SettingsProps) {
                           if (provider === 'gemini') newModel = 'gemini-2.0-flash';
                           else if (provider === 'openai') newModel = 'gpt-4o';
                           else if (provider === 'anthropic') newModel = 'claude-3-5-sonnet-20240620';
+                          else if (provider === 'copilot') newModel = 'gpt-4o';
                           setLocalSettings({ ...localSettings, provider, model: newModel });
                           setTestStatus('idle');
                         }}
@@ -185,17 +189,17 @@ export function Settings({ theme, setTheme }: SettingsProps) {
                     </div>
                   </div>
 
-                  {localSettings.provider === 'custom' && (
+                  {(localSettings.provider === 'custom' || localSettings.provider === 'copilot') && (
                     <div>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--color-text-secondary)', marginBottom: '6px', fontSize: '0.85rem' }}>
-                        <Globe size={14} /> Custom Base URL
+                        <Globe size={14} /> {localSettings.provider === 'copilot' ? 'Copilot Proxy URL' : 'Custom Base URL'}
                       </label>
                       <input 
                         type="text" 
                         className="cyber-input" 
                         value={localSettings.baseUrl || ''} 
                         onChange={(e) => setLocalSettings({ ...localSettings, baseUrl: e.target.value })}
-                        placeholder="https://api.your-provider.com/v1/chat/completions"
+                        placeholder={localSettings.provider === 'copilot' ? 'https://your-proxy.com/chat/completions' : 'https://api.your-provider.com/v1/chat/completions'}
                         style={{ width: '100%' }}
                       />
                     </div>

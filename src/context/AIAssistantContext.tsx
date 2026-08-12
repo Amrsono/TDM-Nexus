@@ -21,7 +21,7 @@ import {
 import { getNextBestActions, chat as aiChat, generatePredictiveAnalytics, generateSmartSchedule, generateDocumentation } from '../utils/aiService';
 
 export interface AISettings {
-  provider: 'openai' | 'gemini' | 'anthropic' | 'custom';
+  provider: 'openai' | 'gemini' | 'anthropic' | 'copilot' | 'custom';
   apiKey: string;
   model: string;
   baseUrl?: string;
@@ -102,6 +102,7 @@ const defaultModelForProvider: Record<AISettings['provider'], string> = {
   openai: 'gpt-4o',
   gemini: 'gemini-2.0-flash',
   anthropic: 'claude-3-5-sonnet-20240620',
+  copilot: 'gpt-4o',
   custom: '',
 };
 
@@ -111,6 +112,7 @@ const modelPrefixMap: Array<{ prefix: string; provider: AISettings['provider'] }
   { prefix: 'o1', provider: 'openai' },
   { prefix: 'gemini-', provider: 'gemini' },
   { prefix: 'claude-', provider: 'anthropic' },
+  { prefix: 'copilot-', provider: 'copilot' },
 ];
 
 /** Bare Gemini IDs that are deprecated on v1beta — map them to their -latest alias */

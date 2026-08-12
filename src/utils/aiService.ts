@@ -75,6 +75,8 @@ function getEndpointUrl(settings: AISettings): string {
       return `https://generativelanguage.googleapis.com/v1beta/models/${settings.model}:generateContent?key=${settings.apiKey}`;
     case 'anthropic':
       return 'https://api.anthropic.com/v1/messages';
+    case 'copilot':
+      return settings.baseUrl || 'https://api.githubcopilot.com/chat/completions';
     case 'custom':
       return settings.baseUrl || '';
     case 'openai':
@@ -90,6 +92,7 @@ function getRequestHeaders(settings: AISettings): Record<string, string> {
       return base; // key is in the URL
     case 'anthropic':
       return { ...base, 'x-api-key': settings.apiKey, 'anthropic-version': '2023-06-01' };
+    case 'copilot':
     case 'openai':
     case 'custom':
     default:
@@ -132,6 +135,7 @@ function buildRequestBody(
         messages: userMessages.map(m => ({ role: m.role, content: m.content }))
       };
     }
+    case 'copilot':
     case 'openai':
     case 'custom':
     default:
@@ -155,6 +159,7 @@ function extractTextFromResponse(settings: AISettings, data: Record<string, unkn
       const content = data.content as Array<{ text: string }>;
       return content?.[0]?.text ?? '';
     }
+    case 'copilot':
     case 'openai':
     case 'custom':
     default: {
