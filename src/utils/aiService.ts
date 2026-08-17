@@ -3,6 +3,7 @@ import { ProjectState, AISettings, AISuggestion, AIMessage } from '../context/AI
 
 export const buildSystemPrompt = (projectState: ProjectState, activePhase: PhaseId): string => {
   return `You are the TDM Nexus AI Assistant, an expert project manager and digital delivery expert for VOIS.
+The current date is ${new Date().toLocaleDateString()}.
 You are currently helping the user on the "${activePhase}" tab.
 Here is the current state of the project:
 - Overall Health: ${projectState.ragStatus.overall} (Schedule: ${projectState.ragStatus.schedule}, Budget: ${projectState.ragStatus.budget})
@@ -328,7 +329,7 @@ SIT Pass Rate: ${projectState.sitProgressPercent}%
 Open High Defects: ${projectState.defects.filter(d => (d.severity === 'P1' || d.severity === 'P2') && d.status !== 'Closed').length}`;
 
     const apiMessages: OpenAIMessage[] = [
-      { role: 'system', content: 'You are a project manager. Summarize health concisely.' },
+      { role: 'system', content: `You are a project manager. Summarize health concisely. The current date is ${new Date().toLocaleDateString()}.` },
       { role: 'user', content: prompt }
     ];
 
@@ -378,7 +379,7 @@ Write a structured analysis for a ${reportType === 'excel' ? 'spreadsheet report
 Keep the tone professional, objective, and action-oriented. Format the response as clean plain text with structured sections (do not wrap in markdown block code formatting).`;
 
     const apiMessages: OpenAIMessage[] = [
-      { role: 'system', content: 'You are an executive project management assistant. Generate clear, structured reports.' },
+      { role: 'system', content: `You are an executive project management assistant. Generate clear, structured reports. The current date is ${new Date().toLocaleDateString()}.` },
       { role: 'user', content: projectSummaryPrompt }
     ];
 
@@ -426,7 +427,7 @@ Identify:
 Provide a concise, bulleted report of identified risks and recommended mitigations. Format with markdown.`;
 
     const apiMessages: OpenAIMessage[] = [
-      { role: 'system', content: 'You are an AI predictive risk analysis system for enterprise project management.' },
+      { role: 'system', content: `You are an AI predictive risk analysis system for enterprise project management. The current date is ${new Date().toLocaleDateString()}.` },
       { role: 'user', content: prompt }
     ];
 
@@ -472,7 +473,7 @@ Please generate a smart scheduling proposal:
 Provide the recommendations in a clear, formatted markdown layout.`;
 
     const apiMessages: OpenAIMessage[] = [
-      { role: 'system', content: 'You are an AI resource allocator and smart scheduling assistant.' },
+      { role: 'system', content: `You are an AI resource allocator and smart scheduling assistant. The current date is ${new Date().toLocaleDateString()}.` },
       { role: 'user', content: prompt }
     ];
 
@@ -516,7 +517,7 @@ Project Context:
 Write a highly professional, ready-to-share document in markdown format.`;
 
     const apiMessages: OpenAIMessage[] = [
-      { role: 'system', content: 'You are an AI documentation generator for project charters, status reports, and action items.' },
+      { role: 'system', content: `You are an AI documentation generator for project charters, status reports, and action items. The current date is ${new Date().toLocaleDateString()}.` },
       { role: 'user', content: prompt }
     ];
 
