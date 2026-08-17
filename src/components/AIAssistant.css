@@ -210,6 +210,26 @@
   border-radius: 12px;
   font-size: 13px;
   line-height: 1.5;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.ai-markdown {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.ai-markdown p {
+  margin: 0 0 10px 0;
+}
+
+.ai-markdown p:last-child {
+  margin-bottom: 0;
+}
+
+.ai-markdown pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
   overflow-x: auto;
 }
 

@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Driven Task & Delivery Management: Trends & Copilot Feature Blueprint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#2563eb',
+                            600: '#1d4ed8',
+                            700: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        accent: {
+                            500: '#0284c7',
+                            600: '#0369a1',
+                        },
+                        amber: {
+                            500: '#f59e0b',
+                        },
+                        emerald: {
+                            500: '#10b981',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 380px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<!-- PALETTE: Corporate Tech Azure Blue (#2563EB), Cyan Accent (#0284C7), Amber Highlight (#F59E0B), Emerald Green (#10B981), Slate Dark (#0F172A) -->
+<!-- CONFIRMATION: Neither Mermaid JS nor SVG graphics were used in this file. All visuals use HTML/CSS and Canvas rendering. -->
+<body class="bg-slate-900 text-slate-100 font-sans antialiased leading-relaxed custom-scrollbar selection:bg-brand-500 selection:text-white">
+
+    <header class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 lg:px-8 py-3 transition-all">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <span class="text-2xl">🤖</span>
+                <div>
+                    <h1 class="font-bold text-lg text-white leading-tight">TDM AI Architecture &amp; Trends</h1>
+                    <p class="text-xs text-slate-400">Next-Gen Delivery Management Powered by Microsoft Copilot Stack</p>
+                </div>
+            </div>
+            <nav class="hidden md:flex space-x-6 text-sm font-medium text-slate-300">
+                <a href="#market-trends" class="hover:text-brand-500 transition">Market Trends</a>
+                <a href="#tdm-features" class="hover:text-brand-500 transition">TDM Features</a>
+                <a href="#copilot-engine" class="hover:text-brand-500 transition">Copilot Engine</a>
+                <a href="#data-flow" class="hover:text-brand-500 transition">Data Flow</a>
+            </nav>
+            <a href="#tdm-features" class="bg-brand-600 hover:bg-brand-500 text-white text-xs px-4 py-2 rounded-lg font-semibold shadow-lg shadow-brand-600/30 transition">
+                Explore Blueprint
+            </a>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 lg:px-8 py-8 space-y-16">
+
+        <section class="space-y-8">
+            <div class="text-center max-w-3xl mx-auto space-y-4">
+                <span class="inline-block bg-brand-500/10 text-brand-500 border border-brand-500/20 px-3 py-1 rounded-full text-xs font-semibold tracking-wide uppercase">
+                    Strategic Market Analysis &amp; Copilot Integration Blueprint
+                </span>
+                <h2 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight">
+                    Transforming Project Management with <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-500 via-accent-500 to-amber-500">Copilot Ecosystem</span>
+                </h2>
+                <p class="text-slate-400 text-base md:text-lg">
+                    Discover emerging market dynamics, essential feature implementations for your Task and Delivery Management (TDM) platform, and exact technical patterns using the embedded Copilot Stack &amp; Extensions API.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-5 shadow-lg relative overflow-hidden group hover:border-brand-500/50 transition">
+                    <div class="flex items-center justify-between text-slate-400 text-xs font-semibold uppercase mb-2">
+                        <span>Market Horizon</span>
+                        <span class="text-brand-500 text-lg">📈</span>
+                    </div>
+                    <div class="text-3xl font-bold text-white">$8.9 Billion</div>
+                    <p class="text-xs text-slate-400 mt-1">Projected AI PM market scale by 2030 (20.1% CAGR)</p>
+                </div>
+
+                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-5 shadow-lg relative overflow-hidden group hover:border-accent-500/50 transition">
+                    <div class="flex items-center justify-between text-slate-400 text-xs font-semibold uppercase mb-2">
+                        <span>Enterprise Adoption</span>
+                        <span class="text-accent-500 text-lg">🏢</span>
+                    </div>
+                    <div class="text-3xl font-bold text-white">88%</div>
+                    <p class="text-xs text-slate-400 mt-1">Organizations deploying AI across core business functions</p>
+                </div>
+
+                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-5 shadow-lg relative overflow-hidden group hover:border-amber-500/50 transition">
+                    <div class="flex items-center justify-between text-slate-400 text-xs font-semibold uppercase mb-2">
+                        <span>Procurement Driver</span>
+                        <span class="text-amber-500 text-lg">🛒</span>
+                    </div>
+                    <div class="text-3xl font-bold text-white">55%</div>
+                    <p class="text-xs text-slate-400 mt-1">Buyers selecting software based on AI capability additions</p>
+                </div>
+
+                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-5 shadow-lg relative overflow-hidden group hover:border-emerald-500/50 transition">
+                    <div class="flex items-center justify-between text-slate-400 text-xs font-semibold uppercase mb-2">
+                        <span>Success Gap</span>
+                        <span class="text-emerald-500 text-lg">🎯</span>
+                    </div>
+                    <div class="text-3xl font-bold text-white">50%</div>
+                    <p class="text-xs text-slate-400 mt-1">Global projects meeting full success criteria without AI</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="market-trends" class="space-y-6">
+            <div class="border-l-4 border-brand-500 pl-4">
+                <h3 class="text-2xl font-bold text-white">1. Industry Trends &amp; Primary AI Use Cases</h3>
+                <p class="text-slate-400 text-sm mt-1">
+                    Understanding operational domain adoption helps target the highest-ROI capabilities for your new TDM tool.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-6 shadow-md flex flex-col justify-between">
+                    <div>
+                        <h4 class="text-lg font-semibold text-white mb-2">Primary Operational AI Deployments</h4>
+                        <p class="text-xs text-slate-400 mb-4">
+                            Percentage of project management professionals actively utilizing AI tools across core delivery workflows.
+                        </p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="useCasesChart"></canvas>
+                    </div>
+                    <p class="text-xs text-slate-400 text-center mt-3">
+                        <span class="text-brand-500 font-semibold">Key Takeaway:</span> Risk management and task automation represent over 50% of active enterprise demand.
+                    </p>
+                </div>
+
+                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-6 shadow-md flex flex-col justify-between">
+                    <div>
+                        <h4 class="text-lg font-semibold text-white mb-2">Global Project Success Baseline</h4>
+                        <p class="text-xs text-slate-400 mb-4">
+                            Current distribution of project outcomes highlighting the yield gap that agentic orchestration aims to fix.
+                        </p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="outcomesChart"></canvas>
+                    </div>
+                    <p class="text-xs text-slate-400 text-center mt-3">
+                        <span class="text-amber-500 font-semibold">Opportunity:</span> 50% of projects experience mixed results or failure due to manual tracking bottlenecks.
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-slate-800/60 border border-slate-700/80 rounded-xl p-6">
+                <h4 class="text-lg font-bold text-white mb-4 flex items-center">
+                    <span class="mr-2">⚡</span> The Generative Shift: Gen 1 Copilots vs. Gen 2 Copilot Agents
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div class="bg-slate-900/80 p-4 rounded-lg border border-slate-800">
+                        <div class="text-amber-500 font-bold mb-2 uppercase text-xs tracking-wider">First-Generation Copilots (2023–2024)</div>
+                        <ul class="space-y-2 text-slate-300">
+                            <li class="flex items-start"><span class="text-red-400 mr-2">✕</span> Reactive: Requires explicit sidebar prompts to generate individual text responses.</li>
+                            <li class="flex items-start"><span class="text-red-400 mr-2">✕</span> Context-Blind: Operates primarily on immediate document or prompt context.</li>
+                            <li class="flex items-start"><span class="text-red-400 mr-2">✕</span> Read-Only: Generates text suggestions without directly executing database mutations.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-900/80 p-4 rounded-lg border border-brand-500/30">
+                        <div class="text-brand-500 font-bold mb-2 uppercase text-xs tracking-wider">Second-Generation Copilot Agents (2025–2026+)</div>
+                        <ul class="space-y-2 text-slate-300">
+                            <li class="flex items-start"><span class="text-emerald-500 mr-2">✓</span> Proactive: Declarative Agents monitor state changes and initiate background tasks.</li>
+                            <li class="flex items-start"><span class="text-emerald-500 mr-2">✓</span> Graph Memory: Taps Microsoft Graph &amp; custom indexes for enterprise-wide awareness.</li>
+                            <li class="flex items-start"><span class="text-emerald-500 mr-2">✓</span> Action Plugins: Executes OpenAPI tool calls to mutate tasks, reassign teams, and update schedules.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tdm-features" class="space-y-6">
+            <div class="border-l-4 border-accent-500 pl-4">
+                <h3 class="text-2xl font-bold text-white">2. High-Impact Feature Blueprint for Your TDM Tool</h3>
+                <p class="text-slate-400 text-sm mt-1">
+                    Translate AI industry trends into five powerful, value-generating product modules powered by Copilot capabilities.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-6 flex flex-col justify-between hover:border-brand-500/60 transition group">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="bg-brand-500/20 text-brand-500 text-xs px-2.5 py-1 rounded-md font-bold uppercase">Module 01</span>
+                            <span class="text-2xl">🤖</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-white group-hover:text-brand-500 transition">Autonomous Delivery Agent</h4>
+                        <p class="text-xs text-slate-400">
+                            Operates as a persistent background teammate executing standup syntheses, automated triage, and daily reporting.
+                        </p>
+                        <hr class="border-slate-700/50">
+                        <div class="space-y-2 text-xs">
+                            <div class="font-semibold text-slate-300">Core Mechanics:</div>
+                            <p class="text-slate-400">• Standup Autopilot: Polling activity &amp; drafting executive status reports.</p>
+                            <p class="text-slate-400">• Backlog Triage: Tagging custom fields and routing tickets to velocity streams.</p>
+                            <p class="text-slate-400">• Human-in-the-Loop: Requiring explicit confirmation for high-stakes schedule changes.</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-700/50 text-xs text-brand-500 font-semibold flex items-center">
+                        <span>Copilot Power:</span> <span class="text-slate-300 ml-1">Copilot Studio Autonomous Agents</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-6 flex flex-col justify-between hover:border-accent-500/60 transition group">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="bg-accent-500/20 text-accent-500 text-xs px-2.5 py-1 rounded-md font-bold uppercase">Module 02</span>
+                            <span class="text-2xl">🔮</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-white group-hover:text-accent-500 transition">Predictive Risk &amp; Bottleneck Engine</h4>
+                        <p class="text-xs text-slate-400">
+                            Replaces static risk registers with dynamic algorithmic schedule and scope forecasting.
+                        </p>
+                        <hr class="border-slate-700/50">
+                        <div class="space-y-2 text-xs">
+                            <div class="font-semibold text-slate-300">Core Mechanics:</div>
+                            <p class="text-slate-400">• Non-Linear Risk Scoring: Scans scope creep and non-linear dependencies.</p>
+                            <p class="text-slate-400">• Early-Warning Alerts: Signals potential milestone slippage before delay occurs.</p>
+                            <p class="text-slate-400">• Automated Remediation: Generates trade-off options (scope reduction vs resourcing).</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-700/50 text-xs text-accent-500 font-semibold flex items-center">
+                        <span>Copilot Power:</span> <span class="text-slate-300 ml-1">Azure OpenAI Reasoning Models (o3/GPT-4o)</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-6 flex flex-col justify-between hover:border-amber-500/60 transition group">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="bg-amber-500/20 text-amber-500 text-xs px-2.5 py-1 rounded-md font-bold uppercase">Module 03</span>
+                            <span class="text-2xl">🧠</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-white group-hover:text-amber-500 transition">Shared Workspace Memory Graph</h4>
+                        <p class="text-xs text-slate-400">
+                            Connects tasks, PRDs, commit histories, and conversations into a unified semantic graph.
+                        </p>
+                        <hr class="border-slate-700/50">
+                        <div class="space-y-2 text-xs">
+                            <div class="font-semibold text-slate-300">Core Mechanics:</div>
+                            <p class="text-slate-400">• Cross-Asset Linking: Connects PRDs to sub-tasks and GitHub pull requests.</p>
+                            <p class="text-slate-400">• Institutional Memory: Retains architectural trade-offs from past retrospectives.</p>
+                            <p class="text-slate-400">• Contextual Querying: Enables natural language workspace search.</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-700/50 text-xs text-amber-500 font-semibold flex items-center">
+                        <span>Copilot Power:</span> <span class="text-slate-300 ml-1">Microsoft Graph &amp; Custom Copilot Index</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-6 flex flex-col justify-between hover:border-emerald-500/60 transition group lg:col-span-1 border-slate-700">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="bg-emerald-500/20 text-emerald-500 text-xs px-2.5 py-1 rounded-md font-bold uppercase">Module 04</span>
+                            <span class="text-2xl">📝</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-white group-hover:text-emerald-500 transition">PRD &amp; Story Scaffolding Engine</h4>
+                        <p class="text-xs text-slate-400">
+                            Ingests raw customer feedback and automatically generates technical PRDs and user stories.
+                        </p>
+                        <hr class="border-slate-700/50">
+                        <div class="space-y-2 text-xs">
+                            <div class="font-semibold text-slate-300">Core Mechanics:</div>
+                            <p class="text-slate-400">• Signal Synthesis: Converts support tickets and feedback into feature proposals.</p>
+                            <p class="text-slate-400">• BDD Generation: Produces structured user stories with Gherkin test cases.</p>
+                            <p class="text-slate-400">• Database Injection: Direct structured task payload creation.</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-700/50 text-xs text-emerald-500 font-semibold flex items-center">
+                        <span>Copilot Power:</span> <span class="text-slate-300 ml-1">GitHub Copilot Workspace &amp; JSON Schema</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-6 flex flex-col justify-between hover:border-brand-500/60 transition group lg:col-span-2 border-slate-700">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="bg-brand-500/20 text-brand-500 text-xs px-2.5 py-1 rounded-md font-bold uppercase">Module 05</span>
+                            <span class="text-2xl">⚖️</span>
+                        </div>
+                        <h4 class="text-xl font-bold text-white group-hover:text-brand-500 transition">Capacity &amp; Resourcing Optimization Hub</h4>
+                        <p class="text-xs text-slate-400">
+                            Monitors developer workload bandwidth and provides real-time re-balancing to prevent burnout.
+                        </p>
+                        <hr class="border-slate-700/50">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                            <div>
+                                <div class="font-semibold text-slate-300 mb-1">Real-Time Bandwidth Balance:</div>
+                                <p class="text-slate-400">Tracks active estimated hours against engineer velocity to flag overload states before sprint execution.</p>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-slate-300 mb-1">AI Resourcing Recommendations:</div>
+                                <p class="text-slate-400">Suggests re-assigning sub-tasks across available team members based on domain expertise and past velocity.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-700/50 text-xs text-brand-500 font-semibold flex items-center">
+                        <span>Copilot Power:</span> <span class="text-slate-300 ml-1">Copilot Plugins with OpenAPI Tool Calls</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="copilot-engine" class="space-y-6">
+            <div class="border-l-4 border-amber-500 pl-4">
+                <h3 class="text-2xl font-bold text-white">3. How Embedded Copilot Stack &amp; APIs Power Your Tool</h3>
+                <p class="text-slate-400 text-sm mt-1">
+                    Leverage specialized Microsoft Copilot primitives to build robust, enterprise-ready, and extensible AI workflows.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-5 space-y-3">
+                    <div class="text-brand-500 font-bold text-base flex items-center">
+                        <span class="bg-brand-500/10 p-2 rounded-lg mr-2">🤖</span> Declarative Agents
+                    </div>
+                    <p class="text-xs text-slate-300">
+                        Copilot Studio &amp; Agentic APIs allow custom background workers to trigger on project events autonomously.
+                    </p>
+                    <div class="bg-slate-900 p-2.5 rounded text-[11px] font-mono text-slate-400">
+                        Eliminates manual prompt invocation for routine status summaries.
+                    </div>
+                </div>
+
+                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-5 space-y-3">
+                    <div class="text-accent-500 font-bold text-base flex items-center">
+                        <span class="bg-accent-500/10 p-2 rounded-lg mr-2">📋</span> Structured JSON Mode
+                    </div>
+                    <p class="text-xs text-slate-300">
+                        Enforces strict JSON schema validation directly at model response using Azure OpenAI endpoints.
+                    </p>
+                    <div class="bg-slate-900 p-2.5 rounded text-[11px] font-mono text-slate-400">
+                        Guarantees strictly formatted task objects ready for direct DB insertion.
+                    </div>
+                </div>
+
+                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-5 space-y-3">
+                    <div class="text-amber-500 font-bold text-base flex items-center">
+                        <span class="bg-amber-500/10 p-2 rounded-lg mr-2">🔌</span> Copilot Extensions &amp; Plugins
+                    </div>
+                    <p class="text-xs text-slate-300">
+                        Exposes TDM REST endpoints (`create_task`, `reassign_user`, `update_date`) via standard OpenAPI specs.
+                    </p>
+                    <div class="bg-slate-900 p-2.5 rounded text-[11px] font-mono text-slate-400">
+                        Enables autonomous multi-step execution across TDM system tools.
+                    </div>
+                </div>
+
+                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-5 space-y-3">
+                    <div class="text-emerald-500 font-bold text-base flex items-center">
+                        <span class="bg-emerald-500/10 p-2 rounded-lg mr-2">🌐</span> Microsoft Graph Context
+                    </div>
+                    <p class="text-xs text-slate-300">
+                        Integrates enterprise documents, Teams discussions, code commits, and project specs into a unified vector index.
+                    </p>
+                    <div class="bg-slate-900 p-2.5 rounded text-[11px] font-mono text-slate-400">
+                        Provides rich context across cross-functional organizational silos.
+                    </div>
+                </div>
+
+                <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-5 space-y-3 lg:col-span-2">
+                    <div class="text-brand-500 font-bold text-base flex items-center">
+                        <span class="bg-brand-500/10 p-2 rounded-lg mr-2">🎯</span> Multi-Tier Copilot Allocation Strategy
+                    </div>
+                    <p class="text-xs text-slate-300">
+                        Balances latency, compute costs, and reasoning power by routing specific project management tasks to optimal models.
+                    </p>
+                    <div class="grid grid-cols-3 gap-2 text-center text-xs pt-1">
+                        <div class="bg-slate-900 p-2 rounded border border-slate-800">
+                            <span class="text-amber-400 font-bold block">Azure OpenAI o3-mini</span>
+                            <span class="text-[10px] text-slate-400">Reasoning &amp; Risk</span>
+                        </div>
+                        <div class="bg-slate-900 p-2 rounded border border-slate-800">
+                            <span class="text-brand-400 font-bold block">Copilot Studio Engine</span>
+                            <span class="text-[10px] text-slate-400">Agentic Workhorse</span>
+                        </div>
+                        <div class="bg-slate-900 p-2 rounded border border-slate-800">
+                            <span class="text-emerald-400 font-bold block">GPT-4o-mini</span>
+                            <span class="text-[10px] text-slate-400">Tagging Subagent</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-6 shadow-md">
+                <h4 class="text-lg font-semibold text-white mb-2">Strategic Model Tier Allocation</h4>
+                <p class="text-xs text-slate-400 mb-4">
+                    Visualizing workload distribution and performance characteristics across Copilot ecosystem tiers in your TDM architecture.
+                </p>
+                <div class="chart-container">
+                    <canvas id="modelRoutingChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="data-flow" class="space-y-6">
+            <div class="border-l-4 border-emerald-500 pl-4">
+                <h3 class="text-2xl font-bold text-white">4. Agentic Data Flow &amp; Human Governance</h3>
+                <p class="text-slate-400 text-sm mt-1">
+                    An enterprise-grade, step-by-step pipeline ensuring safe database mutations through Human-in-the-Loop gates.
+                </p>
+            </div>
+
+            <div class="bg-slate-800/80 border border-slate-700/60 rounded-xl p-6 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 relative">
+
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 flex flex-col justify-between space-y-2 relative">
+                        <div class="flex items-center justify-between">
+                            <span class="bg-brand-500 text-white text-[10px] font-bold px-2 py-0.5 rounded">STEP 01</span>
+                            <span class="text-lg">📥</span>
+                        </div>
+                        <h5 class="text-sm font-bold text-white">Trigger &amp; Context</h5>
+                        <p class="text-[11px] text-slate-400">
+                            Event fires (Standup/Ticket). MS Graph attaches project specs &amp; commits to prompt.
+                        </p>
+                        <div class="text-[10px] text-brand-400 font-semibold pt-1 border-t border-slate-800">
+                            MS Graph Semantic Index
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 flex flex-col justify-between space-y-2 relative">
+                        <div class="flex items-center justify-between">
+                            <span class="bg-brand-500 text-white text-[10px] font-bold px-2 py-0.5 rounded">STEP 02</span>
+                            <span class="text-lg">🧠</span>
+                        </div>
+                        <h5 class="text-sm font-bold text-white">Copilot Cognition</h5>
+                        <p class="text-[11px] text-slate-400">
+                            Copilot Declarative Agent processes state, evaluates risk metrics, and plans steps.
+                        </p>
+                        <div class="text-[10px] text-accent-400 font-semibold pt-1 border-t border-slate-800">
+                            Agentic Runtime Session
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 flex flex-col justify-between space-y-2 relative">
+                        <div class="flex items-center justify-between">
+                            <span class="bg-brand-500 text-white text-[10px] font-bold px-2 py-0.5 rounded">STEP 03</span>
+                            <span class="text-lg">🛠️</span>
+                        </div>
+                        <h5 class="text-sm font-bold text-white">Plugin Call</h5>
+                        <p class="text-[11px] text-slate-400">
+                            Copilot Plugin invokes TDM OpenAPI endpoints (e.g., `update_due_date`) via JSON.
+                        </p>
+                        <div class="text-[10px] text-amber-400 font-semibold pt-1 border-t border-slate-800">
+                            OpenAPI Plugin Schema
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-xl border border-amber-500/50 flex flex-col justify-between space-y-2 relative">
+                        <div class="flex items-center justify-between">
+                            <span class="bg-amber-500 text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded">STEP 04</span>
+                            <span class="text-lg">🛡️</span>
+                        </div>
+                        <h5 class="text-sm font-bold text-white">Governance Gate</h5>
+                        <p class="text-[11px] text-slate-400">
+                            High-risk actions pause. Reasoned proposals presented to PM for human sign-off.
+                        </p>
+                        <div class="text-[10px] text-amber-400 font-semibold pt-1 border-t border-slate-800">
+                            Human-in-the-Loop Check
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 p-4 rounded-xl border border-emerald-500/50 flex flex-col justify-between space-y-2 relative">
+                        <div class="flex items-center justify-between">
+                            <span class="bg-emerald-500 text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded">STEP 05</span>
+                            <span class="text-lg">✅</span>
+                        </div>
+                        <h5 class="text-sm font-bold text-white">Settlement &amp; Sync</h5>
+                        <p class="text-[11px] text-slate-400">
+                            Database mutated. TDM board updates in real time and updates governance audit trail.
+                        </p>
+                        <div class="text-[10px] text-emerald-400 font-semibold pt-1 border-t border-slate-800">
+                            Database State Mutated
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-800 text-xs text-slate-400 flex items-center justify-between">
+                    <span>💡 <strong>Architectural Guarantee:</strong> Non-destructive actions (tagging, status summaries) auto-execute; critical mutations (dates, assignments) pause for PM confirmation.</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="border-t border-slate-800 bg-slate-950 py-8 px-4 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto space-y-2">
+            <p>AI-Driven Task and Delivery Management System Architecture Blueprint</p>
+            <p>Built using Chart.js, Tailwind CSS, and Microsoft Copilot / Azure OpenAI API ecosystem.</p>
+        </div>
+    </footer>
+
+    <script>
+        function wrapLabel(str, maxLen = 16) {
+            if (typeof str !== 'string') return str;
+            if (str.length <= maxLen) return str;
+            
+            const words = str.split(' ');
+            const lines = [];
+            let currentLine = '';
+
+            words.forEach(word => {
+                if ((currentLine + word).length <= maxLen) {
+                    currentLine += (currentLine ? ' ' : '') + word;
+                } else {
+                    if (currentLine) lines.push(currentLine);
+                    currentLine = word;
+                }
+            });
+            if (currentLine) lines.push(currentLine);
+            return lines;
+        }
+
+        const commonTooltipConfig = {
+            callbacks: {
+                title: function(tooltipItems) {
+                    const item = tooltipItems[0];
+                    let label = item.chart.data.labels[item.dataIndex];
+                    if (Array.isArray(label)) {
+                        return label.join(' ');
+                    } else {
+                        return label;
+                    }
+                }
+            }
+        };
+
+        const rawUseCasesLabels = [
+            'Project Risk Management',
+            'Task Automation',
+            'Predictive Forecasting',
+            'Scheduling Optimization'
+        ];
+        const wrappedUseCasesLabels = rawUseCasesLabels.map(l => wrapLabel(l, 16));
+
+        const ctx1 = document.getElementById('useCasesChart').getContext('2d');
+        new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: wrappedUseCasesLabels,
+                datasets: [{
+                    label: 'Enterprise Adoption %',
+                    data: [54, 53, 52, 52],
+                    backgroundColor: [
+                        '#2563eb',
+                        '#0284c7',
+                        '#f59e0b',
+                        '#10b981'
+                    ],
+                    borderRadius: 6,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: commonTooltipConfig
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#94a3b8', font: { size: 10 } },
+                        grid: { display: false }
+                    },
+                    y: {
+                        ticks: { color: '#94a3b8', font: { size: 10 } },
+                        grid: { color: '#334155' },
+                        beginAtZero: true,
+                        max: 60
+                    }
+                }
+            }
+        });
+
+        const rawOutcomesLabels = [
+            'Fully Successful',
+            'Mixed Outcomes',
+            'Complete Failure'
+        ];
+        const wrappedOutcomesLabels = rawOutcomesLabels.map(l => wrapLabel(l, 16));
+
+        const ctx2 = document.getElementById('outcomesChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: wrappedOutcomesLabels,
+                datasets: [{
+                    data: [50, 37, 13],
+                    backgroundColor: [
+                        '#10b981',
+                        '#f59e0b',
+                        '#ef4444'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#1e293b'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#cbd5e1', font: { size: 11 }, padding: 15 }
+                    },
+                    tooltip: commonTooltipConfig
+                },
+                cutout: '65%'
+            }
+        });
+
+        const rawModelLabels = [
+            'Azure OpenAI o3-mini (Reasoning)',
+            'Copilot Studio Engine (Agents)',
+            'GPT-4o-mini (Subagent)'
+        ];
+        const wrappedModelLabels = rawModelLabels.map(l => wrapLabel(l, 18));
+
+        const ctx3 = document.getElementById('modelRoutingChart').getContext('2d');
+        new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: wrappedModelLabels,
+                datasets: [
+                    {
+                        label: 'Reasoning & Intelligence',
+                        data: [96, 82, 58],
+                        backgroundColor: '#f59e0b'
+                    },
+                    {
+                        label: 'Speed & Cost Efficiency',
+                        data: [48, 84, 98],
+                        backgroundColor: '#2563eb'
+                    }
+                ]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: { color: '#cbd5e1', font: { size: 11 } }
+                    },
+                    tooltip: commonTooltipConfig
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#94a3b8', font: { size: 10 } },
+                        grid: { color: '#334155' },
+                        beginAtZero: true,
+                        max: 100
+                    },
+                    y: {
+                        ticks: { color: '#94a3b8', font: { size: 10 } },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
