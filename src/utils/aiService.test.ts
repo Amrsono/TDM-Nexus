@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   buildSystemPrompt,
   getEndpointUrl,
@@ -60,6 +60,14 @@ describe('aiService - Provider Logic and Prompt Construction', () => {
       expect(prompt).toContain('Budget Used: 62%');
       expect(prompt).toContain('QA SIT Pass Rate: 75%');
     });
+
+    it('builds system prompt across multiple phases', () => {
+      const phases = ['funnel', 'analysing', 'finances', 'build', 'governance', 'els', 'poap', 'rpm', 'walkthrough', 'settings'] as const;
+      phases.forEach(phase => {
+        const prompt = buildSystemPrompt(mockProjectState, phase as any);
+        expect(prompt).toBeDefined();
+      });
+    });
   });
 
   describe('getOfflineSuggestions', () => {
@@ -76,6 +84,14 @@ describe('aiService - Provider Logic and Prompt Construction', () => {
       const p1Action = suggestions.find(s => s.id === 's3');
       expect(p1Action).toBeDefined();
       expect(p1Action?.title).toContain('P1 Defects Open');
+    });
+
+    it('generates suggestions across all active phases', () => {
+      const phases = ['funnel', 'analysing', 'finances', 'build', 'testing', 'governance', 'els', 'poap', 'rpm', 'walkthrough', 'settings'] as const;
+      phases.forEach(phase => {
+        const list = getOfflineSuggestions(mockProjectState, phase as any);
+        expect(Array.isArray(list)).toBe(true);
+      });
     });
   });
 
@@ -118,6 +134,19 @@ describe('aiService - Provider Logic and Prompt Construction', () => {
         maxTokens: 2048,
       };
       expect(getEndpointUrl(settings)).toBe('https://api.openai.com/v1/chat/completions');
+    });
+
+    it('returns Copilot proxy endpoint when provider is copilot', () => {
+      const settings: AISettings = {
+        enabled: true,
+        provider: 'copilot',
+        apiKey: 'test-copilot-key',
+        model: 'gpt-4o',
+        baseUrl: 'https://copilot-proxy.internal',
+        temperature: 0.7,
+        maxTokens: 2048,
+      };
+      expect(getEndpointUrl(settings)).toBe('https://copilot-proxy.internal');
     });
 
     it('returns custom endpoint baseUrl when provider is custom', () => {
@@ -249,6 +278,54 @@ describe('aiService - Provider Logic and Prompt Construction', () => {
         choices: [{ message: { content: 'GPT says hi' } }],
       });
       expect(res).toBe('GPT says hi');
+    });
+  });
+
+  describe('Report Analytics & AI Generation Functions', () => {
+    it('returns offline analysis when apiKey is missing', async () => {
+      const { generateReportAnalytics, generatePredictiveAnalytics, generateSmartSchedule, generateDocumentation } = await import('./aiService');
+      const offlineSettings: AISettings = {
+        enabled: true,
+        provider: 'gemini',
+        apiKey: '',
+        model: 'gemini-2.0-flash',
+        temperature: 0.3,
+        maxTokens: 1000,
+      };
+
+      const report = await generateReportAnalytics(mockProjectState, 'ppt', offlineSettings);
+      expect(report).toContain('Offline Analysis');
+
+      const pred = await generatePredictiveAnalytics(mockProjectState, offlineSettings);
+      expect(pred).toContain('Offline Mode');
+
+      const sched = await generateSmartSchedule(mockProjectState, offlineSettings);
+      expect(sched).toContain('Offline Mode');
+
+      const doc = await generateDocumentation(mockProjectState, 'Charter', 'Prompt', offlineSettings);
+      expect(doc).toContain('Offline Mode');
+    });
+
+    it('makes remote API call and returns parsed response when apiKey is configured', async () => {
+      const { generateReportAnalytics } = await import('./aiService');
+      globalThis.fetch = vi.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          choices: [{ message: { content: 'Structured SteerCo executive analysis.' } }],
+        }),
+      } as unknown as Response);
+
+      const onlineSettings: AISettings = {
+        enabled: true,
+        provider: 'openai',
+        apiKey: 'sk-valid-key',
+        model: 'gpt-4o',
+        temperature: 0.3,
+        maxTokens: 1000,
+      };
+
+      const result = await generateReportAnalytics(mockProjectState, 'ppt', onlineSettings);
+      expect(result).toBe('Structured SteerCo executive analysis.');
     });
   });
 });
