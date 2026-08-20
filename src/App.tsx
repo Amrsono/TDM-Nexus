@@ -182,7 +182,7 @@ export default function App() {
 
     // 3. Update transfers fromSquad / toSquad names
     setTransfers(prev => prev.map(t => {
-      let updated = { ...t };
+      const updated = { ...t };
       if (t.fromSquad === oldName) updated.fromSquad = newName;
       if (t.toSquad === oldName) updated.toSquad = newName;
       return updated;

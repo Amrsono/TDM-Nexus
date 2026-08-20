@@ -190,8 +190,8 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({ activePhase, onPhaseSe
     scene.add(particleSystem);
 
     // 8. Animation & Camera Controls
-    let targetCameraPos = new THREE.Vector3(0, 18, 25);
-    let targetLookAt = new THREE.Vector3(0, 0, 0);
+    const targetCameraPos = new THREE.Vector3(0, 18, 25);
+    const targetLookAt = new THREE.Vector3(0, 0, 0);
     const currentLookAt = new THREE.Vector3(0, 0, 0);
 
     const updateCameraFocus = (phaseId: string) => {
