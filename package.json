@@ -1,7 +1,7 @@
 {
   "name": "tdm",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -18,8 +18,6 @@
     "@vercel/analytics": "^2.0.1",
     "lucide-react": "^1.18.0",
     "pptxgenjs": "^4.0.1",
-    "puppeteer": "^25.6.0",
-    "puppeteer-screen-recorder": "^3.0.6",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-markdown": "^10.1.0",
