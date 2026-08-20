@@ -48,22 +48,24 @@ describe('ErrorBoundary Component', () => {
   });
 
   it('resets error state when clicking Try Recovery button', () => {
-    const { rerender } = render(
+    let shouldThrow = true;
+    const DynamicComponent = () => {
+      if (shouldThrow) throw new Error('Dynamic failure');
+      return <div>Healthy Component Content</div>;
+    };
+
+    render(
       <ErrorBoundary>
-        <BadComponent shouldThrow={true} />
+        <DynamicComponent />
       </ErrorBoundary>
     );
 
     expect(screen.getByText('Application Encountered a Crash')).toBeInTheDocument();
 
+    shouldThrow = false;
     const recoverBtn = screen.getByText(/Try Recovery/i);
     fireEvent.click(recoverBtn);
 
-    rerender(
-      <ErrorBoundary>
-        <BadComponent shouldThrow={false} />
-      </ErrorBoundary>
-    );
     expect(screen.getByText('Healthy Component Content')).toBeInTheDocument();
   });
 });

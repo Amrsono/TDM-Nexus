@@ -412,5 +412,5 @@ export const ThreeCanvas: React.FC<ThreeCanvasProps> = ({ activePhase, onPhaseSe
     }
   }, [activePhase]);
 
-  return <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'absolute' }} />;
+  return <div ref={containerRef} className="three-canvas-container" style={{ width: '100%', height: '100%', position: 'absolute' }} />;
 };
