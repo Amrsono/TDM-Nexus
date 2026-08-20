@@ -20,12 +20,11 @@ describe('App Root Integration Component', () => {
   it('renders application header, HUD metrics, and navigation sidebar', () => {
     renderApp();
     expect(screen.getByText('NEXUS')).toBeInTheDocument();
-    expect(screen.getByText('Enterprise Delivery Architecture')).toBeInTheDocument();
-    expect(screen.getByText('Overall RAG')).toBeInTheDocument();
-    expect(screen.getByText('Budget Burn')).toBeInTheDocument();
-    expect(screen.getByText('SIT Pass')).toBeInTheDocument();
-    expect(screen.getByText('Excel Export')).toBeInTheDocument();
-    expect(screen.getByText('PPT Export')).toBeInTheDocument();
+    expect(screen.getByText('Active Phase')).toBeInTheDocument();
+    expect(screen.getByText('Budget vs Actuals')).toBeInTheDocument();
+    expect(screen.getByText('SIT Pass Rate')).toBeInTheDocument();
+    expect(screen.getByText('Export Excel')).toBeInTheDocument();
+    expect(screen.getByText('Export PPT')).toBeInTheDocument();
   });
 
   it('switches between navigation tabs smoothly', () => {
