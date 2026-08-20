@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   validate:
-    name: Lint, Typecheck, Test, and Build
+    name: Lint, Typecheck, Audit, Test with Coverage, and Build
     runs-on: ubuntu-latest
 
     steps:
@@ -28,14 +28,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Dependency Vulnerability Audit
+        run: npm audit --audit-level=critical
+
       - name: Lint Codebase
         run: npm run lint
 
       - name: Typecheck TypeScript
         run: npm run typecheck
 
-      - name: Run Test Suite
-        run: npm run test
+      - name: Run Test Suite with Coverage
+        run: npm run test:coverage
 
       - name: Build Production Assets
         run: npm run build

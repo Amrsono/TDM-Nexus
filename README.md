@@ -92,6 +92,17 @@ cp .env.example .env
 | `VITE_ANTHROPIC_API_KEY` | Anthropic Claude API key (optional) |
 | `VITE_AI_PROXY_URL` | Optional server-side AI proxy endpoint |
 
+### Docker Containerization
+
+Run the production build in an isolated multi-stage container with Nginx:
+
+```bash
+# Build and launch with Docker Compose
+docker compose up --build -d
+
+# Access the application at http://localhost:8080
+```
+
 ---
 
 ## 📜 Available Scripts
@@ -100,6 +111,7 @@ cp .env.example .env
 |---|---|
 | `npm run dev` | Start local Vite development server with Hot Module Replacement |
 | `npm run test` | Run the complete Vitest test suite |
+| `npm run test:coverage` | Run Vitest with v8 code coverage and threshold enforcement |
 | `npm run test:watch` | Run Vitest in interactive watch mode |
 | `npm run typecheck` | Run TypeScript compiler type check (`tsc -b --noEmit`) |
 | `npm run lint` | Run ESLint across all TypeScript and React files |
@@ -110,13 +122,14 @@ cp .env.example .env
 
 ## 🧪 Testing & CI Enforcement
 
-The test suite covers:
+The test suite contains **19 test suites** and **93 passing unit/integration tests** with strict threshold enforcement (`>= 70%` lines, `>= 60%` branches):
+- **State Store (`src/store/projectReducer.ts`)**: 100% line coverage for state actions, financial transfers, and squad mutations.
 - **Timeline Math & Layout**: Automated date boundary calculation, phase detection, and multi-row task collision handling.
 - **AI Service & Providers**: Verification of `buildSystemPrompt`, `getEndpointUrl`, `buildRequestBody`, and response parsers across all providers.
-- **Runtime Validation**: Strict Zod schema tests ensuring type safety for API settings and messages.
-- **Mock Data Integrity**: Domain schema integrity and financial balance validation.
+- **Exporters Engine**: End-to-end testing for Excel spreadsheets (9 worksheets), SteerCo PowerPoint decks, POAP roadmap slides, and Governance Gate decks.
+- **Views & Components**: Interactive testing for all stage-gate views, defect logging, checklist additions, and wizard steps.
 
-Every push and pull request triggers `.github/workflows/ci.yml` to guarantee zero regressions.
+Every push and pull request triggers `.github/workflows/ci.yml` (vulnerability audit, lint, typecheck, coverage tests, and build) to guarantee zero regressions.
 
 ---
 
