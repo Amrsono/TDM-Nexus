@@ -42,13 +42,13 @@ export const ProjectProvider: React.FC<{ children: ReactNode; initialState?: Roo
   );
 
   const sitProgressPercent = useMemo(
-    () => (sitGate ? Math.round((sitGate.passed / (sitGate.total || 1)) * 100) : 85),
+    () => (sitGate ? Math.round((sitGate.passed / (sitGate.totalTests || 1)) * 100) : 85),
     [sitGate]
   );
 
   const checklistPercent = useMemo(() => {
     if (state.checklist.length === 0) return 0;
-    const completed = state.checklist.filter((c) => c.status === 'Completed' || c.status === 'Signed-Off').length;
+    const completed = state.checklist.filter((c) => c.checked).length;
     return Math.round((completed / state.checklist.length) * 100);
   }, [state.checklist]);
 
@@ -68,11 +68,16 @@ export const ProjectProvider: React.FC<{ children: ReactNode; initialState?: Roo
       risks: state.risks,
       checklist: state.checklist,
       hypercare: state.hypercare,
+      poapData: state.poapData,
+      governanceGates: state.governanceGates,
+      piWizardData: state.piWizardData,
+      walkthroughData: state.walkthroughData,
+      ragStatus,
       budgetProgressPercent,
       sitProgressPercent,
-      ragStatus,
+      checklistPercent,
     }),
-    [state, budgetProgressPercent, sitProgressPercent, ragStatus]
+    [state, ragStatus, budgetProgressPercent, sitProgressPercent, checklistPercent]
   );
 
   const value = useMemo(
