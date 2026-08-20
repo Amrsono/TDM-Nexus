@@ -14,6 +14,7 @@ export function Settings({ theme, setTheme }: SettingsProps) {
   const [localSettings, setLocalSettings] = useState(settings);
   const [showApiKey, setShowApiKey] = useState(false);
   const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+  const [testError, setTestError] = useState<string>('');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saved'>('idle');
 
   React.useEffect(() => {
@@ -28,6 +29,7 @@ export function Settings({ theme, setTheme }: SettingsProps) {
 
   const handleTestConnection = async () => {
     setTestStatus('testing');
+    setTestError('');
     try {
       let url: string;
       let headers: Record<string, string> = {};
@@ -50,16 +52,26 @@ export function Settings({ theme, setTheme }: SettingsProps) {
         headers = { 'Authorization': `Bearer ${localSettings.apiKey}` };
       }
 
-      if (!url) throw new Error('No URL configured');
+      if (!url) throw new Error('No endpoint URL configured for provider');
 
       const response = await fetch(url, { method: 'GET', headers });
       if (response.ok) {
         setTestStatus('success');
       } else {
+        let errorDetail = `HTTP ${response.status}: ${response.statusText}`;
+        try {
+          const body = await response.json();
+          if (body?.error?.message) errorDetail = body.error.message;
+        } catch {
+          // ignore
+        }
         setTestStatus('error');
+        setTestError(errorDetail);
       }
-    } catch (error) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown network or configuration error';
       setTestStatus('error');
+      setTestError(msg);
     }
   };
 
@@ -247,7 +259,11 @@ export function Settings({ theme, setTheme }: SettingsProps) {
                       {testStatus === 'testing' ? 'Testing...' : 'Test Connection'}
                     </button>
                     {testStatus === 'success' && <span style={{ color: 'var(--color-green)' }}>Connection Successful!</span>}
-                    {testStatus === 'error' && <span style={{ color: 'var(--color-red)' }}>Connection Failed. Check URL and Key.</span>}
+                    {testStatus === 'error' && (
+                      <span style={{ color: 'var(--color-red)' }} data-testid="test-error-message">
+                        Connection Failed: {testError || 'Check URL and Key.'}
+                      </span>
+                    )}
                   </div>
                 </div>
               )}

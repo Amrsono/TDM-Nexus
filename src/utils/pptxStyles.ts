@@ -28,24 +28,24 @@ export const getRagHex = (val: string): string => {
 
 export const addSlideHeader = (slide: pptxgen.Slide, title: string, slideNum?: number) => {
   slide.background = { color: VF_WHITE };
-  slide.addShape(pptxgen.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 0.08, fill: { color: VF_RED } });
+  slide.addShape('rect', { x: 0, y: 0, w: '100%', h: 0.08, fill: { color: VF_RED } });
   slide.addText(title, {
     x: 0.5, y: 0.2, w: 10.0, h: 0.6,
     fontSize: 24, bold: true, color: VF_AUBERGINE, fontFace: VF_FONT,
   });
-  slide.addShape(pptxgen.ShapeType.rect, { x: 0.5, y: 0.85, w: 1.5, h: 0.04, fill: { color: VF_RED } });
-  slide.addShape(pptxgen.ShapeType.rect, { x: 0, y: 7.3, w: '100%', h: 0.2, fill: { color: VF_AUBERGINE } });
+  slide.addShape('rect', { x: 0.5, y: 0.85, w: 1.5, h: 0.04, fill: { color: VF_RED } });
+  slide.addShape('rect', { x: 0, y: 7.3, w: '100%', h: 0.2, fill: { color: VF_AUBERGINE } });
   slide.addText('TDM NEXUS  •  Steering Committee Report', {
     x: 0.3, y: 7.32, w: 8.0, h: 0.15, fontSize: 7, color: VF_GRAY_MID, fontFace: VF_FONT,
   });
   const badgeX = slideNum !== undefined ? 11.3 : 12.0;
-  slide.addShape(pptxgen.ShapeType.rect, { x: badgeX, y: 7.05, w: 1.3, h: 0.4, fill: { color: VF_RED } });
+  slide.addShape('rect', { x: badgeX, y: 7.05, w: 1.3, h: 0.4, fill: { color: VF_RED } });
   slide.addText('VOIS', {
     x: badgeX, y: 7.05, w: 1.3, h: 0.4, fontSize: 9, bold: true,
     color: VF_WHITE, fontFace: VF_FONT, align: 'center', valign: 'middle',
   });
   if (slideNum !== undefined) {
-    slide.addShape(pptxgen.ShapeType.rect, { x: 12.7, y: 7.05, w: 0.6, h: 0.4, fill: { color: VF_AUBERGINE } });
+    slide.addShape('rect', { x: 12.7, y: 7.05, w: 0.6, h: 0.4, fill: { color: VF_AUBERGINE } });
     slide.addText(slideNum.toString(), {
       x: 12.7, y: 7.05, w: 0.6, h: 0.4, fontSize: 14, bold: true,
       color: VF_WHITE, fontFace: VF_FONT, align: 'center', valign: 'middle',
