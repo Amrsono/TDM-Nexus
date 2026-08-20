@@ -327,5 +327,52 @@ describe('aiService - Provider Logic and Prompt Construction', () => {
       const result = await generateReportAnalytics(mockProjectState, 'ppt', onlineSettings);
       expect(result).toBe('Structured SteerCo executive analysis.');
     });
+
+    it('executeAIRequest returns typed Result with ok: true on success and ok: false on error', async () => {
+      const { executeAIRequest } = await import('./aiService');
+      const validSettings: AISettings = {
+        enabled: true,
+        provider: 'openai',
+        apiKey: 'sk-test',
+        model: 'gpt-4o',
+        temperature: 0.3,
+        maxTokens: 100,
+      };
+
+      // Success
+      globalThis.fetch = vi.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ choices: [{ message: { content: 'AI Output' } }] }),
+      } as unknown as Response);
+
+      const successRes = await executeAIRequest(validSettings, [{ role: 'user', content: 'hi' }]);
+      expect(successRes.ok).toBe(true);
+      if (successRes.ok) {
+        expect(successRes.data).toBe('AI Output');
+      }
+
+      // 401 Auth Error
+      globalThis.fetch = vi.fn().mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        statusText: 'Unauthorized',
+        json: async () => ({ error: { message: 'Invalid API key' } }),
+      } as unknown as Response);
+
+      const authErrRes = await executeAIRequest(validSettings, [{ role: 'user', content: 'hi' }]);
+      expect(authErrRes.ok).toBe(false);
+      if (!authErrRes.ok) {
+        expect(authErrRes.error.code).toBe('AUTH_ERROR');
+        expect(authErrRes.error.friendlyMessage).toContain('Authentication failed');
+      }
+
+      // Network crash
+      globalThis.fetch = vi.fn().mockRejectedValueOnce(new Error('Connection timed out'));
+      const netErrRes = await executeAIRequest(validSettings, [{ role: 'user', content: 'hi' }]);
+      expect(netErrRes.ok).toBe(false);
+      if (!netErrRes.ok) {
+        expect(netErrRes.error.code).toBe('NETWORK_ERROR');
+      }
+    });
   });
 });

@@ -1,6 +1,164 @@
 import { PhaseId } from '../App';
 import { ProjectState, AISettings, AISuggestion, AIMessage } from '../context/AIAssistantContext';
 import { safeValidateAISettings } from './aiValidation';
+import { logger } from './logger';
+
+// ─── Result Pattern & Types ───────────────────────────────────────────────────
+
+export type Result<T, E = Error> =
+  | { ok: true; data: T }
+  | { ok: false; error: E };
+
+export interface AIError {
+  code: string;
+  message: string;
+  statusCode?: number;
+  friendlyMessage: string;
+}
+
+export type AIResult<T> = Result<T, AIError>;
+
+export interface OpenAIMessage {
+  role: string;
+  content: string;
+}
+
+// ─── AI Provider Registry / Adapters ──────────────────────────────────────────
+
+export interface AIProviderAdapter {
+  id: AISettings['provider'];
+  name: string;
+  defaultModel: string;
+  getEndpoint: (settings: AISettings) => string;
+  getHeaders: (settings: AISettings) => Record<string, string>;
+  formatRequestBody: (
+    settings: AISettings,
+    messages: OpenAIMessage[],
+    opts?: { jsonMode?: boolean }
+  ) => Record<string, unknown>;
+  extractText: (data: Record<string, unknown>) => string;
+}
+
+export const AI_PROVIDERS: Record<AISettings['provider'], AIProviderAdapter> = {
+  gemini: {
+    id: 'gemini',
+    name: 'Google Gemini',
+    defaultModel: 'gemini-2.0-flash',
+    getEndpoint: (settings) =>
+      `https://generativelanguage.googleapis.com/v1beta/models/${settings.model}:generateContent?key=${settings.apiKey}`,
+    getHeaders: () => ({ 'Content-Type': 'application/json' }),
+    formatRequestBody: (settings, messages, opts) => {
+      const systemMsg = messages.find((m) => m.role === 'system');
+      const userMessages = messages.filter((m) => m.role !== 'system');
+      return {
+        system_instruction: systemMsg ? { parts: [{ text: systemMsg.content }] } : undefined,
+        contents: userMessages.map((m) => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }],
+        })),
+        generationConfig: {
+          temperature: settings.temperature,
+          maxOutputTokens: settings.maxTokens,
+          ...(opts?.jsonMode ? { responseMimeType: 'application/json' } : {}),
+        },
+      };
+    },
+    extractText: (data) => {
+      const candidates = data.candidates as Array<{ content: { parts: Array<{ text: string }> } }> | undefined;
+      return candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    },
+  },
+  openai: {
+    id: 'openai',
+    name: 'OpenAI',
+    defaultModel: 'gpt-4o',
+    getEndpoint: (settings) => settings.baseUrl || 'https://api.openai.com/v1/chat/completions',
+    getHeaders: (settings) => ({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${settings.apiKey}`,
+    }),
+    formatRequestBody: (settings, messages, opts) => ({
+      model: settings.model,
+      messages,
+      temperature: settings.temperature,
+      max_tokens: settings.maxTokens,
+      ...(opts?.jsonMode ? { response_format: { type: 'json_object' } } : {}),
+    }),
+    extractText: (data) => {
+      const choices = data.choices as Array<{ message: { content: string } }> | undefined;
+      return choices?.[0]?.message?.content ?? '';
+    },
+  },
+  anthropic: {
+    id: 'anthropic',
+    name: 'Anthropic Claude',
+    defaultModel: 'claude-3-5-sonnet-20240620',
+    getEndpoint: (settings) => settings.baseUrl || 'https://api.anthropic.com/v1/messages',
+    getHeaders: (settings) => ({
+      'Content-Type': 'application/json',
+      'x-api-key': settings.apiKey,
+      'anthropic-version': '2023-06-01',
+    }),
+    formatRequestBody: (settings, messages) => {
+      const systemMsg = messages.find((m) => m.role === 'system');
+      const userMessages = messages.filter((m) => m.role !== 'system');
+      return {
+        model: settings.model,
+        max_tokens: settings.maxTokens,
+        ...(systemMsg ? { system: systemMsg.content } : {}),
+        messages: userMessages.map((m) => ({ role: m.role, content: m.content })),
+      };
+    },
+    extractText: (data) => {
+      const content = data.content as Array<{ text: string }> | undefined;
+      return content?.[0]?.text ?? '';
+    },
+  },
+  copilot: {
+    id: 'copilot',
+    name: 'GitHub Copilot',
+    defaultModel: 'gpt-4o',
+    getEndpoint: (settings) => settings.baseUrl || 'https://api.githubcopilot.com/chat/completions',
+    getHeaders: (settings) => ({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${settings.apiKey}`,
+    }),
+    formatRequestBody: (settings, messages, opts) => ({
+      model: settings.model,
+      messages,
+      temperature: settings.temperature,
+      max_tokens: settings.maxTokens,
+      ...(opts?.jsonMode ? { response_format: { type: 'json_object' } } : {}),
+    }),
+    extractText: (data) => {
+      const choices = data.choices as Array<{ message: { content: string } }> | undefined;
+      return choices?.[0]?.message?.content ?? '';
+    },
+  },
+  custom: {
+    id: 'custom',
+    name: 'Custom Endpoint',
+    defaultModel: 'gpt-4o',
+    getEndpoint: (settings) => settings.baseUrl || '',
+    getHeaders: (settings) => ({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${settings.apiKey}`,
+    }),
+    formatRequestBody: (settings, messages, opts) => ({
+      model: settings.model,
+      messages,
+      temperature: settings.temperature,
+      max_tokens: settings.maxTokens,
+      ...(opts?.jsonMode ? { response_format: { type: 'json_object' } } : {}),
+    }),
+    extractText: (data) => {
+      const choices = data.choices as Array<{ message: { content: string } }> | undefined;
+      return choices?.[0]?.message?.content ?? '';
+    },
+  },
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 export const buildSystemPrompt = (projectState: ProjectState, activePhase: PhaseId): string => {
   return `You are the TDM Nexus AI Assistant, an expert project manager and digital delivery expert for VOIS.
@@ -43,7 +201,7 @@ export const getOfflineSuggestions = (projectState: ProjectState, activePhase: P
     });
   }
 
-  const p1Defects = projectState.defects.filter(d => d.severity === 'P1' && d.status !== 'Closed');
+  const p1Defects = projectState.defects.filter((d) => d.severity === 'P1' && d.status !== 'Closed');
   if (p1Defects.length > 0) {
     suggestions.push({
       id: 's3',
@@ -69,46 +227,14 @@ export const getOfflineSuggestions = (projectState: ProjectState, activePhase: P
   return suggestions;
 };
 
-// ─── Provider-specific helpers ───────────────────────────────────────────────
-
 export function getEndpointUrl(settings: AISettings): string {
-  if (settings.baseUrl && settings.provider === 'custom') {
-    return settings.baseUrl;
-  }
-
-  switch (settings.provider) {
-    case 'gemini':
-      return `https://generativelanguage.googleapis.com/v1beta/models/${settings.model}:generateContent?key=${settings.apiKey}`;
-    case 'anthropic':
-      return 'https://api.anthropic.com/v1/messages';
-    case 'copilot':
-      return settings.baseUrl || 'https://api.githubcopilot.com/chat/completions';
-    case 'custom':
-      return settings.baseUrl || '';
-    case 'openai':
-    default:
-      return 'https://api.openai.com/v1/chat/completions';
-  }
+  const adapter = AI_PROVIDERS[settings.provider] || AI_PROVIDERS.openai;
+  return adapter.getEndpoint(settings);
 }
 
 export function getRequestHeaders(settings: AISettings): Record<string, string> {
-  const base: Record<string, string> = { 'Content-Type': 'application/json' };
-  switch (settings.provider) {
-    case 'gemini':
-      return base;
-    case 'anthropic':
-      return { ...base, 'x-api-key': settings.apiKey, 'anthropic-version': '2023-06-01' };
-    case 'copilot':
-    case 'openai':
-    case 'custom':
-    default:
-      return { ...base, 'Authorization': `Bearer ${settings.apiKey}` };
-  }
-}
-
-export interface OpenAIMessage {
-  role: string;
-  content: string;
+  const adapter = AI_PROVIDERS[settings.provider] || AI_PROVIDERS.openai;
+  return adapter.getHeaders(settings);
 }
 
 export function buildRequestBody(
@@ -116,146 +242,155 @@ export function buildRequestBody(
   messages: OpenAIMessage[],
   opts: { jsonMode?: boolean } = {}
 ): Record<string, unknown> {
-  switch (settings.provider) {
-    case 'gemini': {
-      const systemMsg = messages.find(m => m.role === 'system');
-      const userMessages = messages.filter(m => m.role !== 'system');
-      return {
-        system_instruction: systemMsg ? { parts: [{ text: systemMsg.content }] } : undefined,
-        contents: userMessages.map(m => ({
-          role: m.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: m.content }],
-        })),
-        generationConfig: {
-          temperature: settings.temperature,
-          maxOutputTokens: settings.maxTokens,
-          ...(opts.jsonMode ? { responseMimeType: 'application/json' } : {}),
-        },
-      };
-    }
-    case 'anthropic': {
-      const systemMsg = messages.find(m => m.role === 'system');
-      const userMessages = messages.filter(m => m.role !== 'system');
-      return {
-        model: settings.model,
-        max_tokens: settings.maxTokens,
-        ...(systemMsg ? { system: systemMsg.content } : {}),
-        messages: userMessages.map(m => ({ role: m.role, content: m.content })),
-      };
-    }
-    case 'copilot':
-    case 'openai':
-    case 'custom':
-    default:
-      return {
-        model: settings.model,
-        messages,
-        temperature: settings.temperature,
-        max_tokens: settings.maxTokens,
-        ...(opts.jsonMode ? { response_format: { type: 'json_object' } } : {}),
-      };
-  }
+  const adapter = AI_PROVIDERS[settings.provider] || AI_PROVIDERS.openai;
+  return adapter.formatRequestBody(settings, messages, opts);
 }
 
 export function extractTextFromResponse(settings: AISettings, data: Record<string, unknown>): string {
-  switch (settings.provider) {
-    case 'gemini': {
-      const candidates = data.candidates as Array<{ content: { parts: Array<{ text: string }> } }>;
-      return candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-    }
-    case 'anthropic': {
-      const content = data.content as Array<{ text: string }>;
-      return content?.[0]?.text ?? '';
-    }
-    case 'copilot':
-    case 'openai':
-    case 'custom':
-    default: {
-      const choices = data.choices as Array<{ message: { content: string } }>;
-      return choices?.[0]?.message?.content ?? '';
-    }
-  }
+  const adapter = AI_PROVIDERS[settings.provider] || AI_PROVIDERS.openai;
+  return adapter.extractText(data);
 }
 
-// ─── Error helpers ────────────────────────────────────────────────────────────
-
-async function parseFriendlyError(response: Response, provider: AISettings['provider']): Promise<string> {
+async function parseFriendlyError(response: Response, provider: AISettings['provider']): Promise<AIError> {
   let body: Record<string, unknown> = {};
-  try { body = await response.json(); } catch { /* ignore parse errors */ }
+  try {
+    body = await response.json();
+  } catch {
+    /* ignore parse errors */
+  }
 
   const status = response.status;
   const rawMessage: string =
-    (body?.error as Record<string, unknown>)?.message as string ||
+    ((body?.error as Record<string, unknown>)?.message as string) ||
     (body?.message as string) ||
     response.statusText ||
     'Unknown error';
 
+  let friendlyMessage = `API Error ${status}: ${rawMessage}`;
+  let code = `HTTP_${status}`;
+
   if (status === 429) {
+    code = 'RATE_LIMITED';
     const retryMatch = rawMessage.match(/(\d+(\.\d+)?)s/);
     const retryHint = retryMatch ? ` Retry in ~${Math.ceil(Number(retryMatch[1]))} seconds.` : '';
 
     if (rawMessage.includes('free_tier') || rawMessage.includes('FreeTier') || rawMessage.includes('limit: 0')) {
-      return `⚠️ Gemini free-tier quota exhausted.${retryHint} To fix this: enable billing at https://aistudio.google.com/ or switch to a different model in Settings.`;
+      friendlyMessage = `⚠️ Gemini free-tier quota exhausted.${retryHint} To fix this: enable billing at https://aistudio.google.com/ or switch to a different model in Settings.`;
+    } else {
+      friendlyMessage = `⚠️ Rate limit reached.${retryHint} Please wait before sending another message.`;
     }
-    return `⚠️ Rate limit reached.${retryHint} Please wait before sending another message.`;
-  }
-
-  if (status === 401 || status === 403) {
-    return `🔑 Authentication failed (${status}). Please check your API key in Settings — it may be invalid or expired.`;
-  }
-
-  if (status === 404) {
+  } else if (status === 401 || status === 403) {
+    code = 'AUTH_ERROR';
+    friendlyMessage = `🔑 Authentication failed (${status}). Please check your API key in Settings — it may be invalid or expired.`;
+  } else if (status === 404) {
+    code = 'NOT_FOUND';
     const modelHint = provider === 'gemini' ? ' Try selecting a different Gemini model in Settings.' : '';
-    return `❌ Model or endpoint not found (404).${modelHint}`;
+    friendlyMessage = `❌ Model or endpoint not found (404).${modelHint}`;
+  } else if (status >= 500) {
+    code = 'SERVER_ERROR';
+    friendlyMessage = `🔥 The ${provider} API returned a server error (${status}). This is likely temporary — please try again shortly.`;
   }
 
-  if (status >= 500) {
-    return `🔥 The ${provider} API returned a server error (${status}). This is likely temporary — please try again shortly.`;
-  }
-
-  const trimmed = rawMessage.length > 200 ? rawMessage.slice(0, 200) + '…' : rawMessage;
-  return `API Error ${status}: ${trimmed}`;
+  return {
+    code,
+    message: rawMessage,
+    statusCode: status,
+    friendlyMessage,
+  };
 }
 
-// ─── Public API ───────────────────────────────────────────────────────────────
+// ─── Centralized Request Executor ─────────────────────────────────────────────
+
+export async function executeAIRequest(
+  settings: AISettings,
+  messages: OpenAIMessage[],
+  opts: { jsonMode?: boolean } = {}
+): Promise<AIResult<string>> {
+  const validated = safeValidateAISettings(settings);
+  if (!validated.success || !settings.apiKey) {
+    return {
+      ok: false,
+      error: {
+        code: 'MISSING_CONFIG',
+        message: 'AI Provider is not configured with a valid API key.',
+        friendlyMessage: 'Offline Mode: Please configure an API key in Settings.',
+      },
+    };
+  }
+
+  const adapter = AI_PROVIDERS[settings.provider] || AI_PROVIDERS.openai;
+  const url = adapter.getEndpoint(settings);
+  if (!url) {
+    return {
+      ok: false,
+      error: {
+        code: 'MISSING_URL',
+        message: 'Endpoint URL could not be resolved.',
+        friendlyMessage: 'Configuration Error: Missing endpoint URL.',
+      },
+    };
+  }
+
+  try {
+    logger.debug('AIService', `Executing AI request via ${settings.provider}`, { model: settings.model });
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: adapter.getHeaders(settings),
+      body: JSON.stringify(adapter.formatRequestBody(settings, messages, opts)),
+    });
+
+    if (!response.ok) {
+      const err = await parseFriendlyError(response, settings.provider);
+      logger.warn('AIService', `AI Request failed with status ${response.status}`, err);
+      return { ok: false, error: err };
+    }
+
+    const data = await response.json();
+    const text = adapter.extractText(data);
+    return { ok: true, data: text };
+  } catch (error) {
+    const errorObj = error instanceof Error ? error : new Error(String(error));
+    logger.error('AIService', 'Network or runtime error during AI call', errorObj);
+    return {
+      ok: false,
+      error: {
+        code: 'NETWORK_ERROR',
+        message: errorObj.message,
+        friendlyMessage: `Failed to connect to ${settings.provider}: ${errorObj.message}`,
+      },
+    };
+  }
+}
+
+// ─── Public Workflows ─────────────────────────────────────────────────────────
 
 export const getNextBestActions = async (
   projectState: ProjectState,
   activePhase: PhaseId,
   settings: AISettings
 ): Promise<AISuggestion[]> => {
-  const validated = safeValidateAISettings(settings);
-  if (!validated.success || !settings.apiKey) {
+  const result = await executeAIRequest(
+    settings,
+    [
+      { role: 'system', content: buildSystemPrompt(projectState, activePhase) },
+      {
+        role: 'user',
+        content:
+          'Generate 3 next best actions based on the current project state. Return ONLY a JSON array of objects with keys: id, type (action/warning/insight/optimization), title, description, priority (high/medium/low), relatedTab.',
+      },
+    ],
+    { jsonMode: true }
+  );
+
+  if (!result.ok) {
     return getOfflineSuggestions(projectState, activePhase);
   }
 
   try {
-    const systemPrompt = buildSystemPrompt(projectState, activePhase);
-    const url = getEndpointUrl(settings);
-    if (!url) return getOfflineSuggestions(projectState, activePhase);
-
-    const messages: OpenAIMessage[] = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: 'Generate 3 next best actions based on the current project state. Return ONLY a JSON array of objects with keys: id, type (action/warning/insight/optimization), title, description, priority (high/medium/low), relatedTab.' },
-    ];
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: getRequestHeaders(settings),
-      body: JSON.stringify(buildRequestBody(settings, messages, { jsonMode: true })),
-    });
-
-    if (!response.ok) {
-      console.warn('API error, falling back to offline suggestions', await response.text());
-      return getOfflineSuggestions(projectState, activePhase);
-    }
-
-    const data = await response.json();
-    const resultContent = extractTextFromResponse(settings, data);
-    const parsed = JSON.parse(resultContent);
-    return Array.isArray(parsed) ? parsed : (parsed.suggestions || getOfflineSuggestions(projectState, activePhase));
-  } catch (error) {
-    console.error('Error fetching suggestions:', error);
+    const cleanText = result.data.replace(/```json\n?|\n?```/g, '').trim();
+    return JSON.parse(cleanText) as AISuggestion[];
+  } catch (err) {
+    logger.warn('AIService', 'JSON parse failure for next best actions, falling back to offline suggestions', err);
     return getOfflineSuggestions(projectState, activePhase);
   }
 };
@@ -265,261 +400,107 @@ export const chat = async (
   projectState: ProjectState,
   activePhase: PhaseId,
   settings: AISettings
-): Promise<AIMessage> => {
-  const validated = safeValidateAISettings(settings);
-  if (!validated.success || !settings.apiKey) {
-    return {
-      id: Math.random().toString(36).substring(2, 9),
-      role: 'assistant',
-      content: 'I am currently in offline mode. Please configure an API key in the Settings tab to enable full chat functionality. In the meantime, I can still provide rule-based suggestions!',
-      timestamp: new Date(),
-    };
+): Promise<string> => {
+  const systemPrompt = buildSystemPrompt(projectState, activePhase);
+  const apiMessages: OpenAIMessage[] = [
+    { role: 'system', content: systemPrompt },
+    ...messages.slice(-10).map((m) => ({ role: m.role, content: m.content })),
+  ];
+
+  const result = await executeAIRequest(settings, apiMessages);
+  if (result.ok) {
+    return result.data;
   }
 
-  try {
-    const systemPrompt = buildSystemPrompt(projectState, activePhase);
-    const url = getEndpointUrl(settings);
-    if (!url) throw new Error('Missing API URL');
-
-    const apiMessages: OpenAIMessage[] = [
-      { role: 'system', content: systemPrompt },
-      ...messages.filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.content })),
-    ];
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: getRequestHeaders(settings),
-      body: JSON.stringify(buildRequestBody(settings, apiMessages)),
-    });
-
-    if (!response.ok) {
-      const friendlyError = await parseFriendlyError(response, settings.provider);
-      throw new Error(friendlyError);
-    }
-
-    const data = await response.json();
-    return {
-      id: Math.random().toString(36).substring(2, 9),
-      role: 'assistant',
-      content: extractTextFromResponse(settings, data),
-      timestamp: new Date(),
-    };
-  } catch (error) {
-    return {
-      id: Math.random().toString(36).substring(2, 9),
-      role: 'system',
-      content: `Failed to connect to AI: ${error instanceof Error ? error.message : String(error)}`,
-      timestamp: new Date(),
-    };
+  if (result.error.code === 'MISSING_CONFIG') {
+    return `Offline Mode: You asked "${messages[messages.length - 1]?.content}". Overall Health is ${projectState.ragStatus.overall}. (${projectState.budgetProgressPercent}% budget used, ${projectState.sitProgressPercent}% SIT pass rate). Configure an API key in Settings for AI responses.`;
   }
+
+  return result.error.friendlyMessage;
 };
 
-export const getProjectHealthSummary = async (projectState: ProjectState, settings: AISettings): Promise<string> => {
-  if (!settings.apiKey) {
-    return `Project Health is ${projectState.ragStatus.overall}. Schedule is ${projectState.ragStatus.schedule} and Budget is ${projectState.ragStatus.budget}. You have used ${projectState.budgetProgressPercent}% of your budget and SIT pass rate is ${projectState.sitProgressPercent}%.`;
-  }
-
-  try {
-    const url = getEndpointUrl(settings);
-    if (!url) throw new Error('Missing API URL');
-
-    const prompt = `Provide a concise 2-sentence executive summary of the project health based on the following:
-Overall RAG: ${projectState.ragStatus.overall} (Schedule: ${projectState.ragStatus.schedule}, Budget: ${projectState.ragStatus.budget})
-Budget Used: ${projectState.budgetProgressPercent}%
-SIT Pass Rate: ${projectState.sitProgressPercent}%
-Open High Defects: ${projectState.defects.filter(d => (d.severity === 'P1' || d.severity === 'P2') && d.status !== 'Closed').length}`;
-
-    const apiMessages: OpenAIMessage[] = [
-      { role: 'system', content: `You are a project manager. Summarize health concisely. The current date is ${new Date().toLocaleDateString()}.` },
-      { role: 'user', content: prompt },
-    ];
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: getRequestHeaders(settings),
-      body: JSON.stringify(buildRequestBody(settings, apiMessages)),
-    });
-
-    if (!response.ok) {
-      return `Overall Health is ${projectState.ragStatus.overall}. Schedule: ${projectState.ragStatus.schedule}, Budget: ${projectState.ragStatus.budget}. (${projectState.budgetProgressPercent}% budget used, ${projectState.sitProgressPercent}% SIT pass rate)`;
-    }
-
-    const data = await response.json();
-    return extractTextFromResponse(settings, data);
-  } catch (_error) {
-    return `Overall Health is ${projectState.ragStatus.overall}. Schedule: ${projectState.ragStatus.schedule}, Budget: ${projectState.ragStatus.budget}. (${projectState.budgetProgressPercent}% budget used, ${projectState.sitProgressPercent}% SIT pass rate)`;
-  }
-};
-
-export const generateReportAnalytics = async (projectState: ProjectState, reportType: 'ppt' | 'excel', settings?: AISettings): Promise<string> => {
+export const generateReportAnalytics = async (
+  projectState: ProjectState,
+  reportType: 'ppt' | 'excel',
+  settings?: AISettings
+): Promise<string> => {
   if (!settings || !settings.apiKey) {
     return 'Offline Analysis: Project is tracking to overall RAG status. Please configure an AI provider for deep analytics.';
   }
 
-  try {
-    const url = getEndpointUrl(settings);
-    if (!url) throw new Error('Missing API URL');
+  const openDefects = projectState.defects.filter((d) => d.status !== 'Closed');
+  const openRisks = projectState.risks.filter((r) => r.status === 'Open');
 
-    const openDefects = projectState.defects.filter(d => d.status !== 'Closed');
-    const openRisks = projectState.risks.filter(r => r.status === 'Open');
-
-    const projectSummaryPrompt = `You are a project management executive at VOIS. Provide a detailed, professional AI analysis and executive recommendation summary for the project based on the following metrics:
-- Overall Health RAG: ${projectState.ragStatus.overall} (Schedule: ${projectState.ragStatus.schedule}, Budget: ${projectState.ragStatus.budget}, Scope: ${projectState.ragStatus.scope}, Quality: ${projectState.ragStatus.quality})
-- Budget Progress: ${projectState.budgetProgressPercent}% consumed of CAPEX: $${projectState.financials.capexLimit} / OPEX: $${projectState.financials.opexLimit} (Total Spent: $${projectState.financials.totalSpent})
+  const prompt = `You are a project management executive at VOIS. Provide a detailed, professional AI analysis and executive recommendation summary:
+- Overall Health RAG: ${projectState.ragStatus.overall} (Schedule: ${projectState.ragStatus.schedule}, Budget: ${projectState.ragStatus.budget})
+- Budget Progress: ${projectState.budgetProgressPercent}% of CAPEX: $${projectState.financials.capexLimit} / OPEX: $${projectState.financials.opexLimit}
 - QA SIT Pass Rate: ${projectState.sitProgressPercent}%
-- Open Defects count: ${openDefects.length} (P1/P2 high severity count: ${openDefects.filter(d => d.severity === 'P1' || d.severity === 'P2').length})
+- Open Defects: ${openDefects.length}
 - Open Risks: ${openRisks.length}
-- Governance Gate Completion: ${projectState.checklistPercent}%
 
-Write a structured analysis for a ${reportType === 'excel' ? 'spreadsheet report tab' : 'SteerCo deck slide'}, including:
-1. Executive Summary: High-level overview of health, delivery risks, and progress.
-2. Financial Health: Budget consumption analysis and outlook.
-3. Quality & Testing: SIT pass rate assessment and defect remediation.
-4. Key Recommendations: 3 concrete next best actions to mitigate risks and ensure gate approvals.
+Format for a ${reportType === 'excel' ? 'spreadsheet report tab' : 'SteerCo deck slide'}.`;
 
-Keep the tone professional, objective, and action-oriented. Format the response as clean plain text with structured sections (do not wrap in markdown block code formatting).`;
+  const result = await executeAIRequest(settings, [
+    { role: 'system', content: `You are an executive project management assistant. Current date: ${new Date().toLocaleDateString()}.` },
+    { role: 'user', content: prompt },
+  ]);
 
-    const apiMessages: OpenAIMessage[] = [
-      { role: 'system', content: `You are an executive project management assistant. Generate clear, structured reports. The current date is ${new Date().toLocaleDateString()}.` },
-      { role: 'user', content: projectSummaryPrompt },
-    ];
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: getRequestHeaders(settings),
-      body: JSON.stringify(buildRequestBody(settings, apiMessages)),
-    });
-
-    if (!response.ok) {
-      const friendlyError = await parseFriendlyError(response, settings.provider);
-      return `Failed to generate AI Analysis: ${friendlyError}`;
-    }
-
-    const data = await response.json();
-    return extractTextFromResponse(settings, data);
-  } catch (error) {
-    console.error('Error generating report analytics:', error);
-    return `Failed to generate AI Analysis: ${error instanceof Error ? error.message : String(error)}`;
-  }
+  return result.ok ? result.data : `Failed to generate AI Analysis: ${result.error.friendlyMessage}`;
 };
 
-export const generatePredictiveAnalytics = async (projectState: ProjectState, settings: AISettings): Promise<string> => {
+export const generatePredictiveAnalytics = async (
+  projectState: ProjectState,
+  settings: AISettings
+): Promise<string> => {
   if (!settings.apiKey) {
-    return "Offline Mode: Predictive Analytics requires an active AI provider. Based on current data, your project budget is " + projectState.budgetProgressPercent + "% consumed, and SIT pass rate is " + projectState.sitProgressPercent + "%. Watch out for scope creep if defect rates increase.";
+    return `Offline Mode: Predictive Analytics requires an active AI provider. Based on current data, your project budget is ${projectState.budgetProgressPercent}% consumed, and SIT pass rate is ${projectState.sitProgressPercent}%.`;
   }
 
-  try {
-    const url = getEndpointUrl(settings);
-    if (!url) throw new Error('Missing API URL');
+  const prompt = `You are a specialized AI Project Management Risk Assessor for VOIS:
+- RAG: ${projectState.ragStatus.overall}
+- Financials: Spent $${projectState.financials.totalSpent}
+- Quality: SIT Pass Rate ${projectState.sitProgressPercent}%`;
 
-    const prompt = `You are a specialized AI Project Management Risk Assessor for VOIS. Perform a Predictive Analytics sweep:
-- RAG: ${projectState.ragStatus.overall} (Schedule: ${projectState.ragStatus.schedule}, Budget: ${projectState.ragStatus.budget})
-- Financials: Spent $${projectState.financials.totalSpent} / Limits $${projectState.financials.capexLimit + projectState.financials.opexLimit}
-- Quality: SIT Pass Rate ${projectState.sitProgressPercent}%
-- Open Risks: ${projectState.risks.filter(r => r.status === 'Open').length}
+  const result = await executeAIRequest(settings, [
+    { role: 'system', content: 'You are an AI predictive risk analysis system.' },
+    { role: 'user', content: prompt },
+  ]);
 
-Identify:
-1. Potential project delays based on QA performance.
-2. Forecasted budget overruns based on current burn rate.
-3. Resource bottlenecks.
-4. Scope creep and sequencing conflicts.`;
-
-    const apiMessages: OpenAIMessage[] = [
-      { role: 'system', content: `You are an AI predictive risk analysis system for enterprise project management. The current date is ${new Date().toLocaleDateString()}.` },
-      { role: 'user', content: prompt }
-    ];
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: getRequestHeaders(settings),
-      body: JSON.stringify(buildRequestBody(settings, apiMessages))
-    });
-
-    if (!response.ok) {
-      const friendlyError = await parseFriendlyError(response, settings.provider);
-      return `Failed to generate Predictive Analytics: ${friendlyError}`;
-    }
-
-    const data = await response.json();
-    return extractTextFromResponse(settings, data);
-  } catch (error) {
-    return `Failed to run Predictive Analytics: ${error instanceof Error ? error.message : String(error)}`;
-  }
+  return result.ok ? result.data : `Failed to run Predictive Analytics: ${result.error.friendlyMessage}`;
 };
 
-export const generateSmartSchedule = async (projectState: ProjectState, settings: AISettings): Promise<string> => {
+export const generateSmartSchedule = async (
+  projectState: ProjectState,
+  settings: AISettings
+): Promise<string> => {
   if (!settings.apiKey) {
-    return "Offline Mode: Smart Scheduling requires an active AI provider. Please assign unallocated squad members manually.";
+    return 'Offline Mode: Smart Scheduling requires an active AI provider. Please assign unallocated squad members manually.';
   }
 
-  try {
-    const url = getEndpointUrl(settings);
-    if (!url) throw new Error('Missing API URL');
+  const prompt = `Smart Scheduling AI for VOIS: Squads: ${projectState.squads.map((s) => s.name).join(', ')}`;
+  const result = await executeAIRequest(settings, [
+    { role: 'system', content: 'You are an AI resource allocator.' },
+    { role: 'user', content: prompt },
+  ]);
 
-    const prompt = `You are a Smart Scheduling AI for VOIS. Analyze squad and workload data:
-- Squads: ${projectState.squads.map(s => s.name).join(', ')}
-- Unassigned Work Items: ${projectState.adoWorkItems.filter(w => w.portfolio === 'Unassigned').length}
-- Total Work Items: ${projectState.adoWorkItems.length}
-- Milestones remaining: ${projectState.milestones.filter(m => m.status !== 'Completed').length}
-
-Please generate a smart scheduling proposal:
-1. Workload Rebalancing
-2. Timeline Adjustments
-3. Resource Optimization`;
-
-    const apiMessages: OpenAIMessage[] = [
-      { role: 'system', content: `You are an AI resource allocator. The current date is ${new Date().toLocaleDateString()}.` },
-      { role: 'user', content: prompt }
-    ];
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: getRequestHeaders(settings),
-      body: JSON.stringify(buildRequestBody(settings, apiMessages))
-    });
-
-    if (!response.ok) {
-      const friendlyError = await parseFriendlyError(response, settings.provider);
-      return `Failed to generate Smart Schedule: ${friendlyError}`;
-    }
-
-    const data = await response.json();
-    return extractTextFromResponse(settings, data);
-  } catch (error) {
-    return `Failed to run Smart Scheduling: ${error instanceof Error ? error.message : String(error)}`;
-  }
+  return result.ok ? result.data : `Failed to run Smart Scheduling: ${result.error.friendlyMessage}`;
 };
 
-export const generateDocumentation = async (projectState: ProjectState, docType: string, customPrompt: string, settings: AISettings): Promise<string> => {
+export const generateDocumentation = async (
+  projectState: ProjectState,
+  docType: string,
+  customPrompt: string,
+  settings: AISettings
+): Promise<string> => {
   if (!settings.apiKey) {
-    return "Offline Mode: Documentation generation requires an active AI provider.";
+    return 'Offline Mode: Documentation generation requires an active AI provider.';
   }
 
-  try {
-    const url = getEndpointUrl(settings);
-    if (!url) throw new Error('Missing API URL');
+  const prompt = `Generate a ${docType} based on current project data and prompt: "${customPrompt}"`;
+  const result = await executeAIRequest(settings, [
+    { role: 'system', content: 'You are an AI documentation generator.' },
+    { role: 'user', content: prompt },
+  ]);
 
-    const prompt = `Generate a ${docType} based on current project data and prompt: "${customPrompt}"`;
-
-    const apiMessages: OpenAIMessage[] = [
-      { role: 'system', content: `You are an AI documentation generator. The current date is ${new Date().toLocaleDateString()}.` },
-      { role: 'user', content: prompt }
-    ];
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: getRequestHeaders(settings),
-      body: JSON.stringify(buildRequestBody(settings, apiMessages))
-    });
-
-    if (!response.ok) {
-      const friendlyError = await parseFriendlyError(response, settings.provider);
-      return `Failed to generate Documentation: ${friendlyError}`;
-    }
-
-    const data = await response.json();
-    return extractTextFromResponse(settings, data);
-  } catch (error) {
-    return `Failed to generate Documentation: ${error instanceof Error ? error.message : String(error)}`;
-  }
+  return result.ok ? result.data : `Failed to generate Documentation: ${result.error.friendlyMessage}`;
 };
