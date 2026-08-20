@@ -1,13 +1,13 @@
-import React, { useState, useMemo } from 'react';
-import { 
-  FolderOpen, 
-  Compass, 
-  Wrench, 
-  CircleDollarSign, 
-  Bug, 
-  Scale, 
-  ShieldCheck, 
-  FileSpreadsheet, 
+import React, { useState, useReducer, useMemo } from 'react';
+import {
+  FolderOpen,
+  Compass,
+  Wrench,
+  CircleDollarSign,
+  Bug,
+  Scale,
+  ShieldCheck,
+  FileSpreadsheet,
   Presentation,
   LayoutTemplate,
   Settings as SettingsIcon,
@@ -15,7 +15,7 @@ import {
   ClipboardList,
   BookOpen,
   Menu,
-  X
+  X,
 } from 'lucide-react';
 import { ThreeCanvas } from './components/ThreeCanvas';
 import { FunnelReviewing } from './views/FunnelReviewing';
@@ -35,41 +35,21 @@ import { exportToPPT } from './utils/pptxExporter';
 import { useAIAssistant } from './context/AIAssistantContext';
 import { AIAssistantApplet } from './components/AIAssistantApplet';
 import { generateReportAnalytics } from './utils/aiService';
-import {
-  initialFinancials,
-  initialADOWorkItems,
-  initialSquads,
-  initialMilestones,
-  initialAllocations,
-  initialForecastMonths,
-  initialTransfers,
-  initialQAGates,
-  initialDefects,
-  initialRisks,
-  initialChecklist,
-  initialHypercare,
-  initialPOAPData,
-  ProjectFinancials,
-  ADOWorkItem,
-  PortfolioSquad,
-  Milestone,
-  FinancialAllocation,
-  FundTransfer,
-  QAGate,
-  Defect,
-  RiskIssue,
-  ChecklistItem,
-  HypercareTicket,
-  POAPData,
-  GovernanceGateDetail,
-  initialGovernanceGates,
-  PIWizardData,
-  initialPIWizardData,
-  WalkthroughData,
-  initialWalkthroughData
-} from './utils/mockData';
+import { projectReducer, initialRootProjectState } from './store/projectReducer';
 
-export type PhaseId = 'funnel' | 'analysing' | 'build' | 'finances' | 'testing' | 'releaseplanning' | 'walkthrough' | 'governance' | 'postlaunch' | 'poap' | 'slidebuilder' | 'settings';
+export type PhaseId =
+  | 'funnel'
+  | 'analysing'
+  | 'build'
+  | 'finances'
+  | 'testing'
+  | 'releaseplanning'
+  | 'walkthrough'
+  | 'governance'
+  | 'postlaunch'
+  | 'poap'
+  | 'slidebuilder'
+  | 'settings';
 
 interface PhaseMetadata {
   id: PhaseId;
@@ -84,35 +64,32 @@ export default function App() {
   const [theme, setTheme] = useState<ThemeMode>('dark');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Centralized State Store via useReducer
+  const [state, dispatch] = useReducer(projectReducer, initialRootProjectState);
+
+  const {
+    financials,
+    adoWorkItems,
+    squads,
+    milestones,
+    allocations,
+    transfers,
+    forecastMonths,
+    qaGates,
+    defects,
+    risks,
+    checklist,
+    hypercare,
+    poapData,
+    governanceGates,
+    piWizardData,
+    walkthroughData,
+    ragStatus,
+  } = state;
+
   React.useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
-
-  // Shared Data States
-  const [financials, setFinancials] = useState<ProjectFinancials>(initialFinancials);
-  const [adoWorkItems, setAdoWorkItems] = useState<ADOWorkItem[]>(initialADOWorkItems);
-  const [squads, setSquads] = useState<PortfolioSquad[]>(initialSquads);
-  const [milestones, setMilestones] = useState<Milestone[]>(initialMilestones);
-  const [allocations, setAllocations] = useState<FinancialAllocation[]>(initialAllocations);
-  const [transfers, setTransfers] = useState<FundTransfer[]>(initialTransfers);
-  const [forecastMonths] = useState(initialForecastMonths);
-  const [qaGates, setQaGates] = useState<QAGate[]>(initialQAGates);
-  const [defects, setDefects] = useState<Defect[]>(initialDefects);
-  const [risks, setRisks] = useState<RiskIssue[]>(initialRisks);
-  const [checklist, setChecklist] = useState<ChecklistItem[]>(initialChecklist);
-  const [hypercare, setHypercare] = useState<HypercareTicket[]>(initialHypercare);
-  const [poapData, setPoapData] = useState<POAPData>(initialPOAPData);
-  const [governanceGates, setGovernanceGates] = useState<GovernanceGateDetail[]>(initialGovernanceGates);
-  const [piWizardData, setPiWizardData] = useState<PIWizardData>(initialPIWizardData);
-  const [walkthroughData, setWalkthroughData] = useState<WalkthroughData>(initialWalkthroughData);
-  
-  const [ragStatus, setRagStatus] = useState({
-    schedule: 'Green',
-    budget: 'Amber',
-    scope: 'Green',
-    quality: 'Green',
-    overall: 'Amber'
-  });
 
   const phases: PhaseMetadata[] = [
     { id: 'funnel', name: 'Funnel & Reviewing', icon: FolderOpen, color: 'var(--color-green)' },
@@ -126,7 +103,7 @@ export default function App() {
     { id: 'postlaunch', name: 'Go-Live & ELS', icon: ShieldCheck, color: '#a855f7' },
     { id: 'poap', name: 'Digital POAP', icon: LayoutTemplate, color: '#2dd4bf' },
     { id: 'slidebuilder', name: 'POAP Slide Builder', icon: SlidersHorizontal, color: '#f472b6' },
-    { id: 'settings', name: 'Settings', icon: SettingsIcon, color: '#94a3b8' }
+    { id: 'settings', name: 'Settings', icon: SettingsIcon, color: '#94a3b8' },
   ];
 
   const activeMetadata = useMemo(() => {
@@ -153,11 +130,50 @@ export default function App() {
 
   React.useEffect(() => {
     setProjectState({
-      financials, adoWorkItems, squads, milestones, allocations, transfers, forecastMonths,
-      qaGates, defects, risks, checklist, hypercare, poapData, governanceGates, 
-      piWizardData, walkthroughData, ragStatus, budgetProgressPercent, sitProgressPercent, checklistPercent
+      financials,
+      adoWorkItems,
+      squads,
+      milestones,
+      allocations,
+      transfers,
+      forecastMonths,
+      qaGates,
+      defects,
+      risks,
+      checklist,
+      hypercare,
+      poapData,
+      governanceGates,
+      piWizardData,
+      walkthroughData,
+      ragStatus,
+      budgetProgressPercent,
+      sitProgressPercent,
+      checklistPercent,
     });
-  }, [financials, adoWorkItems, squads, milestones, allocations, transfers, forecastMonths, qaGates, defects, risks, checklist, hypercare, poapData, governanceGates, piWizardData, walkthroughData, ragStatus, budgetProgressPercent, sitProgressPercent, checklistPercent, setProjectState]);
+  }, [
+    financials,
+    adoWorkItems,
+    squads,
+    milestones,
+    allocations,
+    transfers,
+    forecastMonths,
+    qaGates,
+    defects,
+    risks,
+    checklist,
+    hypercare,
+    poapData,
+    governanceGates,
+    piWizardData,
+    walkthroughData,
+    ragStatus,
+    budgetProgressPercent,
+    sitProgressPercent,
+    checklistPercent,
+    setProjectState,
+  ]);
 
   const handlePhaseSelect = (phaseId: string) => {
     if (phases.some(p => p.id === phaseId)) {
@@ -167,142 +183,119 @@ export default function App() {
   };
 
   const renameSquad = (id: string, newName: string) => {
-    if (!newName.trim()) return;
-
-    const squadToRename = squads.find(s => s.id === id);
-    if (!squadToRename) return;
-    const oldName = squadToRename.name;
-    if (oldName === newName) return;
-
-    // 1. Update squads name
-    setSquads(prev => prev.map(s => s.id === id ? { ...s, name: newName } : s));
-
-    // 2. Update allocations squadName
-    setAllocations(prev => prev.map(a => a.squadId === id ? { ...a, squadName: newName } : a));
-
-    // 3. Update transfers fromSquad / toSquad names
-    setTransfers(prev => prev.map(t => {
-      const updated = { ...t };
-      if (t.fromSquad === oldName) updated.fromSquad = newName;
-      if (t.toSquad === oldName) updated.toSquad = newName;
-      return updated;
-    }));
-
-    // 4. Update defects squad name
-    setDefects(prev => prev.map(d => d.squad === oldName ? { ...d, squad: newName } : d));
-
-    // 5. Update adoWorkItems portfolio
-    setAdoWorkItems(prev => prev.map(a => a.portfolio === oldName ? { ...a, portfolio: newName } : a));
+    const s = squads.find(x => x.id === id);
+    if (s) {
+      dispatch({ type: 'UPDATE_SQUAD_NAME', payload: { id, oldName: s.name, newName } });
+    }
   };
 
   const deleteSquad = (id: string) => {
-    const squadToDelete = squads.find(s => s.id === id);
-    if (!squadToDelete) return;
-    const oldName = squadToDelete.name;
-
-    setSquads(prev => prev.filter(s => s.id !== id));
-    setAllocations(prev => prev.filter(a => a.squadId !== id));
-    setTransfers(prev => prev.filter(t => t.fromSquad !== oldName && t.toSquad !== oldName));
-    setDefects(prev => prev.map(d => d.squad === oldName ? { ...d, squad: 'Unassigned' } : d));
-    setAdoWorkItems(prev => prev.map(a => a.portfolio === oldName ? { ...a, portfolio: 'Unassigned' } : a));
+    const s = squads.find(x => x.id === id);
+    if (!s) return;
+    const oldName = s.name;
+    dispatch({ type: 'SET_SQUADS', payload: prev => prev.filter(item => item.id !== id) });
+    dispatch({ type: 'SET_ALLOCATIONS', payload: prev => prev.filter(a => a.squadId !== id) });
+    dispatch({ type: 'SET_TRANSFERS', payload: prev => prev.filter(t => t.fromSquad !== oldName && t.toSquad !== oldName) });
+    dispatch({ type: 'SET_DEFECTS', payload: prev => prev.map(d => (d.squad === oldName ? { ...d, squad: 'Unassigned' } : d)) });
+    dispatch({ type: 'SET_ADO_WORK_ITEMS', payload: prev => prev.map(a => (a.portfolio === oldName ? { ...a, portfolio: 'Unassigned' } : a)) });
   };
 
   const clearAllSquads = () => {
-    setSquads([]);
-    setAllocations([]);
-    setTransfers([]);
-    setDefects(prev => prev.map(d => ({ ...d, squad: 'Unassigned' })));
-    setAdoWorkItems(prev => prev.map(a => ({ ...a, portfolio: 'Unassigned' })));
+    dispatch({ type: 'SET_SQUADS', payload: [] });
+    dispatch({ type: 'SET_ALLOCATIONS', payload: [] });
+    dispatch({ type: 'SET_TRANSFERS', payload: [] });
+    dispatch({ type: 'SET_DEFECTS', payload: prev => prev.map(d => ({ ...d, squad: 'Unassigned' })) });
+    dispatch({ type: 'SET_ADO_WORK_ITEMS', payload: prev => prev.map(a => ({ ...a, portfolio: 'Unassigned' })) });
   };
 
   const renderActiveView = () => {
     switch (activePhase) {
       case 'funnel':
-        return <FunnelReviewing financials={financials} setFinancials={setFinancials} />;
+        return <FunnelReviewing financials={financials} setFinancials={payload => dispatch({ type: 'SET_FINANCIALS', payload })} />;
       case 'analysing':
         return (
-          <Analysing 
-            adoWorkItems={adoWorkItems} 
-            setAdoWorkItems={setAdoWorkItems} 
-            squads={squads} 
-            setSquads={setSquads}
-            renameSquad={renameSquad} 
+          <Analysing
+            adoWorkItems={adoWorkItems}
+            setAdoWorkItems={payload => dispatch({ type: 'SET_ADO_WORK_ITEMS', payload })}
+            squads={squads}
+            setSquads={payload => dispatch({ type: 'SET_SQUADS', payload })}
+            renameSquad={renameSquad}
             deleteSquad={deleteSquad}
             clearAllSquads={clearAllSquads}
           />
         );
       case 'finances':
         return (
-          <FinancesApprovals 
+          <FinancesApprovals
             financials={financials}
-            setFinancials={setFinancials}
-            allocations={allocations} 
-            setAllocations={setAllocations} 
-            transfers={transfers} 
-            setTransfers={setTransfers} 
-            forecastMonths={forecastMonths} 
+            setFinancials={payload => dispatch({ type: 'SET_FINANCIALS', payload })}
+            allocations={allocations}
+            setAllocations={payload => dispatch({ type: 'SET_ALLOCATIONS', payload })}
+            transfers={transfers}
+            setTransfers={payload => dispatch({ type: 'SET_TRANSFERS', payload })}
+            forecastMonths={forecastMonths}
           />
         );
       case 'build':
         return (
-          <ImplementingBuild 
-            squads={squads} 
-            setSquads={setSquads} 
-            milestones={milestones} 
-            setMilestones={setMilestones} 
+          <ImplementingBuild
+            squads={squads}
+            setSquads={payload => dispatch({ type: 'SET_SQUADS', payload })}
+            milestones={milestones}
+            setMilestones={payload => dispatch({ type: 'SET_MILESTONES', payload })}
           />
         );
       case 'testing':
         return (
-          <TestingQuality 
-            qaGates={qaGates} 
-            setQaGates={setQaGates} 
-            defects={defects} 
-            setDefects={setDefects} 
-            squads={squads} 
+          <TestingQuality
+            qaGates={qaGates}
+            setQaGates={payload => dispatch({ type: 'SET_QA_GATES', payload })}
+            defects={defects}
+            setDefects={payload => dispatch({ type: 'SET_DEFECTS', payload })}
+            squads={squads}
           />
         );
       case 'governance':
         return (
-          <ReleaseGovernance 
-            risks={risks} 
-            setRisks={setRisks} 
-            ragStatus={ragStatus} 
-            setRagStatus={setRagStatus} 
-            financials={financials} 
-            squads={squads} 
+          <ReleaseGovernance
+            risks={risks}
+            setRisks={payload => dispatch({ type: 'SET_RISKS', payload })}
+            ragStatus={ragStatus}
+            setRagStatus={(payload: typeof ragStatus | ((prev: typeof ragStatus) => typeof ragStatus)) => dispatch({ type: 'SET_RAG_STATUS', payload: payload as any })}
+            financials={financials}
+            squads={squads}
             defects={defects}
             checklist={checklist}
-            setChecklist={setChecklist}
+            setChecklist={payload => dispatch({ type: 'SET_CHECKLIST', payload })}
           />
         );
       case 'postlaunch':
         return (
-          <PostLaunchELS 
-            hypercare={hypercare} 
-            setHypercare={setHypercare} 
+          <PostLaunchELS
+            hypercare={hypercare}
+            setHypercare={payload => dispatch({ type: 'SET_HYPERCARE', payload })}
           />
         );
       case 'poap':
         return (
-          <POAP 
+          <POAP
             poapData={poapData}
-            setPoapData={setPoapData}
+            setPoapData={payload => dispatch({ type: 'SET_POAP_DATA', payload })}
             ragStatus={ragStatus}
           />
         );
       case 'releaseplanning':
         return (
-          <ReleasePlanningMeeting 
+          <ReleasePlanningMeeting
             gates={governanceGates}
-            setGates={setGovernanceGates}
+            setGates={payload => dispatch({ type: 'SET_GOVERNANCE_GATES', payload })}
           />
         );
       case 'walkthrough':
         return (
-          <WalkthroughWizard 
+          <WalkthroughWizard
             data={walkthroughData}
-            setData={setWalkthroughData}
+            setData={payload => dispatch({ type: 'SET_WALKTHROUGH_DATA', payload })}
           />
         );
       case 'slidebuilder':
@@ -310,7 +303,7 @@ export default function App() {
       case 'settings':
         return <SettingsView theme={theme} setTheme={setTheme} />;
       default:
-        return <FunnelReviewing financials={financials} setFinancials={setFinancials} />;
+        return <FunnelReviewing financials={financials} setFinancials={payload => dispatch({ type: 'SET_FINANCIALS', payload })} />;
     }
   };
 
@@ -319,7 +312,7 @@ export default function App() {
     if (projectState && settings.enabled) {
       aiAnalysis = await generateReportAnalytics(projectState, 'excel', settings);
     }
-    
+
     exportToExcel(
       financials,
       adoWorkItems,
@@ -353,154 +346,95 @@ export default function App() {
   };
 
   return (
-    <>
-      <div className="dashboard-container">
-      <div className="grid-bg-overlay"></div>
-      <div className="scanlines-overlay"></div>
-
-      {/* Sidebar Backdrop Drawer Overlay */}
-      {sidebarOpen && (
-        <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)}></div>
-      )}
-
-      {/* Sidebar Navigation */}
-      <aside className={`sidebar ${sidebarOpen ? 'sidebar--open' : ''}`}>
-        <div>
-          <div className="sidebar-logo" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              TDM <span>NEXUS</span>
+    <div className="layout-container">
+      <header className="header">
+        <div className="header-left">
+          <button
+            className="mobile-menu-toggle"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label="Toggle navigation menu"
+          >
+            {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+          <div className="logo-group">
+            <span className="logo-icon">TDM</span>
+            <div className="logo-text">
+              <h1>NEXUS</h1>
+              <span>Enterprise Delivery Architecture</span>
             </div>
-            <button 
-              className="hamburger-btn mobile-close-btn"
-              onClick={() => setSidebarOpen(false)}
-              style={{ padding: '0.25rem', border: 'none', background: 'transparent', cursor: 'pointer' }}
-            >
-              <X size={20} style={{ color: 'var(--color-text-secondary)' }} />
-            </button>
           </div>
-          <ul className="nav-list">
-            {phases.map(p => {
-              const Icon = p.icon;
-              return (
-                <li 
-                  key={p.id} 
-                  className={`nav-item ${activePhase === p.id ? 'active' : ''}`}
-                  onClick={() => handlePhaseSelect(p.id)}
-                >
-                  <Icon size={18} />
-                  <span>{p.name}</span>
-                </li>
-              );
-            })}
-          </ul>
         </div>
 
-        {/* Sidebar Footer Info */}
-        <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '1.25rem', marginTop: '1.25rem' }}>
-          <div className="mono" style={{ fontSize: '0.7rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
-            PROJECT RAG STATUS
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.9rem', color: '#fff' }}>Overall Health:</span>
-            <span className={`rag-badge ${ragStatus.overall.toLowerCase()}`}>
+        <div className="hud-metrics">
+          <div className="hud-metric">
+            <span className="metric-label">Overall RAG</span>
+            <span className={`metric-value rag-${ragStatus.overall.toLowerCase()}`}>
               {ragStatus.overall}
             </span>
           </div>
+          <div className="hud-metric">
+            <span className="metric-label">Budget Burn</span>
+            <span className="metric-value">{budgetProgressPercent}%</span>
+          </div>
+          <div className="hud-metric">
+            <span className="metric-label">SIT Pass</span>
+            <span className="metric-value">{sitProgressPercent}%</span>
+          </div>
+          <div className="hud-metric">
+            <span className="metric-label">Gate Progress</span>
+            <span className="metric-value">{checklistPercent}%</span>
+          </div>
         </div>
-      </aside>
 
-      {/* Main View Area */}
-      <main className="main-content">
-        {/* Interactive 3D Canvas */}
-        <div className="three-viewport-wrapper">
-          <ThreeCanvas activePhase={activePhase} onPhaseSelect={handlePhaseSelect} />
+        <div className="header-actions">
+          <button className="btn btn-secondary" onClick={handleExcelExport}>
+            <FileSpreadsheet size={16} />
+            <span>Excel Export</span>
+          </button>
+          <button className="btn btn-primary" onClick={handlePPTExport}>
+            <Presentation size={16} />
+            <span>PPT Export</span>
+          </button>
         </div>
+      </header>
 
-        {/* Front Panel HUD and Active View Card */}
-        <div className="ui-overlay-container">
-          <div className="scroll-content-wrapper">
-          {/* Top HUD Banner */}
-          <header className="hud-banner glass-panel">
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <button 
-                className="hamburger-btn" 
-                onClick={() => setSidebarOpen(true)}
-                title="Toggle Menu"
-              >
-                <Menu size={20} />
-              </button>
-              <div className="hud-stat">
-                <span className="hud-stat-label">Project / Increment</span>
-                <span className="hud-stat-value mono" style={{ color: 'var(--color-cyan)', fontSize: '1.1rem' }}>
-                  PRJ-VELOCITY (PI40)
-                </span>
-              </div>
+      <div className="main-layout">
+        <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
+          <nav className="nav-list">
+            {phases.map(p => {
+              const Icon = p.icon;
+              const isActive = activePhase === p.id;
+              return (
+                <button
+                  key={p.id}
+                  className={`nav-item ${isActive ? 'active' : ''}`}
+                  onClick={() => handlePhaseSelect(p.id)}
+                >
+                  <Icon size={18} style={{ color: p.color }} />
+                  <span>{p.name}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
+
+        <main className="content-area">
+          {activePhase !== 'settings' && activePhase !== 'slidebuilder' && (
+            <div className="canvas-wrapper">
+              <ThreeCanvas activePhase={activePhase} onPhaseSelect={handlePhaseSelect} />
             </div>
+          )}
 
-            <div className="hud-stat-group">
-              <div className="hud-stat">
-                <span className="hud-stat-label">Active Phase</span>
-                <span className="hud-stat-value mono" style={{ color: activeMetadata.color }}>
-                  {activeMetadata.name.toUpperCase()}
-                </span>
-              </div>
-
-              <div className="hud-stat">
-                <span className="hud-stat-label">Budget vs Actuals</span>
-                <span className="hud-stat-value mono">
-                  ${(financials.totalSpent / 1000000).toFixed(2)}M / ${( (financials.capexLimit + financials.opexLimit) / 1000000 ).toFixed(2)}M ({budgetProgressPercent}%)
-                </span>
-              </div>
-
-              <div className="hud-stat">
-                <span className="hud-stat-label">SIT Pass Rate</span>
-                <span className="hud-stat-value mono" style={{ color: sitProgressPercent > 70 ? 'var(--color-green)' : 'var(--color-amber)' }}>
-                  {sitProgressPercent}%
-                </span>
-              </div>
-
-              <div className="hud-stat">
-                <span className="hud-stat-label">Governance Readiness</span>
-                <span className="hud-stat-value mono">
-                  {checklistPercent}%
-                </span>
-              </div>
-            </div>
-          </header>
-
-          {/* Active View Module */}
-          <div 
-            className="active-view-overlay glass-panel"
-            style={activePhase === 'slidebuilder' ? { maxWidth: 'none' } : undefined}
-          >
+          <div className="view-container">
             <div className="view-header">
-              <div className="view-title">
-                {React.createElement(activeMetadata.icon, { size: 22, className: 'mono', style: { color: activeMetadata.color } })}
-                <h2 className="mono" style={{ textTransform: 'uppercase' }}>{activeMetadata.name}</h2>
-              </div>
-              
-              {/* Excel and PPT Exporters */}
-              <div style={{ display: 'flex', gap: '0.75rem', pointerEvents: 'auto' }}>
-                <button className="cyber-button" onClick={handleExcelExport} title="Export project details, finances, NFRs to Excel">
-                  <FileSpreadsheet size={16} />
-                  <span className="cyber-btn-text">Export Excel</span>
-                </button>
-                <button className="cyber-button secondary" onClick={handlePPTExport} title="Export SteerCo Steering Committee PPT deck">
-                  <Presentation size={16} />
-                  <span className="cyber-btn-text">Export PPT</span>
-                </button>
-              </div>
+              <h2>{activeMetadata.name}</h2>
             </div>
-            
-            <div className="view-body">
-              {renderActiveView()}
-            </div>
+            {renderActiveView()}
           </div>
-          </div>
-        </div>
-      </main>
+        </main>
+      </div>
+
+      <AIAssistantApplet activePhase={activePhase} onNavigateToSettings={() => handlePhaseSelect('settings')} />
     </div>
-    <AIAssistantApplet activePhase={activePhase} onNavigateToSettings={() => handlePhaseSelect('settings')} />
-    </>
   );
 }
