@@ -169,6 +169,7 @@ export function POAPMilestoneTable({ milestones, onChange }: POAPMilestoneTableP
                 <td style={{ textAlign: 'center' }}>
                   <button
                     className="icon-button"
+                    aria-label="Delete milestone"
                     onClick={() => removeMilestone(idx)}
                     style={{ opacity: milestones.length <= 1 ? 0.3 : 1 }}
                   >

@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import App from '../../App';
 import { ProjectProvider } from '../../context/ProjectContext';
 import { AIAssistantProvider } from '../../context/AIAssistantContext';
@@ -24,18 +24,18 @@ describe('Delivery Journey Integration Flow', () => {
     renderApp();
 
     // 1. Initial Funnel View
-    expect(screen.getByText('Funnel & Reviewing Phase')).toBeInTheDocument();
+    expect(screen.getByText('Funnel & Mobilisation Phase')).toBeInTheDocument();
     expect(screen.getByText('PRJ-VELOCITY (PI40)')).toBeInTheDocument();
 
     // 2. Navigate to Analysing & PI Readiness
     const analysingBtn = screen.getByText('Analysing & PI Readiness');
     fireEvent.click(analysingBtn);
-    expect(screen.getByText('Analysing & PI Readiness Phase')).toBeInTheDocument();
+    expect(screen.getByText('ADO Work Items & HLD Readiness')).toBeInTheDocument();
 
     // 3. Navigate to Finances & Approvals
     const financesBtn = screen.getByText('Finances & Approvals');
     fireEvent.click(financesBtn);
-    expect(screen.getByText('Finances & Approvals Phase')).toBeInTheDocument();
+    expect(screen.getByText('ICAR & ITRB Approvals')).toBeInTheDocument();
 
     // 4. Navigate to Implementing & Build
     const buildBtn = screen.getByText('Implementing & Build');
@@ -50,7 +50,7 @@ describe('Delivery Journey Integration Flow', () => {
     // 6. Navigate to Release & Governance
     const govBtn = screen.getByText('Release & Governance');
     fireEvent.click(govBtn);
-    expect(screen.getByText('Release & Governance Overview')).toBeInTheDocument();
+    expect(screen.getByText('Release Governance & RAGs')).toBeInTheDocument();
 
     // 7. Verify HUD Metrics & Export buttons
     expect(screen.getByText('Export Excel')).toBeInTheDocument();

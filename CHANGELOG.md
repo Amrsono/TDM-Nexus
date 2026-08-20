@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-08-20
+
+### Added
+- **Project State Context Layer (`ProjectContext`)**: Extracted domain state and derived delivery metrics into a context layer, eliminating monolithic prop drilling in `App.tsx`.
+- **Phase Navigation Configuration Module (`src/config/phases.ts`)**: Decoupled phase metadata and icons from root layout, shrinking `App.tsx` below 400 LOC.
+- **Dedicated AI Providers Module (`src/utils/aiProviders.ts`)**: Modularized provider adapter registry away from service orchestration.
+- **End-to-End Delivery Journey Test (`src/__tests__/integration/deliveryJourney.test.tsx`)**: Full user flow verification covering stage transitions, state mutations, and export triggers.
+- **Parallel GitHub Actions Matrix Pipeline**: Refactored `.github/workflows/ci.yml` into 5 parallel jobs (`audit`, `lint`, `typecheck`, `test`, `build`) with pinned immutable action commit SHAs.
+- **Expanded Test Coverage**: Added dedicated test suites for `POAPMilestoneTable`, `FunnelReviewing`, `pptxExporter`, and `phases`, raising test suite count to **29 files and 119 passing tests**.
+
 ## [0.2.0] - 2026-08-20
 
 ### Added

@@ -4,7 +4,6 @@ import {
   ProjectAction,
   projectReducer,
   initialRootProjectState,
-  calculateRAGStatus,
   RAGStatus,
 } from '../store/projectReducer';
 import { ProjectState } from './AIAssistantContext';
@@ -53,10 +52,7 @@ export const ProjectProvider: React.FC<{ children: ReactNode; initialState?: Roo
     return Math.round((completed / state.checklist.length) * 100);
   }, [state.checklist]);
 
-  const ragStatus = useMemo(
-    () => calculateRAGStatus(state.financials, state.defects, state.qaGates, state.risks),
-    [state.financials, state.defects, state.qaGates, state.risks]
-  );
+  const ragStatus = state.ragStatus;
 
   const projectState: ProjectState = useMemo(
     () => ({

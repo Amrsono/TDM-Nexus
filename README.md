@@ -141,14 +141,12 @@ docker compose up --build -d
 
 ## 🧪 Testing & CI Enforcement
 
-The test suite contains **23 test suites** and **105 passing unit/integration tests** with strict threshold enforcement (`>= 70%` lines, `>= 60%` branches):
-- **State Store (`src/store/projectReducer.ts`)**: 100% line coverage for state actions, financial transfers, and squad mutations.
-- **Robustness & Observability**: Full test coverage for React `ErrorBoundary` and client-side structured `Logger`.
-- **AI Service & Providers**: Verification of unified `AI_PROVIDERS` adapters, `executeAIRequest` with typed `Result<T, E>` pattern, and fallback prompts.
-- **Exporters Engine**: End-to-end testing for Excel spreadsheets (9 worksheets), SteerCo PowerPoint decks, POAP roadmap slides, and Governance Gate presentations.
-- **Interactive 3D Stage**: WebGL canvas lifecycle and phase camera synchronization unit tests.
-
-Every push and pull request triggers `.github/workflows/ci.yml` (vulnerability audit, lint, typecheck, coverage tests with artifact uploads, and build) to guarantee zero regressions.
+The test suite contains **29 test suites** and **119 passing unit & integration tests** with strict threshold enforcement (`>= 70%` lines, `>= 60%` branches):
+- **Domain State Layer (`src/context/ProjectContext.tsx`)**: Centralized state management eliminating prop drilling.
+- **Integration User Journey (`src/__tests__/integration/deliveryJourney.test.tsx`)**: Cross-module verification covering phase transitions, state mutations, and export workflows.
+- **AI Service & Providers**: Modular adapter registry (`src/utils/aiProviders.ts`) with typed `Result<T, E>` pattern.
+- **Exporters Engine**: Comprehensive test suites for Excel workbooks (9 worksheets), SteerCo PowerPoint decks, POAP roadmap slides, and Governance Gate decks.
+- **CI Matrix Pipeline**: Parallel execution across 5 isolated GitHub Actions jobs (`audit`, `lint`, `typecheck`, `test`, `build`) with pinned action commit SHAs and artifact uploads.
 
 ---
 

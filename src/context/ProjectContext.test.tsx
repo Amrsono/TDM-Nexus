@@ -26,7 +26,7 @@ describe('ProjectContext Unit Tests', () => {
 
     act(() => {
       result.current.dispatch({
-        type: 'UPDATE_FINANCIALS',
+        type: 'SET_FINANCIALS',
         payload: { ...result.current.state.financials, NPV: 9999999 },
       });
     });

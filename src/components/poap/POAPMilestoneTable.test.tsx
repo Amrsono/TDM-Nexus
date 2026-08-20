@@ -33,4 +33,48 @@ describe('POAPMilestoneTable Component', () => {
 
     expect(mockOnChange).toHaveBeenCalled();
   });
+
+  it('loads example timeline when clicking Load Example Timeline', () => {
+    render(
+      <POAPMilestoneTable
+        milestones={[]}
+        onChange={mockOnChange}
+      />
+    );
+
+    const loadBtn = screen.getByText('Load Example Timeline');
+    fireEvent.click(loadBtn);
+
+    expect(mockOnChange).toHaveBeenCalledWith(exampleMilestones);
+  });
+
+  it('updates milestone name on input change', () => {
+    render(
+      <POAPMilestoneTable
+        milestones={exampleMilestones}
+        onChange={mockOnChange}
+      />
+    );
+
+    const inputs = screen.getAllByRole('textbox');
+    if (inputs.length > 0) {
+      fireEvent.change(inputs[0], { target: { value: 'New Epic Name' } });
+      expect(mockOnChange).toHaveBeenCalled();
+    }
+  });
+
+  it('removes a milestone row when clicking delete button', () => {
+    render(
+      <POAPMilestoneTable
+        milestones={exampleMilestones}
+        onChange={mockOnChange}
+      />
+    );
+
+    const deleteButtons = screen.getAllByLabelText('Delete milestone');
+    if (deleteButtons.length > 0) {
+      fireEvent.click(deleteButtons[0]);
+      expect(mockOnChange).toHaveBeenCalled();
+    }
+  });
 });
