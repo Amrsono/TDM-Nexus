@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-08-20
+
+### Added
+- **Structured Error Boundary**: Added React `ErrorBoundary` component with crash diagnostics, stack copy, and state recovery capabilities.
+- **Client-Side Structured Logger**: Built telemetry `Logger` buffer supporting `debug`, `info`, `warn`, and `error` log levels with timestamped metadata.
+- **Typed AI Result Pattern**: Introduced `Result<T, E>` and `AIResult<T>` interfaces eliminating fragile string parsing and try/catch exceptions.
+- **Consolidated AI Provider Registry**: De-duplicated provider adapters for Gemini, OpenAI, Claude, Copilot, and Custom endpoints.
+- **ThreeJS Canvas & Governance Tests**: Added unit tests for 3D stage-gate WebGL viewport and governance slide deck generators bringing test suite count to 23 files and 105 tests.
+- **Fresh-Clone Verification Scripts**: Added `scripts/verify-fresh-install.sh` and `scripts/verify-fresh-install.ps1` for automated zero-account CI/local validation.
+- **CI Coverage Artifacts & Renovate**: Uploading code coverage reports in GitHub Actions and added `renovate.json`.
+
+### Removed
+- Removed unused `puppeteer` and `puppeteer-screen-recorder` dependencies, reducing total package count by 70 packages.
+
 ## [0.1.0] - 2026-08-20
 
 ### Added

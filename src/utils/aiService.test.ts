@@ -366,6 +366,56 @@ describe('aiService - Provider Logic and Prompt Construction', () => {
         expect(authErrRes.error.friendlyMessage).toContain('Authentication failed');
       }
 
+      // 429 Free Tier Exceeded Error
+      globalThis.fetch = vi.fn().mockResolvedValueOnce({
+        ok: false,
+        status: 429,
+        statusText: 'Too Many Requests',
+        json: async () => ({ error: { message: 'FreeTier limit: 0 exhausted' } }),
+      } as unknown as Response);
+
+      const rateErrRes = await executeAIRequest({ ...validSettings, provider: 'gemini' }, [{ role: 'user', content: 'hi' }]);
+      expect(rateErrRes.ok).toBe(false);
+      if (!rateErrRes.ok) {
+        expect(rateErrRes.error.code).toBe('RATE_LIMITED');
+        expect(rateErrRes.error.friendlyMessage).toContain('quota exhausted');
+      }
+
+      // 404 Not Found
+      globalThis.fetch = vi.fn().mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        statusText: 'Not Found',
+        json: async () => ({ message: 'Model not found' }),
+      } as unknown as Response);
+
+      const notFoundRes = await executeAIRequest({ ...validSettings, provider: 'gemini' }, [{ role: 'user', content: 'hi' }]);
+      expect(notFoundRes.ok).toBe(false);
+      if (!notFoundRes.ok) {
+        expect(notFoundRes.error.code).toBe('NOT_FOUND');
+      }
+
+      // 500 Server Error
+      globalThis.fetch = vi.fn().mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        statusText: 'Internal Server Error',
+        json: async () => ({ message: 'Crash' }),
+      } as unknown as Response);
+
+      const serverErrRes = await executeAIRequest(validSettings, [{ role: 'user', content: 'hi' }]);
+      expect(serverErrRes.ok).toBe(false);
+      if (!serverErrRes.ok) {
+        expect(serverErrRes.error.code).toBe('SERVER_ERROR');
+      }
+
+      // Missing URL
+      const noUrlRes = await executeAIRequest({ ...validSettings, provider: 'custom', baseUrl: '' }, [{ role: 'user', content: 'hi' }]);
+      expect(noUrlRes.ok).toBe(false);
+      if (!noUrlRes.ok) {
+        expect(noUrlRes.error.code).toBe('MISSING_URL');
+      }
+
       // Network crash
       globalThis.fetch = vi.fn().mockRejectedValueOnce(new Error('Connection timed out'));
       const netErrRes = await executeAIRequest(validSettings, [{ role: 'user', content: 'hi' }]);

@@ -62,9 +62,16 @@
 
 ## 🛠️ Getting Started
 
-### Prerequisites
-- Node.js `20.x` or higher
-- npm `10.x` or higher
+### Prerequisites & Compatibility
+
+- **Runtime Engine**: Node.js `20.x` LTS or higher, npm `10.x` or higher
+- **Supported Browsers**:
+  | Browser | Minimum Version | Status |
+  |---|---|---|
+  | Google Chrome | 110+ | ✅ Supported |
+  | Microsoft Edge | 110+ | ✅ Supported |
+  | Mozilla Firefox | 115+ (ESR) | ✅ Supported |
+  | Apple Safari | 16.0+ | ✅ Supported |
 
 ### Installation
 
@@ -74,7 +81,19 @@ git clone https://github.com/Amrsono/TDM-Nexus.git
 cd TDM-Nexus
 
 # Install dependencies with lockfile fidelity
-npm install
+npm ci
+```
+
+### Automated Fresh-Clone Verification
+
+Run the automated smoke-test script to verify dependencies, typechecking, test coverage, and production build from a clean state:
+
+```bash
+# Linux / macOS
+./scripts/verify-fresh-install.sh
+
+# Windows PowerShell
+./scripts/verify-fresh-install.ps1
 ```
 
 ### Environment Configuration
@@ -122,14 +141,14 @@ docker compose up --build -d
 
 ## 🧪 Testing & CI Enforcement
 
-The test suite contains **19 test suites** and **93 passing unit/integration tests** with strict threshold enforcement (`>= 70%` lines, `>= 60%` branches):
+The test suite contains **23 test suites** and **105 passing unit/integration tests** with strict threshold enforcement (`>= 70%` lines, `>= 60%` branches):
 - **State Store (`src/store/projectReducer.ts`)**: 100% line coverage for state actions, financial transfers, and squad mutations.
-- **Timeline Math & Layout**: Automated date boundary calculation, phase detection, and multi-row task collision handling.
-- **AI Service & Providers**: Verification of `buildSystemPrompt`, `getEndpointUrl`, `buildRequestBody`, and response parsers across all providers.
-- **Exporters Engine**: End-to-end testing for Excel spreadsheets (9 worksheets), SteerCo PowerPoint decks, POAP roadmap slides, and Governance Gate decks.
-- **Views & Components**: Interactive testing for all stage-gate views, defect logging, checklist additions, and wizard steps.
+- **Robustness & Observability**: Full test coverage for React `ErrorBoundary` and client-side structured `Logger`.
+- **AI Service & Providers**: Verification of unified `AI_PROVIDERS` adapters, `executeAIRequest` with typed `Result<T, E>` pattern, and fallback prompts.
+- **Exporters Engine**: End-to-end testing for Excel spreadsheets (9 worksheets), SteerCo PowerPoint decks, POAP roadmap slides, and Governance Gate presentations.
+- **Interactive 3D Stage**: WebGL canvas lifecycle and phase camera synchronization unit tests.
 
-Every push and pull request triggers `.github/workflows/ci.yml` (vulnerability audit, lint, typecheck, coverage tests, and build) to guarantee zero regressions.
+Every push and pull request triggers `.github/workflows/ci.yml` (vulnerability audit, lint, typecheck, coverage tests with artifact uploads, and build) to guarantee zero regressions.
 
 ---
 

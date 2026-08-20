@@ -48,7 +48,7 @@ class Logger {
 
   debug(context: string, message: string, data?: unknown): LogEntry {
     const entry = this.createEntry('debug', context, message, data);
-    if (process.env.NODE_ENV !== 'production') {
+    if (typeof import.meta !== 'undefined' && import.meta.env?.DEV) {
       console.debug(`[${entry.timestamp}] [DEBUG] [${context}] ${message}`, data ?? '');
     }
     return entry;

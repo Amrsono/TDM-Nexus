@@ -198,7 +198,7 @@ export const AIAssistantProvider: React.FC<{ children: ReactNode }> = ({ childre
     
     try {
       const response = await aiChat(messages.concat({ id: 'temp', role: 'user', content, timestamp: new Date() }), projectState, activePhase, settings);
-      setMessages(prev => [...prev, response]);
+      addMessage({ role: 'assistant', content: response, tab: activePhase });
     } catch (error) {
       addMessage({ role: 'system', content: `Error: ${error instanceof Error ? error.message : String(error)}` });
     } finally {

@@ -51,7 +51,7 @@ describe('governancePptxExporter Unit Tests', () => {
 2. Approve VROM scope freeze`;
 
     expect(() => {
-      exportAIInsightToPPT('SteerCo AI Advisory', markdownInsight, 'testing');
+      exportAIInsightToPPT('SteerCo AI Advisory', markdownInsight);
     }).not.toThrow();
   });
 });
