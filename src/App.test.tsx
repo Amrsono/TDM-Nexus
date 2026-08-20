@@ -2,6 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import App from './App';
+import { ProjectProvider } from './context/ProjectContext';
 import { AIAssistantProvider } from './context/AIAssistantContext';
 
 vi.mock('./components/ThreeCanvas', () => ({
@@ -11,9 +12,11 @@ vi.mock('./components/ThreeCanvas', () => ({
 describe('App Root Integration Component', () => {
   const renderApp = () => {
     return render(
-      <AIAssistantProvider>
-        <App />
-      </AIAssistantProvider>
+      <ProjectProvider>
+        <AIAssistantProvider>
+          <App />
+        </AIAssistantProvider>
+      </ProjectProvider>
     );
   };
 
