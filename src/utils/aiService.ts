@@ -1,5 +1,6 @@
 import { PhaseId } from '../App';
 import { ProjectState, AISettings, AISuggestion, AIMessage } from '../context/AIAssistantContext';
+import { safeValidateAISettings } from './aiValidation';
 
 export const buildSystemPrompt = (projectState: ProjectState, activePhase: PhaseId): string => {
   return `You are the TDM Nexus AI Assistant, an expert project manager and digital delivery expert for VOIS.
@@ -16,9 +17,9 @@ Here is the current state of the project:
 Provide concise, actionable advice.`;
 };
 
-const getOfflineSuggestions = (projectState: ProjectState, activePhase: PhaseId): AISuggestion[] => {
+export const getOfflineSuggestions = (projectState: ProjectState, activePhase: PhaseId): AISuggestion[] => {
   const suggestions: AISuggestion[] = [];
-  
+
   if (projectState.sitProgressPercent < 80 && activePhase === 'testing') {
     suggestions.push({
       id: 's1',
@@ -27,10 +28,10 @@ const getOfflineSuggestions = (projectState: ProjectState, activePhase: PhaseId)
       description: `SIT Pass rate is currently ${projectState.sitProgressPercent}%. Focus on resolving blocked test cases.`,
       priority: 'high',
       relatedTab: 'testing',
-      actionable: true
+      actionable: true,
     });
   }
-  
+
   if (projectState.budgetProgressPercent > 90) {
     suggestions.push({
       id: 's2',
@@ -38,7 +39,7 @@ const getOfflineSuggestions = (projectState: ProjectState, activePhase: PhaseId)
       title: 'Budget Warning',
       description: `Budget consumption is at ${projectState.budgetProgressPercent}%. Consider reviewing CAPEX/OPEX allocations.`,
       priority: 'high',
-      relatedTab: 'finances'
+      relatedTab: 'finances',
     });
   }
 
@@ -50,7 +51,7 @@ const getOfflineSuggestions = (projectState: ProjectState, activePhase: PhaseId)
       title: 'P1 Defects Open',
       description: `There are ${p1Defects.length} open P1 defects. Immediate attention required before release planning.`,
       priority: 'high',
-      relatedTab: 'testing'
+      relatedTab: 'testing',
     });
   }
 
@@ -61,7 +62,7 @@ const getOfflineSuggestions = (projectState: ProjectState, activePhase: PhaseId)
       title: 'Project on Track',
       description: 'Key metrics are healthy. Review upcoming milestones in the Build tab.',
       priority: 'low',
-      relatedTab: 'build'
+      relatedTab: 'build',
     });
   }
 
@@ -70,7 +71,11 @@ const getOfflineSuggestions = (projectState: ProjectState, activePhase: PhaseId)
 
 // ─── Provider-specific helpers ───────────────────────────────────────────────
 
-function getEndpointUrl(settings: AISettings): string {
+export function getEndpointUrl(settings: AISettings): string {
+  if (settings.baseUrl && settings.provider === 'custom') {
+    return settings.baseUrl;
+  }
+
   switch (settings.provider) {
     case 'gemini':
       return `https://generativelanguage.googleapis.com/v1beta/models/${settings.model}:generateContent?key=${settings.apiKey}`;
@@ -86,11 +91,11 @@ function getEndpointUrl(settings: AISettings): string {
   }
 }
 
-function getRequestHeaders(settings: AISettings): Record<string, string> {
+export function getRequestHeaders(settings: AISettings): Record<string, string> {
   const base: Record<string, string> = { 'Content-Type': 'application/json' };
   switch (settings.provider) {
     case 'gemini':
-      return base; // key is in the URL
+      return base;
     case 'anthropic':
       return { ...base, 'x-api-key': settings.apiKey, 'anthropic-version': '2023-06-01' };
     case 'copilot':
@@ -101,29 +106,31 @@ function getRequestHeaders(settings: AISettings): Record<string, string> {
   }
 }
 
-interface OpenAIMessage { role: string; content: string; }
+export interface OpenAIMessage {
+  role: string;
+  content: string;
+}
 
-function buildRequestBody(
+export function buildRequestBody(
   settings: AISettings,
   messages: OpenAIMessage[],
   opts: { jsonMode?: boolean } = {}
-): object {
+): Record<string, unknown> {
   switch (settings.provider) {
     case 'gemini': {
-      // Gemini uses a different schema
       const systemMsg = messages.find(m => m.role === 'system');
       const userMessages = messages.filter(m => m.role !== 'system');
       return {
         system_instruction: systemMsg ? { parts: [{ text: systemMsg.content }] } : undefined,
         contents: userMessages.map(m => ({
           role: m.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: m.content }]
+          parts: [{ text: m.content }],
         })),
         generationConfig: {
           temperature: settings.temperature,
           maxOutputTokens: settings.maxTokens,
-          ...(opts.jsonMode ? { responseMimeType: 'application/json' } : {})
-        }
+          ...(opts.jsonMode ? { responseMimeType: 'application/json' } : {}),
+        },
       };
     }
     case 'anthropic': {
@@ -133,7 +140,7 @@ function buildRequestBody(
         model: settings.model,
         max_tokens: settings.maxTokens,
         ...(systemMsg ? { system: systemMsg.content } : {}),
-        messages: userMessages.map(m => ({ role: m.role, content: m.content }))
+        messages: userMessages.map(m => ({ role: m.role, content: m.content })),
       };
     }
     case 'copilot':
@@ -145,12 +152,12 @@ function buildRequestBody(
         messages,
         temperature: settings.temperature,
         max_tokens: settings.maxTokens,
-        ...(opts.jsonMode ? { response_format: { type: 'json_object' } } : {})
+        ...(opts.jsonMode ? { response_format: { type: 'json_object' } } : {}),
       };
   }
 }
 
-function extractTextFromResponse(settings: AISettings, data: Record<string, unknown>): string {
+export function extractTextFromResponse(settings: AISettings, data: Record<string, unknown>): string {
   switch (settings.provider) {
     case 'gemini': {
       const candidates = data.candidates as Array<{ content: { parts: Array<{ text: string }> } }>;
@@ -172,17 +179,11 @@ function extractTextFromResponse(settings: AISettings, data: Record<string, unkn
 
 // ─── Error helpers ────────────────────────────────────────────────────────────
 
-/**
- * Converts raw API error responses into concise, human-readable messages.
- * Handles quota exhaustion, auth errors, model-not-found, and generic failures.
- */
 async function parseFriendlyError(response: Response, provider: AISettings['provider']): Promise<string> {
   let body: Record<string, unknown> = {};
   try { body = await response.json(); } catch { /* ignore parse errors */ }
 
   const status = response.status;
-
-  // Extract the core message from the provider's error schema
   const rawMessage: string =
     (body?.error as Record<string, unknown>)?.message as string ||
     (body?.message as string) ||
@@ -190,12 +191,11 @@ async function parseFriendlyError(response: Response, provider: AISettings['prov
     'Unknown error';
 
   if (status === 429) {
-    // Extract retry delay if present
     const retryMatch = rawMessage.match(/(\d+(\.\d+)?)s/);
     const retryHint = retryMatch ? ` Retry in ~${Math.ceil(Number(retryMatch[1]))} seconds.` : '';
 
     if (rawMessage.includes('free_tier') || rawMessage.includes('FreeTier') || rawMessage.includes('limit: 0')) {
-      return `⚠️ Gemini free-tier quota exhausted.${retryHint} To fix this: enable billing at https://aistudio.google.com/ or switch to a different model (e.g. Gemini 1.5 Flash (Latest)) in Settings.`;
+      return `⚠️ Gemini free-tier quota exhausted.${retryHint} To fix this: enable billing at https://aistudio.google.com/ or switch to a different model in Settings.`;
     }
     return `⚠️ Rate limit reached.${retryHint} Please wait before sending another message.`;
   }
@@ -213,7 +213,6 @@ async function parseFriendlyError(response: Response, provider: AISettings['prov
     return `🔥 The ${provider} API returned a server error (${status}). This is likely temporary — please try again shortly.`;
   }
 
-  // Trim the raw message to avoid giant JSON dumps in the chat
   const trimmed = rawMessage.length > 200 ? rawMessage.slice(0, 200) + '…' : rawMessage;
   return `API Error ${status}: ${trimmed}`;
 }
@@ -221,11 +220,12 @@ async function parseFriendlyError(response: Response, provider: AISettings['prov
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 export const getNextBestActions = async (
-  projectState: ProjectState, 
+  projectState: ProjectState,
   activePhase: PhaseId,
   settings: AISettings
 ): Promise<AISuggestion[]> => {
-  if (!settings.apiKey) {
+  const validated = safeValidateAISettings(settings);
+  if (!validated.success || !settings.apiKey) {
     return getOfflineSuggestions(projectState, activePhase);
   }
 
@@ -236,13 +236,13 @@ export const getNextBestActions = async (
 
     const messages: OpenAIMessage[] = [
       { role: 'system', content: systemPrompt },
-      { role: 'user', content: 'Generate 3 next best actions based on the current project state. Return ONLY a JSON array of objects with keys: id, type (action/warning/insight/optimization), title, description, priority (high/medium/low), relatedTab.' }
+      { role: 'user', content: 'Generate 3 next best actions based on the current project state. Return ONLY a JSON array of objects with keys: id, type (action/warning/insight/optimization), title, description, priority (high/medium/low), relatedTab.' },
     ];
 
     const response = await fetch(url, {
       method: 'POST',
       headers: getRequestHeaders(settings),
-      body: JSON.stringify(buildRequestBody(settings, messages, { jsonMode: true }))
+      body: JSON.stringify(buildRequestBody(settings, messages, { jsonMode: true })),
     });
 
     if (!response.ok) {
@@ -261,17 +261,18 @@ export const getNextBestActions = async (
 };
 
 export const chat = async (
-  messages: AIMessage[], 
-  projectState: ProjectState, 
+  messages: AIMessage[],
+  projectState: ProjectState,
   activePhase: PhaseId,
   settings: AISettings
 ): Promise<AIMessage> => {
-  if (!settings.apiKey) {
+  const validated = safeValidateAISettings(settings);
+  if (!validated.success || !settings.apiKey) {
     return {
       id: Math.random().toString(36).substring(2, 9),
       role: 'assistant',
       content: 'I am currently in offline mode. Please configure an API key in the Settings tab to enable full chat functionality. In the meantime, I can still provide rule-based suggestions!',
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -282,13 +283,13 @@ export const chat = async (
 
     const apiMessages: OpenAIMessage[] = [
       { role: 'system', content: systemPrompt },
-      ...messages.filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.content }))
+      ...messages.filter(m => m.role !== 'system').map(m => ({ role: m.role, content: m.content })),
     ];
 
     const response = await fetch(url, {
       method: 'POST',
       headers: getRequestHeaders(settings),
-      body: JSON.stringify(buildRequestBody(settings, apiMessages))
+      body: JSON.stringify(buildRequestBody(settings, apiMessages)),
     });
 
     if (!response.ok) {
@@ -301,14 +302,14 @@ export const chat = async (
       id: Math.random().toString(36).substring(2, 9),
       role: 'assistant',
       content: extractTextFromResponse(settings, data),
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   } catch (error) {
     return {
       id: Math.random().toString(36).substring(2, 9),
       role: 'system',
       content: `Failed to connect to AI: ${error instanceof Error ? error.message : String(error)}`,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 };
@@ -317,7 +318,7 @@ export const getProjectHealthSummary = async (projectState: ProjectState, settin
   if (!settings.apiKey) {
     return `Project Health is ${projectState.ragStatus.overall}. Schedule is ${projectState.ragStatus.schedule} and Budget is ${projectState.ragStatus.budget}. You have used ${projectState.budgetProgressPercent}% of your budget and SIT pass rate is ${projectState.sitProgressPercent}%.`;
   }
-  
+
   try {
     const url = getEndpointUrl(settings);
     if (!url) throw new Error('Missing API URL');
@@ -330,13 +331,13 @@ Open High Defects: ${projectState.defects.filter(d => (d.severity === 'P1' || d.
 
     const apiMessages: OpenAIMessage[] = [
       { role: 'system', content: `You are a project manager. Summarize health concisely. The current date is ${new Date().toLocaleDateString()}.` },
-      { role: 'user', content: prompt }
+      { role: 'user', content: prompt },
     ];
 
     const response = await fetch(url, {
       method: 'POST',
       headers: getRequestHeaders(settings),
-      body: JSON.stringify(buildRequestBody(settings, apiMessages))
+      body: JSON.stringify(buildRequestBody(settings, apiMessages)),
     });
 
     if (!response.ok) {
@@ -345,23 +346,23 @@ Open High Defects: ${projectState.defects.filter(d => (d.severity === 'P1' || d.
 
     const data = await response.json();
     return extractTextFromResponse(settings, data);
-  } catch (error) {
+  } catch (_error) {
     return `Overall Health is ${projectState.ragStatus.overall}. Schedule: ${projectState.ragStatus.schedule}, Budget: ${projectState.ragStatus.budget}. (${projectState.budgetProgressPercent}% budget used, ${projectState.sitProgressPercent}% SIT pass rate)`;
   }
 };
 
 export const generateReportAnalytics = async (projectState: ProjectState, reportType: 'ppt' | 'excel', settings?: AISettings): Promise<string> => {
   if (!settings || !settings.apiKey) {
-    return "Offline Analysis: Project is tracking to overall RAG status. Please configure an AI provider for deep analytics.";
+    return 'Offline Analysis: Project is tracking to overall RAG status. Please configure an AI provider for deep analytics.';
   }
-  
+
   try {
     const url = getEndpointUrl(settings);
     if (!url) throw new Error('Missing API URL');
 
     const openDefects = projectState.defects.filter(d => d.status !== 'Closed');
     const openRisks = projectState.risks.filter(r => r.status === 'Open');
-    
+
     const projectSummaryPrompt = `You are a project management executive at VOIS. Provide a detailed, professional AI analysis and executive recommendation summary for the project based on the following metrics:
 - Overall Health RAG: ${projectState.ragStatus.overall} (Schedule: ${projectState.ragStatus.schedule}, Budget: ${projectState.ragStatus.budget}, Scope: ${projectState.ragStatus.scope}, Quality: ${projectState.ragStatus.quality})
 - Budget Progress: ${projectState.budgetProgressPercent}% consumed of CAPEX: $${projectState.financials.capexLimit} / OPEX: $${projectState.financials.opexLimit} (Total Spent: $${projectState.financials.totalSpent})
@@ -380,13 +381,13 @@ Keep the tone professional, objective, and action-oriented. Format the response 
 
     const apiMessages: OpenAIMessage[] = [
       { role: 'system', content: `You are an executive project management assistant. Generate clear, structured reports. The current date is ${new Date().toLocaleDateString()}.` },
-      { role: 'user', content: projectSummaryPrompt }
+      { role: 'user', content: projectSummaryPrompt },
     ];
 
     const response = await fetch(url, {
       method: 'POST',
       headers: getRequestHeaders(settings),
-      body: JSON.stringify(buildRequestBody(settings, apiMessages))
+      body: JSON.stringify(buildRequestBody(settings, apiMessages)),
     });
 
     if (!response.ok) {
@@ -406,25 +407,22 @@ export const generatePredictiveAnalytics = async (projectState: ProjectState, se
   if (!settings.apiKey) {
     return "Offline Mode: Predictive Analytics requires an active AI provider. Based on current data, your project budget is " + projectState.budgetProgressPercent + "% consumed, and SIT pass rate is " + projectState.sitProgressPercent + "%. Watch out for scope creep if defect rates increase.";
   }
-  
+
   try {
     const url = getEndpointUrl(settings);
     if (!url) throw new Error('Missing API URL');
 
-    const prompt = `You are a specialized AI Project Management Risk Assessor for VOIS. Perform a Predictive Analytics and Risk Identification sweep based on this project state:
+    const prompt = `You are a specialized AI Project Management Risk Assessor for VOIS. Perform a Predictive Analytics sweep:
 - RAG: ${projectState.ragStatus.overall} (Schedule: ${projectState.ragStatus.schedule}, Budget: ${projectState.ragStatus.budget})
 - Financials: Spent $${projectState.financials.totalSpent} / Limits $${projectState.financials.capexLimit + projectState.financials.opexLimit}
 - Quality: SIT Pass Rate ${projectState.sitProgressPercent}%
 - Open Risks: ${projectState.risks.filter(r => r.status === 'Open').length}
-- Unassigned Work Items: ${projectState.adoWorkItems.filter(w => w.portfolio === 'Unassigned').length}
 
 Identify:
 1. Potential project delays based on QA performance.
 2. Forecasted budget overruns based on current burn rate.
-3. Resource bottlenecks based on unassigned work items.
-4. Scope creep and sequencing conflicts.
-
-Provide a concise, bulleted report of identified risks and recommended mitigations. Format with markdown.`;
+3. Resource bottlenecks.
+4. Scope creep and sequencing conflicts.`;
 
     const apiMessages: OpenAIMessage[] = [
       { role: 'system', content: `You are an AI predictive risk analysis system for enterprise project management. The current date is ${new Date().toLocaleDateString()}.` },
@@ -453,27 +451,24 @@ export const generateSmartSchedule = async (projectState: ProjectState, settings
   if (!settings.apiKey) {
     return "Offline Mode: Smart Scheduling requires an active AI provider. Please assign unallocated squad members manually.";
   }
-  
+
   try {
     const url = getEndpointUrl(settings);
     if (!url) throw new Error('Missing API URL');
 
-    const prompt = `You are a Smart Scheduling AI for VOIS. Analyze the following squad and workload data:
-- Number of Squads: ${projectState.squads.length}
-- Squad Details: ${projectState.squads.map(s => s.name + " (Lead: " + s.lead + ")").join(', ')}
+    const prompt = `You are a Smart Scheduling AI for VOIS. Analyze squad and workload data:
+- Squads: ${projectState.squads.map(s => s.name).join(', ')}
 - Unassigned Work Items: ${projectState.adoWorkItems.filter(w => w.portfolio === 'Unassigned').length}
 - Total Work Items: ${projectState.adoWorkItems.length}
 - Milestones remaining: ${projectState.milestones.filter(m => m.status !== 'Completed').length}
 
 Please generate a smart scheduling proposal:
-1. Workload Rebalancing: Suggest how to reallocate the unassigned work items across available squads.
-2. Timeline Adjustments: Identify if any milestones are at risk and propose adjusted target dates.
-3. Resource Optimization: Identify any over/under-utilized squads based on the ratio of work items to their current workload.
-
-Provide the recommendations in a clear, formatted markdown layout.`;
+1. Workload Rebalancing
+2. Timeline Adjustments
+3. Resource Optimization`;
 
     const apiMessages: OpenAIMessage[] = [
-      { role: 'system', content: `You are an AI resource allocator and smart scheduling assistant. The current date is ${new Date().toLocaleDateString()}.` },
+      { role: 'system', content: `You are an AI resource allocator. The current date is ${new Date().toLocaleDateString()}.` },
       { role: 'user', content: prompt }
     ];
 
@@ -497,27 +492,17 @@ Provide the recommendations in a clear, formatted markdown layout.`;
 
 export const generateDocumentation = async (projectState: ProjectState, docType: string, customPrompt: string, settings: AISettings): Promise<string> => {
   if (!settings.apiKey) {
-    return "Offline Mode: Documentation generation requires an active AI provider. Please configure an API key.";
+    return "Offline Mode: Documentation generation requires an active AI provider.";
   }
-  
+
   try {
     const url = getEndpointUrl(settings);
     if (!url) throw new Error('Missing API URL');
 
-    const prompt = `You are an AI Automated Documentation assistant for VOIS project management. Generate a ${docType} based on the current project data and the user's specific request.
-User Request/Transcript/Prompt: "${customPrompt}"
-
-Project Context:
-- Health: ${projectState.ragStatus.overall}
-- Finances: $${projectState.financials.totalSpent} Spent
-- Active Phase: In Progress
-- Open Risks: ${projectState.risks.length}
-- Governance Gate Progress: ${projectState.checklistPercent}%
-
-Write a highly professional, ready-to-share document in markdown format.`;
+    const prompt = `Generate a ${docType} based on current project data and prompt: "${customPrompt}"`;
 
     const apiMessages: OpenAIMessage[] = [
-      { role: 'system', content: `You are an AI documentation generator for project charters, status reports, and action items. The current date is ${new Date().toLocaleDateString()}.` },
+      { role: 'system', content: `You are an AI documentation generator. The current date is ${new Date().toLocaleDateString()}.` },
       { role: 'user', content: prompt }
     ];
 
@@ -538,4 +523,3 @@ Write a highly professional, ready-to-share document in markdown format.`;
     return `Failed to generate Documentation: ${error instanceof Error ? error.message : String(error)}`;
   }
 };
-

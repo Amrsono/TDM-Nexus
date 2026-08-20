@@ -25,6 +25,8 @@ export interface AISettings {
   apiKey: string;
   model: string;
   baseUrl?: string;
+  proxyUrl?: string;
+  autoSuggest?: boolean;
   temperature: number;
   maxTokens: number;
   enabled: boolean;
